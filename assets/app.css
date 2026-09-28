@@ -1,0 +1,719 @@
+
+:root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
+*{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
+.logo{display:block;width:100%;height:92px;object-fit:cover;object-position:center;background:#050712;border-bottom:1px solid #8526ac}
+main{padding:7px 8px 16px}.btn,.week{color:#fff;background:#090a13;border:1px solid #d838f1;border-radius:7px;padding:6px 9px;box-shadow:0 0 8px #d13cff35}.title{text-align:center}.title h1{font-size:24px;margin:2px 0}.title p{font-size:12px;color:#d88cff;margin:2px 0}
+.top{display:grid;grid-template-columns:75px 1fr 80px;align-items:center;margin:2px 0 7px}.top>:last-child{justify-self:end}
+.exercise{display:grid;grid-template-columns:76px minmax(0,1fr) 82px;grid-template-rows:34px auto;margin:6px 0;border:1px solid #bc28dc;border-radius:8px;background:#050914;overflow:hidden;box-shadow:0 0 8px #9e28ca25}
+.head{grid-column:1;grid-row:1/3;position:relative;padding:5px 3px;border-right:1px solid var(--line);min-height:138px;text-align:center}.n{position:absolute;left:50%;top:30px;transform:translateX(-50%);width:22px;height:22px;margin:0;border:1px solid var(--purple);border-radius:50%;display:grid;place-items:center;font-size:11px}.name{position:absolute;left:3px;right:3px;top:55%;transform:translateY(-50%);text-align:center;font-size:7px;font-weight:800;line-height:1.15;white-space:normal;word-break:normal;overflow-wrap:normal;hyphens:none;letter-spacing:-.15px;padding:0 2px}.editMain{position:absolute;bottom:5px;left:4px;width:66px;padding:4px 1px;font-size:8px}
+table{grid-column:2;grid-row:1/3;width:100%;border-collapse:collapse;table-layout:fixed;font-size:7px}th,td{text-align:center;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:1px 0;height:13px}th{color:#dca6ff;font-weight:600;line-height:1.02;height:21px}.cell{width:92%;min-width:0;padding:2px 1px;background:#040812;border:1px solid #46506c;color:#fff;border-radius:4px;text-align:center;font-size:9px}.fist{padding:0;border:1px solid #3b455f;border-radius:4px;background:#080b14 url("assets/images/asset-001-02f74a1de74e.png") center/25px 25px no-repeat;font-size:0;min-width:28px;min-height:28px}.fist.done{border-color:#23f1a1;box-shadow:0 0 7px #23f1a177}
+.maxbox{grid-column:3;grid-row:1;padding:5px 1px 2px;text-align:center;font-weight:800;font-size:8px;border-bottom:1px solid #8b28ad}.maxbox span{color:#ec79ff}.exComplete{grid-column:3;grid-row:2;margin:3px;padding:2px;border:1px solid #e23cff;border-radius:7px;background:linear-gradient(135deg,#22072b,#3d0a49,#15051b);color:#fff;font-size:7px;font-weight:900;font-style:italic;box-shadow:0 0 9px #dd37ff4c;display:flex;align-items:center;justify-content:center;gap:2px}.flameimg{width:30px;height:30px;object-fit:cover;object-position:center;border-radius:5px}
+.finish{width:100%;margin:8px 0;padding:10px;border:1px solid #24f2a0;border-radius:8px;background:linear-gradient(90deg,#05271b,#075b3e,#05271b);color:#fff;font-weight:900;font-style:italic;box-shadow:0 0 11px #20f3a044}
+.extras,.section,.pagecard{border:1px solid #642083;border-radius:8px;background:#060912;padding:8px;margin:7px 0}.extras h2,.section h2{font-size:15px;margin:0 0 6px}.extra{display:grid;grid-template-columns:1fr 55px 52px;gap:4px;align-items:center;border-top:1px solid #20273a;padding:4px 0;font-size:10px}.extra .cell{font-size:9px}.note{color:#bca3ce;font-size:9px}.small{font-size:9px;color:#c9afd9}.row{display:flex;gap:5px;align-items:center}.grow{flex:1}.danger{border-color:#ff5278!important}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#040610f8;border-top:1px solid #76249a;z-index:30;padding-bottom:env(safe-area-inset-bottom)}.navin{max-width:1000px;margin:auto;display:grid;grid-template-columns:repeat(6,1fr)}.nav button{border:0;border-right:1px solid #281331;background:transparent;color:#df76ff;padding:4px 1px 5px;font-size:9px;min-height:52px}.nav img{display:block;width:24px;height:24px;margin:0 auto 1px;filter:drop-shadow(0 0 5px #d63cff)}.nav button.active{color:#fff;background:linear-gradient(#3a104e,#190722);box-shadow:inset 0 0 14px #d63cff88;border:1px solid #dd43ff;border-radius:7px}
+.modal{position:fixed;inset:0;background:#000c;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px}.modalbox{width:min(430px,96vw);max-height:80vh;overflow:auto;background:#080b15;border:1px solid #e33cff;border-radius:14px;padding:14px;box-shadow:0 0 35px #c32cff66}.modalbox h2{margin:0 0 4px}.pick{display:block;width:100%;text-align:left;margin:6px 0;padding:10px;border:1px solid #742495;background:#0d0b17;color:#fff;border-radius:8px}.close{float:right}
+.dayedit{display:grid;grid-template-columns:30px 1fr auto;gap:5px;align-items:center;margin:5px 0}.dayedit input{width:100%;background:#050812;color:#fff;border:1px solid #3e4963;border-radius:5px;padding:6px}.maxsection{padding:7px;margin:7px 0;border:1px solid #752493;border-radius:8px;background:#050812}.maxsection h2{margin:0 0 4px;font-size:14px;color:#fff}.maxrow{display:grid;grid-template-columns:1fr 58px 35px;gap:4px;align-items:center;padding:3px 0;border-top:1px solid #1e2638;font-size:9.5px}.extraslabel{font-size:9px;letter-spacing:1.5px;color:#df74ff;margin:6px 0 2px}
+@media(min-width:900px){.logo{height:125px}.exercise{grid-template-columns:180px minmax(0,1fr) 155px}.head{min-height:185px;padding-left:65px}.n{width:43px;height:43px;font-size:21px;left:12px}.name{font-size:16px}table{font-size:11px}.cell{font-size:11px}.maxbox{font-size:14px}.exComplete{font-size:12px}.flameimg{width:45px;height:45px}}
+
+.groupsTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:8px 0}.groupsTabs button{padding:9px 2px}.groupsTabs .sel{background:linear-gradient(#64167d,#280634);box-shadow:inset 0 0 14px #e73cff88}.groupHero{display:flex;gap:8px;align-items:center}.groupBadge{width:58px;height:48px;border:1px solid #9d2bc0;border-radius:8px;background:radial-gradient(circle,#371047,#080a13);display:grid;place-items:center;font-size:27px}.groupTitle{font-size:18px;font-weight:900}.leadTable{width:100%;font-size:10px}.leadTable th,.leadTable td{padding:7px 3px;height:auto}.leadTable td:nth-child(2){text-align:left}.podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:7px;align-items:end;margin:12px 0}.pod{border:1px solid #9c28bd;border-radius:10px;padding:9px 4px;text-align:center;background:#070912}.pod.first{border-color:#ffd84a;box-shadow:0 0 16px #ffd84a55;padding-top:14px}.pod .medal{font-size:25px}.pod b{display:block;font-size:12px}.pod span{font-size:10px;color:#e5b8f7}.exerciseTabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:3px}.exerciseTabs button{white-space:nowrap}.accountRow{display:flex;align-items:center;gap:9px}.accountIcon{width:42px;height:42px;border-radius:50%;border:1px solid #d83cf1;display:grid;place-items:center;font-size:21px}.settingLine{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #20273a}.coming{font-size:9px;color:#d88cff}.createChoices label{display:block;padding:8px;margin:5px 0;border:1px solid #54206d;border-radius:7px}.createChoices input{margin-right:7px}
+
+.groupIcon{width:27px;height:27px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 6px #d63cff);margin-right:5px}
+.statIcon{width:25px;height:25px;object-fit:contain;display:block;margin:0 auto 2px;filter:drop-shadow(0 0 5px #d63cff)}
+.medalImg{width:39px;height:39px;object-fit:contain;filter:none;-webkit-mask-image:radial-gradient(circle at center,#000 0%,#000 44%,rgba(0,0,0,.96) 50%,rgba(0,0,0,.78) 56%,rgba(0,0,0,.48) 62%,rgba(0,0,0,.18) 68%,transparent 75%);mask-image:radial-gradient(circle at center,#000 0%,#000 44%,rgba(0,0,0,.96) 50%,rgba(0,0,0,.78) 56%,rgba(0,0,0,.48) 62%,rgba(0,0,0,.18) 68%,transparent 75%);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.pod .medalImg{width:48px;height:48px;margin:auto;display:block}
+.groupStats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px;text-align:center}
+.groupStat{font-size:10px;line-height:1.1}
+
+.groupEmptyFigurine{margin:-10px auto 10px;overflow:hidden;border-radius:18px;background:#05050d;line-height:0;border:2px solid #e969ff;box-shadow:0 0 10px rgba(233,105,255,.18),inset 0 0 8px rgba(233,105,255,.10)}.groupEmptyFigurine img{width:100%;height:auto;display:block}.pagecard:has(.groupEmptyFigurine){padding:18px 18px 28px!important;background:linear-gradient(180deg,#070711 0%,#090510 100%);border-color:#9f2bc7;box-shadow:inset 0 0 28px rgba(170,34,220,.08)}
+
+.groupMainTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 12px}.groupMainTab{background:#0c0b16;color:#f7f2fb;border:1.5px solid #d82cff;border-radius:10px;padding:12px 6px;font-size:14px}.groupMainTab.sel{border:2.5px solid #ef4cff;box-shadow:0 0 13px #b900ff88;background:#25102f}.exerciseTabStrip{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.exerciseTab{flex:0 0 auto;background:#0b0b14;color:#fff;border:1.5px solid #d82cff;border-radius:9px;padding:10px 12px;font-size:13px}.exerciseTab.sel{border:2.5px solid #ef4cff;box-shadow:0 0 12px #c300ff99;background:#25102f}.groupPodium{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-items:end;margin:10px 0 12px}.podiumCard{border:1.5px solid #a82bc5;border-radius:12px;padding:12px 5px;text-align:center;background:#090a12}.podiumCard.winner{border-color:#ffd84a;box-shadow:0 0 14px #ffd84a33;padding-top:18px}.podiumMedal{font-size:28px;margin-bottom:5px}.groupBoard{padding:12px!important}.groupBoard h2{margin:0 0 10px;font-size:20px}.boardHead,.boardRow{display:grid;grid-template-columns:54px 1fr 100px;align-items:center}.boardHead{color:#dc8cf0;font-size:12px;font-weight:700;border-bottom:1px solid #35405a;padding:8px 4px}.boardRow{min-height:50px;border-bottom:1px solid #29334a;padding:4px}.boardRow:last-child{border-bottom:0}.boardRow span:first-child{text-align:center;font-size:18px}.boardRow b:last-child{text-align:right;padding-right:6px}@media(max-width:430px){.groupMainTab{font-size:12px;padding:11px 3px}.boardHead,.boardRow{grid-template-columns:48px 1fr 86px}}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.streakWidget{margin:10px 0 14px;padding:14px;border:1px solid #a92bc7;border-radius:16px;background:linear-gradient(135deg,#090914,#16071e);box-shadow:0 0 22px #a629c733;display:flex;align-items:center;gap:14px}
+.streakArm{width:76px;height:76px;object-fit:contain;filter:drop-shadow(0 0 5px #b83bd999) drop-shadow(0 0 11px #6818c777)}
+.streakNum{font-size:32px;font-weight:900;line-height:1;color:#fff;text-shadow:0 0 12px #d94dff}
+.streakWeek{display:flex;gap:7px;margin-top:9px} .streakDot{width:20px;height:20px;border-radius:50%;border:1px solid #764482;display:grid;place-items:center;font-size:10px} .streakDot.on{background:#b832d0;color:white;box-shadow:0 0 9px #d94dff}
+.streakOverlay{position:fixed;inset:0;z-index:99999;background:#02030bd9;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:22px}
+.streakPopup{width:min(360px,92vw);border:1px solid #b72fd0;border-radius:22px;padding:24px;text-align:center;background:radial-gradient(circle at 50% 25%,#3b084f 0,#100616 42%,#05060d 78%);box-shadow:0 0 45px #a92bc766}
+.streakHero{position:relative;height:185px;display:grid;place-items:center} .streakHero img{width:180px;max-height:180px;object-fit:contain;filter:drop-shadow(0 0 6px #bd40db99) drop-shadow(0 0 16px #6117c277)} .streakHero .big{position:absolute;bottom:13px;font-size:66px;font-weight:1000;color:white;text-shadow:0 0 10px #d83cff,0 0 25px #8b24ff}
+.streakPopup h2{margin:0;font-size:25px} .streakPopup p{color:#d9a7e5} .streakPopup .pick{width:100%;font-size:16px;margin-top:10px}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.streakMuscle,.streak-muscle,.streakArm,.streak-arm,.streak-arm-art{
+background:none!important;background-image:url("assets/images/asset-002-248cf4983ff2.png")!important;background-position:center!important;
+background-repeat:no-repeat!important;background-size:contain!important;background-color:transparent!important;
+box-shadow:none!important;filter:none!important;border:0!important;outline:0!important;
+color:transparent!important;text-shadow:none!important;font-size:0!important;overflow:visible!important;
+}
+.streakMuscle::before,.streakMuscle::after,.streak-muscle::before,.streak-muscle::after,
+.streakArm::before,.streakArm::after,.streak-arm::before,.streak-arm::after,
+.streak-arm-art::before,.streak-arm-art::after{content:none!important;display:none!important;background:none!important;box-shadow:none!important}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.streakArm,
+.streakHero img {
+  content: url("assets/images/asset-002-248cf4983ff2.png") !important;
+  background: none !important;
+  filter: drop-shadow(0 0 5px #a62cff70) !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.streakArm,
+.streakHero img {
+  content: url("assets/images/asset-003-de2bacaa7288.png") !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  filter: none !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.streakArm,
+.streakHero img {
+  content: url("assets/images/asset-004-6da5fb9a980f.png") !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  filter: none !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+html, body { margin-top:0 !important; padding-top:0 !important; }
+img.logo[alt="Zag Science"]{
+  display:block !important;
+  width:100% !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  object-fit:cover !important;
+  object-position:center top !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.zagNeedle{width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:3px;filter:drop-shadow(0 0 4px #e73cff)}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+/* Final home fixes: hide duplicate top-right Info button and show full transparent ZAG PRO logo. */
+#zagHomeInfoV7{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+.zagProCard{overflow:hidden!important;}
+.zagProCard b{display:flex!important;align-items:center!important;width:100%!important;height:48px!important;margin:0 0 2px!important;padding:0!important;overflow:visible!important;background:transparent!important;}
+.zagProCard .zagNeedle{display:block!important;width:100%!important;height:48px!important;object-fit:contain!important;object-position:center center!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;filter:none!important;clip-path:none!important;mask:none!important;}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.streakArmWrap{position:relative;display:inline-grid;place-items:center}
+.streakLost .streakArm{filter:grayscale(.8) brightness(.62) contrast(1.15)!important;opacity:.82}
+.streakHero.streakLost img{filter:none!important;opacity:1}
+.streakLost .streakArmWrap::before,.streakLost .streakArmWrap::after{content:none!important;display:none!important}
+.streakLost .streakArmWrap::before{content:none!important;display:none!important}
+.streakLost .streakArmWrap::after{content:none!important;display:none!important}
+.streakHero.streakLost .streakArmWrap::before{content:none!important;display:none!important}
+.streakHero.streakLost .streakArmWrap::after{content:none!important;display:none!important}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+/* The arm artwork itself controls the streak state. Do not layer the old lightning PNG behind it. */
+.streakArm,.streakHero img,.streakArmWrap img{
+  background-image:none !important;
+  background:none !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+/* Critical fix: earlier prototype CSS replaced every streak <img> via the CSS content property.
+   Restore each image element's actual src so the state-specific artwork can render. */
+.streakArm, .streakHero img, .streakArmWrap img {
+  content: normal !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+/* Each streak state is a real IMG src swap. No CSS artwork replacement. */
+#homeStreakStateArm,.streakHero .streakPopupStateArm{content:normal!important;background:none!important;background-image:none!important;object-fit:contain!important;}
+#homeStreakStateArm{width:76px;height:76px;display:block;}
+.streakHero .streakPopupStateArm{width:180px;height:180px;display:block;}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.groupCreateTop{margin-top:10px}.groupModeGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.groupSelectBox{border:1px solid #54206d;border-radius:10px;background:#070912;padding:14px 8px;text-align:center;font-weight:800;cursor:pointer;transition:.15s}.groupSelectBox.selected,.bodyRatioBox.selected{border-color:#e53cff;box-shadow:inset 0 0 18px #d52df344,0 0 10px #b526d455;background:linear-gradient(180deg,#180820,#090a13)}.bodyRatioBox{border:1px solid #54206d;border-radius:10px;padding:11px;margin:10px 0;background:#070912}.bodyRatioTitle{font-size:14px;font-weight:900;margin-bottom:8px}.ratioMiniGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.ratioMini{border:1px solid #54206d;border-radius:8px;padding:10px 5px;text-align:center;font-size:11px;font-weight:800;cursor:pointer}.ratioMini.selected{border-color:#e53cff;background:#2b0a36;box-shadow:inset 0 0 12px #e53cff55}.exerciseChooser{border:1px solid #54206d;border-radius:10px;margin:10px 0;background:#070912;overflow:hidden}.exerciseChooserHead{display:flex;align-items:center;justify-content:space-between;padding:13px 12px;cursor:pointer;font-weight:900}.exerciseChooserHead.selected{border-color:#e53cff;box-shadow:inset 0 0 14px #d52df322}.exerciseChooserList{display:none;border-top:1px solid #54206d;max-height:330px;overflow:auto;padding:6px}.exerciseChooserList.open{display:block}.exerciseChoice{display:flex!important;align-items:center;gap:7px;padding:9px!important;margin:4px 0!important;border:1px solid #3d194f!important;border-radius:7px}.exerciseCount{font-size:10px;color:#d88cff;font-weight:500}.createGroupAction{width:100%;margin-top:12px}
+.groupExerciseSection{margin:8px 2px 13px}.groupExerciseSectionTitle{font-size:12px;font-weight:900;color:#e5a1ff;letter-spacing:.08em;text-transform:uppercase;padding:7px 4px 5px;border-bottom:1px solid #4b1a5f}.groupExerciseSectionTitle.extras{font-size:10px;color:#bd79d5;margin-top:7px}.groupExercisePill{display:block;width:100%;box-sizing:border-box;text-align:left;border:2px solid #3d194f;border-radius:12px;background:#070912;color:#fff;padding:11px 12px;margin:6px 0;font:inherit;cursor:pointer;transition:.14s}.groupExercisePill:active{transform:scale(.99)}.groupExercisePill.selected{border:4px solid #d92cff;padding:9px 10px;box-shadow:0 0 10px #e52fff,inset 0 0 14px #9e20c744;background:#110716}.groupSelectedBlock{margin:5px 0 14px;padding:8px;border:1px solid #70258a;border-radius:10px;background:#0a0710}.groupSelectedTitle{font-size:12px;font-weight:1000;letter-spacing:.12em;color:#f0b4ff;text-transform:uppercase;margin:1px 2px 7px}.groupEmptySelected{font-size:11px;color:#8e8199;padding:8px 4px}.createGroupAction{width:100%;margin-top:12px}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+#zagInfoOverlayV6 {
+ position:fixed; inset:0; z-index:2147483000;
+ display:none; align-items:center; justify-content:center;
+ padding:12px; background:rgba(2,2,9,.90); backdrop-filter:blur(6px);
+}
+#zagInfoOverlayV6.open {display:flex!important}
+#zagInfoPanelV6 {
+ position:relative;
+ width:min(94vw,700px);
+ max-height:94vh;
+ aspect-ratio:1024/1536;
+ background:#05050c url("assets/images/asset-023-f0de65ed68e8.png") center/contain no-repeat;
+ border-radius:22px;
+}
+#zagInfoGoV6 {
+ position:absolute; left:20%; bottom:2.5%; width:60%; height:9%;
+ border:0; background:transparent; z-index:3; cursor:pointer;
+ -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+#zagHomeInfoV7{
+  position:fixed !important;
+  top:198px !important;
+  right:24px !important;
+  width:70px !important;
+  height:70px !important;
+  z-index:9000 !important;
+  border:1.5px solid #d52cf2 !important;
+  border-radius:13px !important;
+  background:linear-gradient(160deg,#160b20,#090810) !important;
+  box-shadow:0 0 16px #b72bd766,inset 0 0 12px #8e25aa22 !important;
+  color:#fff !important;
+  padding:0 !important;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#zagHomeInfoV7 .zagInfoIconV7{
+  width:29px;height:29px;
+  border:2px solid #df45fa;
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:#efadff;
+  font:800 19px/1 system-ui;
+}
+#zagHomeInfoV7 .zagInfoTextV7{
+  color:#fff;
+  font:600 11px/1 system-ui;
+}
+@media(max-width:500px){
+  #zagHomeInfoV7{right:18px !important;width:66px !important;height:66px !important;}
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+#zagHomeInfoV7{
+  position:absolute !important;
+  top:auto !important;
+  right:18px !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+/* Compact Info control: sized to fit between the split-title and rotation lines. */
+#zagHomeInfoV7{
+  width:52px !important;
+  height:52px !important;
+  right:22px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  border-radius:10px !important;
+  gap:1px !important;
+  box-shadow:0 0 10px #b72bd755,inset 0 0 8px #8e25aa18 !important;
+}
+#zagHomeInfoV7 .zagInfoIconV7{
+  width:23px !important;
+  height:23px !important;
+  border-width:1.5px !important;
+  font-size:16px !important;
+}
+#zagHomeInfoV7 .zagInfoTextV7{
+  font-size:9px !important;
+  line-height:10px !important;
+}
+@media(max-width:500px){
+  #zagHomeInfoV7{
+    width:50px !important;
+    height:50px !important;
+    right:18px !important;
+  }
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.zagHomeCards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 10px}.zagHomeCard{min-height:62px;padding:9px 7px;border:1px solid #742495;border-radius:10px;background:linear-gradient(135deg,#080a14,#100717);color:#fff;text-align:left;box-shadow:0 0 10px #9d2bc02c}.zagHomeCard b{display:block;font-size:12px;color:#f0b4ff;margin-bottom:4px}.zagHomeCard span{display:block;font-size:9px;color:#c9afd9}.zagProCard{border-color:#df3cff;background:linear-gradient(135deg,#190620,#33083f,#100514);box-shadow:0 0 14px #d63cff45}.zagProCard b{color:#fff;text-shadow:0 0 9px #e73cff}.zagProOverlay{position:fixed;inset:0;z-index:100001;background:#000d;display:none;align-items:center;justify-content:center;padding:18px}.zagProOverlay.open{display:flex}.zagProPanel{width:min(390px,95vw);max-height:88vh;overflow:auto;border:1px solid #e73cff;border-radius:18px;padding:17px;background:radial-gradient(circle at 50% 0,#341044,#0a0710 40%,#05060c 100%);box-shadow:0 0 36px #c32cff66}.zagProClose{float:right;width:31px;height:31px;border:1px solid #74308b;border-radius:50%;background:#090812;color:#fff;font-size:18px}.zagProPanel h2{margin:3px 0 2px;font-size:25px}.zagProSub{margin:0 0 13px;color:#dca6ff;font-size:11px}.zagProFeatures{padding:10px;border:1px solid #4f205f;border-radius:10px;background:#070810;margin-bottom:10px;font-size:11px;line-height:1.8}.zagPlan{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #d93cf2;border-radius:11px;background:linear-gradient(135deg,#21072b,#480957,#1a0520);color:#fff;text-align:left;box-shadow:0 0 12px #d63cff38}.zagPlan strong{display:block;font-size:16px}.zagPlan small{display:block;color:#e2b4ef;margin-top:3px}.zagLifetime{border-color:#ff5cff;box-shadow:0 0 17px #e73cff55}.zagEarly{display:inline-block;font-size:8px;font-weight:900;letter-spacing:.7px;padding:3px 6px;border-radius:20px;background:#e73cff;color:#120016;margin-bottom:5px}.zagFine{font-size:8.5px;color:#9e8ba7;text-align:center;margin-top:9px}
+.zagNeedle{display:block;width:100%;height:44px;object-fit:contain;object-position:left center;vertical-align:middle;margin:0;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}.zagProCard b{display:flex!important;align-items:center!important;width:100%;margin:0 0 3px!important;overflow:visible!important}.zagProCard{overflow:visible!important}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.zagProCard{position:relative!important;overflow:hidden!important;}
+.zagProCard b{display:block!important;width:100%!important;height:44px!important;margin:0 0 3px!important;padding:0!important;background:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;overflow:visible!important;}
+.zagProCard .zagNeedle{display:block!important;width:100%!important;height:44px!important;max-width:none!important;object-fit:contain!important;object-position:left center!important;margin:0!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;filter:none!important;clip-path:none!important;mask:none!important;opacity:1!important;}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+
+
+
+.groupHero{flex-wrap:wrap}
+.groupHeroActions{margin-left:auto;display:flex;gap:7px;align-items:center}
+.groupHeroActions .btn{white-space:nowrap}
+.groupInviteInline{flex:0 0 100%;width:100%;margin-top:10px;padding:11px;border-top:1px solid #6d247e;background:#070812;border-radius:0 0 10px 10px}
+.groupInviteSearch{width:100%;padding:10px 11px;background:#040711;color:#fff;border:1px solid #505872;border-radius:9px;margin-bottom:10px}
+.groupInviteTitle{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#df8cff;margin:3px 0 5px}
+.groupFriendRow{display:grid;grid-template-columns:36px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-top:1px solid #252b3d}
+.groupFriendAvatar{width:34px;height:34px;border:1.5px solid #c433e4;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#efc7fa;background:radial-gradient(circle,#471153,#080a13)}
+.groupFriendRow small{display:block;color:#b99fc7;margin-top:2px}
+.groupFriendAdd{border:1px solid #d838f1;border-radius:8px;padding:6px 10px;background:#100716;color:#fff}
+.groupFriendAdd:disabled{opacity:.45}
+.groupMainTabs.dynamic{grid-template-columns:repeat(var(--tab-count),1fr)}
+.groupBodySubtabs{display:grid;grid-template-columns:repeat(var(--sub-count),1fr);gap:6px;margin:0 0 12px}
+.groupBodySubtab{background:#0b0b14;color:#fff;border:1.5px solid #b42bd1;border-radius:9px;padding:10px 6px}
+.groupBodySubtab.sel{border:2.5px solid #ef4cff;box-shadow:0 0 12px #c300ff88;background:#25102f}
+.groupNoLeaderboard{border:1px solid #51245f;border-radius:10px;padding:18px;text-align:center;color:#c3aecb}
+.groupBadgeNoEmoji{width:58px;height:48px;border:1px solid #9d2bc0;border-radius:8px;background:radial-gradient(circle,#371047,#080a13);display:grid;place-items:center}
+.groupBadgeNoEmoji:before{content:"";width:25px;height:18px;border:2px solid #e33cff;border-radius:12px 12px 8px 8px;box-shadow:0 0 8px #d93cff}
+.groupBoard h2 .boardTitleMark{display:inline-block;width:18px;height:18px;border:2px solid #df3cff;border-radius:50%;vertical-align:-3px;margin-right:7px;box-shadow:0 0 7px #cf35ff}
+
+
+
+.exileGroupBtn{
+  width:100%;margin-top:14px;padding:12px;
+  border:1.5px solid #a72bc4;border-radius:10px;
+  background:#120714;color:#ffb8ff;font-weight:800;
+}
+
+
+
+.exileConfirmBox{margin-top:10px;padding:12px;border:1.5px solid #b72bd2;border-radius:10px;background:#0c0710;text-align:center}
+.exileConfirmBox b{display:block;margin-bottom:5px}
+.exileConfirmBox .small{margin-bottom:10px}
+.exileConfirmActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exileConfirmActions button{padding:10px;border-radius:9px;font-weight:800}
+.exileCancel{background:#090b12;color:#fff;border:1px solid #64677a}
+.exileConfirm{background:#2b082e;color:#ffd5ff;border:1.5px solid #e63cff}
+
+
+
+/* Keep Bodyweight Ratio visually active from its own parent setting. */
+.bodyRatioBox.selected{border:2.5px solid #ef4cff!important;box-shadow:0 0 12px #c300ff88!important}
+
+
+
+.zagBwSubTabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.zagBwSubTab{min-height:48px;border:1.5px solid #d52bf0;border-radius:12px;background:#090812;color:#f4eafa;font-size:15px}
+.zagBwSubTab.sel{border:2.5px solid #f04cff;background:#2a0d31;box-shadow:0 0 12px rgba(227,52,255,.45)}
+
+
+
+/* Completely replace the previous podium images with three new independent assets. */
+.zagPersistentGroup .groupPodium .podiumCard{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  min-height:205px!important;
+  background:#05040b!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-end!important;
+  padding:14px 8px 16px!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard .podiumMedal{display:none!important}
+
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  content:"";
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:cover!important;
+}
+/* Visual podium order: 2nd, 1st, 3rd. */
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/asset-044-8812220dd161.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/asset-045-ed64595cd7bd.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/asset-046-4792b9f04472.webp")!important}
+
+.zagPersistentGroup .groupPodium .podiumCard::after{
+  content:"";
+  position:absolute!important;
+  left:0!important;right:0!important;bottom:0!important;
+  height:35%!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  background:linear-gradient(to bottom,transparent,rgba(3,2,9,.74) 52%,rgba(3,2,9,.96))!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard > b,
+.zagPersistentGroup .groupPodium .podiumCard > .small{
+  position:relative!important;
+  z-index:3!important;
+  text-shadow:0 2px 6px #000,0 0 10px #000!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard.winner{
+  border:3px solid #f14cff!important;
+  box-shadow:0 0 10px #f14cff,0 0 25px rgba(229,45,255,.95),0 0 44px rgba(168,31,255,.72),inset 0 0 18px rgba(235,65,255,.30)!important;
+  z-index:3!important;
+}
+
+
+
+/* Increase the three podium artworks slightly while preserving their proportions.
+   The card clips the small overflow, so they fill the available area more strongly. */
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  inset:-7%!important;
+  background-size:cover!important;
+  background-position:center center!important;
+}
+
+
+
+/* Zoom artwork a little further so there is no visible gap at top/bottom. */
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  inset:-12%!important;
+  background-size:cover!important;
+  background-position:center center!important;
+}
+
+/* Make the actual edge of the 1st-place podium card glow strongly. */
+.zagPersistentGroup .groupPodium .podiumCard.winner{
+  border:3px solid #f34cff!important;
+  box-shadow:
+    0 0 5px #ff59ff,
+    0 0 12px #f03cff,
+    0 0 24px rgba(226,45,255,.95),
+    0 0 38px rgba(174,32,255,.72),
+    inset 0 0 10px rgba(244,76,255,.48)!important;
+  z-index:5!important;
+}
+
+
+
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2){
+  border-color:#f35cff!important;
+  box-shadow:
+    0 0 5px rgba(255,94,255,.95),
+    0 0 11px rgba(238,61,255,.78),
+    0 0 19px rgba(181,45,255,.52)!important;
+}
+
+
+
+.zagEditGroupTopRow{
+  display:grid;
+  grid-template-columns:62px minmax(0,1fr);
+  gap:10px;
+  align-items:stretch;
+  margin-bottom:10px;
+}
+.zagEditGroupTopRow .groupCreateTop{margin:0!important;height:62px}
+.zagGroupImageBox{
+  width:62px;height:62px;padding:0;
+  border:1.5px solid #d838f1;border-radius:9px;
+  background:#080a14;
+  display:grid;place-items:center;
+  box-shadow:0 0 8px #d13cff35;
+  overflow:hidden;
+}
+.zagGroupImageBox:active{transform:scale(.97)}
+.zagGroupImagePlaceholder{
+  width:31px;height:23px;
+  border:2px solid #e73cff;
+  border-radius:11px;
+  box-shadow:0 0 8px rgba(231,60,255,.65),inset 0 0 6px rgba(231,60,255,.18);
+}
+
+
+
+.zagGroupImagePreview,.zagSavedGroupEmblem{width:100%;height:100%;display:block;object-fit:cover}
+.groupBadgeNoEmoji:has(.zagSavedGroupEmblem):before{display:none!important}
+.zagEmblemPickerOnly{margin:0 0 10px;padding:10px;border:1.5px solid #a72ac4;border-radius:10px;background:#050711}
+.zagEmblemPickerOnlyTitle{font-size:12px;font-weight:800;color:#dfa8ff;margin:0 0 8px}
+.zagEmblemPickerOnlyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:290px;overflow:auto}
+.zagEmblemPickerOnlyChoice{aspect-ratio:1;padding:0;border:1.5px solid #76228b;border-radius:8px;background:#05040b;overflow:hidden}
+.zagEmblemPickerOnlyChoice img{width:100%;height:100%;display:block;object-fit:cover}
+.zagEmblemPickerOnlyChoice.selected{border:3px solid #ef47ff;box-shadow:0 0 10px rgba(239,71,255,.8)}
+
+
+
+.zagEmblemPickerOnlyGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;max-height:340px!important}
+.zagEmblemPickerOnlyChoice{aspect-ratio:1!important;padding:5px!important;border:1.5px solid #8d29a5!important;border-radius:11px!important;background:#060711!important;overflow:hidden!important}
+.zagEmblemPickerOnlyChoice img{width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important}
+.zagEmblemPickerOnlyChoice.selected{border:3px solid #f04cff!important;box-shadow:0 0 8px #ef47ff,0 0 16px rgba(221,53,255,.65)!important}
+.zagGroupImagePreview,.zagSavedGroupEmblem{object-fit:contain!important;background:transparent!important}
+
+
+
+.zagEmblemPickerOnlyChoice{padding:4px!important}
+.zagEmblemPickerOnlyChoice img{
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+.zagGroupImagePreview,.zagSavedGroupEmblem{
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+  background:transparent!important;
+}
+
+
+
+.zagEmblemPickerOnlyChoice{
+  padding:0!important;
+}
+.zagEmblemPickerOnlyChoice img{
+  width:112%!important;
+  height:112%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-6%!important;
+  top:-9%!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+
+
+
+/* Selection boxes: larger artwork, still centred and fully contained. */
+.zagEmblemPickerOnlyChoice img{
+  width:122%!important;
+  height:122%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-11%!important;
+  top:-14%!important;
+  transform:none!important;
+}
+
+/* Edit Group preview: enlarge the chosen emblem while keeping it centred. */
+.zagGroupImagePreview{
+  width:118%!important;
+  height:118%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-9%!important;
+  top:-9%!important;
+}
+
+/* Main Groups page emblem: larger and shifted upward slightly. */
+.groupBadgeNoEmoji .zagSavedGroupEmblem{
+  width:122%!important;
+  height:122%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-11%!important;
+  top:-16%!important;
+  transform:none!important;
+}
+
+
+
+/* Main Groups page only: remove the emblem container outline/background/glow.
+   The emblem image itself is unchanged. */
+.groupBadgeNoEmoji:has(.zagSavedGroupEmblem){
+  border:none!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
+
+
+.stickWeekSwitch{min-width:64px}
+.stickWeekSwitch.on{border-color:#f04cff!important;box-shadow:0 0 14px rgba(240,76,255,.55),inset 0 0 12px rgba(240,76,255,.15)!important;background:rgba(113,22,122,.28)!important}
+
+
+
+#zagInfoPanelV6{overflow:auto!important;aspect-ratio:auto!important;height:min(94vh,1050px)!important;background-size:100% auto!important;background-position:center top!important;}
+#zagInfoPanelV6:before{content:"";display:block;padding-top:150%;pointer-events:none;}
+.zagInfoUpdateV8{position:relative;margin:-17% 4.2% 11%;padding:10px;border:1.5px solid #d93cf2;border-radius:14px;background:linear-gradient(180deg,rgba(12,7,23,.98),rgba(5,5,13,.99));box-shadow:0 0 16px rgba(218,60,242,.25);color:#f8efff;z-index:2;}
+.zagInfoUpdateBlock{padding:8px 10px;text-align:left;}
+.zagInfoUpdateBlock+.zagInfoUpdateBlock{border-top:1px solid rgba(218,60,242,.35);}
+.zagInfoUpdateBlock b{display:block;color:#f0a7ff;font-size:13px;letter-spacing:.7px;margin-bottom:4px;}
+.zagInfoUpdateBlock span{display:block;font-size:11px;line-height:1.38;color:#eee2f5;}
+#zagInfoGoV6{position:relative!important;left:20%!important;bottom:auto!important;width:60%!important;height:54px!important;margin:0 0 18px!important;border:1.5px solid #e33cff!important;border-radius:12px!important;background:rgba(84,12,104,.45)!important;}
+#zagInfoGoV6:after{content:"LET’S GET STRONGER";color:#fff;font-weight:900;font-size:15px;letter-spacing:.5px;}
+
+
+
+#zagInfoPanelV6{
+  width:min(94vw,700px)!important;
+  height:auto!important;
+  max-height:94vh!important;
+  aspect-ratio:1024/2048!important;
+  overflow:hidden!important;
+  background-size:100% 100%!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  border-radius:22px!important;
+}
+#zagInfoPanelV6:before{display:none!important;content:none!important;padding:0!important}
+.zagInfoUpdateV8{display:none!important}
+#zagInfoGoV6{
+  position:absolute!important;
+  left:25%!important;
+  bottom:2.1%!important;
+  width:50%!important;
+  height:5.5%!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  z-index:5!important;
+}
+#zagInfoGoV6:after{content:none!important}
+#zagInfoCloseTop{
+  position:absolute;
+  right:1.5%;
+  top:1.2%;
+  width:10%;
+  aspect-ratio:1;
+  border:0;
+  background:transparent;
+  z-index:6;
+  cursor:pointer;
+}
+
+
+
+.splitDragHelp{margin:0 0 14px!important;color:#d9b8e5!important}
+.splitDropZone{
+ min-height:54px;border:1px dashed rgba(224,62,255,.38);border-radius:14px;
+ padding:7px;margin:5px 0 9px;transition:.15s ease;background:rgba(5,5,14,.22)
+}
+.splitDropZone.dragOver{border-color:#ef4cff;box-shadow:0 0 16px rgba(239,76,255,.35);background:rgba(103,18,117,.18)}
+.splitDragExercise{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
+.splitDragExercise:active{cursor:grabbing}
+.splitDragExercise.dragging{opacity:.35}
+.splitDragHandle{font-size:21px;line-height:1;color:#e34dff;letter-spacing:-5px;width:26px;flex:0 0 26px}
+.splitDragName{flex:1;min-width:0}
+.splitEmptyHint{display:none;text-align:center;color:#a883b5;font-size:11px;padding:10px}
+.splitDropZone:not(:has(.splitDragExercise)) .splitEmptyHint{display:block}
+
+
+
+/* Keep each exercise as one clean horizontal row on mobile. */
+.splitDropZone{width:100%!important;box-sizing:border-box!important;overflow:hidden!important;padding:8px 10px!important}
+.splitDragExercise{
+ display:grid!important;
+ grid-template-columns:34px minmax(0,1fr) 54px!important;
+ align-items:center!important;
+ gap:10px!important;
+ width:100%!important;
+ min-height:58px!important;
+ margin:0!important;
+ padding:7px 0!important;
+ box-sizing:border-box!important;
+ background:transparent!important;
+ border:0!important;
+ border-bottom:1px solid rgba(111,121,151,.28)!important;
+}
+.splitDragExercise:last-of-type{border-bottom:0!important}
+.splitDragHandle{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:34px!important;height:42px!important;flex:none!important;
+ font-size:22px!important;line-height:1!important;color:#e34dff!important;
+ letter-spacing:-5px!important;touch-action:none!important;user-select:none!important;
+}
+.splitDragName{
+ display:block!important;width:auto!important;min-width:0!important;max-width:none!important;
+ margin:0!important;padding:0!important;
+ font-size:15px!important;line-height:1.25!important;text-align:left!important;
+ white-space:normal!important;overflow-wrap:break-word!important;
+}
+.splitDragExercise .danger{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:54px!important;min-width:54px!important;max-width:54px!important;height:42px!important;
+ margin:0!important;padding:0!important;justify-self:end!important;
+}
+.splitTouchGhost{
+ position:fixed!important;z-index:999999!important;pointer-events:none!important;
+ padding:10px 14px!important;border:1px solid #ef4cff!important;border-radius:12px!important;
+ background:#090914!important;color:#fff!important;box-shadow:0 0 18px rgba(239,76,255,.5)!important;
+ max-width:65vw!important;font-size:14px!important
+}
+
+
+
+/* Normal page/modal scrolling everywhere except the actual purple drag grips. */
+.splitDragExercise{touch-action:pan-y!important}
+.splitDragName,.splitDragExercise .danger,.splitDropZone{touch-action:pan-y!important}
+.splitDragHandle{touch-action:none!important}
+
+/* Visible insertion marker between exercises while dragging. */
+.splitDropMarker{
+ height:4px!important;
+ margin:-2px 6px!important;
+ border-radius:999px!important;
+ background:#ef4cff!important;
+ box-shadow:0 0 7px #ef4cff,0 0 15px rgba(239,76,255,.9)!important;
+ pointer-events:none!important;
+ position:relative!important;
+ z-index:20!important;
+}
+.splitDropMarker:before,.splitDropMarker:after{
+ content:""!important;position:absolute!important;top:50%!important;
+ width:8px!important;height:8px!important;border-radius:50%!important;
+ background:#ef4cff!important;transform:translateY(-50%)!important;
+ box-shadow:0 0 8px #ef4cff!important
+}
+.splitDropMarker:before{left:-2px!important}
+.splitDropMarker:after{right:-2px!important}
