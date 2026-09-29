@@ -295,6 +295,8 @@ function sets(ex){
  return wu.concat(plans[w]).map(x=>({p:x[0],r:x[1],kg:Math.round(m*x[0]*10)/10}))
 }
 function k(ex,i){return st.day+"|"+ex+"|"+i}
+let zagScrollRestoreToken=0;
+let zagSkipNextScrollSave=false;
 function setActiveNav(name){
  st.pageScrolls=st.pageScrolls||{};
  // Migrate the older Maxes-only scroll value once, if present.
@@ -302,13 +304,19 @@ function setActiveNav(name){
  let currentId=document.querySelector(".nav button.active")?.id||"";
  let current=currentId.startsWith("nav-")?currentId.slice(4):"";
  // Every main tab owns its own scroll position. Never carry one tab's Y into another.
- if(current)st.pageScrolls[current]=window.scrollY||0;
+ // Finishing a workout deliberately resets Workout to the top, so do not immediately overwrite that reset.
+ if(current && !zagSkipNextScrollSave)st.pageScrolls[current]=window.scrollY||0;
+ zagSkipNextScrollSave=false;
  save();
  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
  document.getElementById("nav-"+name)?.classList.add("active");
  let target=Number(st.pageScrolls[name]||0);
- // Page renderers replace #screen synchronously after setActiveNav(). Restore only after that render.
- requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:target,left:0,behavior:"instant"})));
+ // Only the newest navigation is allowed to restore scroll. This prevents an older queued
+ // restore from springing the page back down after Finish Workout resets it to the top.
+ const restoreToken=++zagScrollRestoreToken;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   if(restoreToken===zagScrollRestoreToken)window.scrollTo({top:target,left:0,behavior:"instant"});
+ }));
 }
 function audioCtx(){window._zagAudio=window._zagAudio||new(window.AudioContext||window.webkitAudioContext)();if(window._zagAudio.state==="suspended")window._zagAudio.resume();return window._zagAudio}
 function noise(duration=.025,gain=.07,filter=2400,delay=0){if(!st.sound)return;let a=audioCtx(),n=Math.floor(a.sampleRate*duration),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);let s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+delay;s.buffer=b;f.type="bandpass";f.frequency.value=filter;g.gain.value=gain;s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
@@ -463,7 +471,7 @@ d[1].forEach(ex=>{
 st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
 recordStreakWorkout();save();returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
-function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"});save();workout();requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"instant"})));}}
+function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;++zagScrollRestoreToken;save();workout();requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"instant"})));}}
 function home(){setActiveNav("home");let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b>ⓘ Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class=btn style="width:100%;margin:3px 0;text-align:left;font-size:11px" onclick="st.day=${i};save();workout()">Day ${i+1} — ${esc(d[0])} <span style="float:right">›</span></button>`).join("")}`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function editSplit(){
   let saved=Object.keys(st.customSplits||{});
@@ -675,7 +683,7 @@ ${streakReminderTimeSetting()}
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
-processStreakCalendar();save();workout();zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
+processStreakCalendar();save();home();zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
 </script>
 
 <style id="zag-info-replacement-v6">
