@@ -595,8 +595,10 @@ async function zagShowNotification(kind){
  const reg=await navigator.serviceWorker.ready;
  const streak=Number(st.streak?.count||0);
  const isStreak=kind==="streak";
- await reg.showNotification(isStreak?"Zag Science — Keep your streak alive":"Zag Science — Workout reminder",{
-   body:isStreak?`Your ${streak}-day streak is waiting. Train today or use a rest day.`:`${st.days?.[st.day]?.[0]||"Today's workout"} is ready when you are.`,
+ const streakTitle=streak>0?"Zag Science — Keep your streak alive":"Zag Science — Start your streak today";
+ const streakBody=streak>0?`Your ${streak}-day streak is waiting. Train today or use a rest day.`:"Train today to start your streak.";
+ await reg.showNotification(isStreak?streakTitle:"Zag Science — Workout reminder",{
+   body:isStreak?streakBody:`${st.days?.[st.day]?.[0]||"Today's workout"} is ready when you are.`,
    icon:"./assets/icons/icon-192.png",
    badge:"./assets/icons/icon-192.png",
    tag:isStreak?"zag-streak-reminder":"zag-workout-reminder",
@@ -618,11 +620,19 @@ function zagUseRestDayFromNotification(){
  try{workout()}catch(e){}
  setTimeout(()=>{try{showStreakPopup(true)}catch(e){}},100);
 }
+function zagNotificationPopup(kind){
+ const isStreak=kind==="streak";
+ const streak=Number(st.streak?.count||0);
+ const title=isStreak?(streak>0?"Keep your streak alive":"Start your streak today"):"Workout reminder";
+ const copy=isStreak?(streak>0?`Your ${streak}-day streak is waiting. Train today or mark today as a rest day.`:"Train today to begin your streak, or mark today as a rest day if you are not training."):`${esc(st.days?.[st.day]?.[0]||"Today’s workout")} is ready when you are.`;
+ modal(title,`<div class=note style="margin-bottom:14px">${copy}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class=pick onclick="closeModal();workout()">${isStreak?"Train Today":"Start Workout"}</button><button class=btn onclick="closeModal();zagUseRestDayFromNotification()">Rest Day</button></div>`);
+}
 function zagHandleNotificationAction(){
- const u=new URL(location.href),a=u.searchParams.get("notificationAction");if(!a)return;
- u.searchParams.delete("notificationAction");history.replaceState({},"",u.pathname+u.search+u.hash);
+ const u=new URL(location.href),a=u.searchParams.get("notificationAction"),kind=u.searchParams.get("notificationKind")||"workout";if(!a&&!u.searchParams.has("notificationKind"))return;
+ u.searchParams.delete("notificationAction");u.searchParams.delete("notificationKind");history.replaceState({},"",u.pathname+u.search+u.hash);
  if(a==="rest-day")setTimeout(zagUseRestDayFromNotification,250);
  else if(a==="open-workout")setTimeout(()=>{try{workout()}catch(e){}},150);
+ else setTimeout(()=>zagNotificationPopup(kind),250);
 }
 setInterval(()=>{try{maybeBrowserStreakReminder()}catch(e){}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)try{processStreakCalendar();maybeBrowserStreakReminder()}catch(e){}});
@@ -639,7 +649,7 @@ ${notificationToggle("groupPRs","Group PRs","Alerts when a group member sets a n
 ${notificationToggle("streakScore","Streak score","Daily streak reminders and streak-status alerts.")}
 ${streakRestSelector()}
 ${streakReminderTimeSetting()}
-<div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">Enable</button></div>
+<div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable"}</button></div>
 <div class=settingLine><div class=grow><b style="font-size:15px">Test notifications</b><div class=note style="margin-top:4px">Send a test to check the iPhone notification design and Rest Day action.</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class=btn onclick="zagShowNotification('workout')">Workout</button><button class=btn onclick="zagShowNotification('streak')">Streak</button></div></div>
 <div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. Test notifications work now. Reliable timed delivery while the app is fully closed requires the push backend that will be connected in the next notification stage.</div>
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}

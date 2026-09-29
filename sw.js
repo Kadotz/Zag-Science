@@ -1,4 +1,4 @@
-const CACHE = 'zag-science-v2-notifications';
+const CACHE = 'zag-science-v3-notification-tap';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
@@ -45,8 +45,9 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const action = event.action === 'rest-day' ? 'rest-day' : 'open-workout';
-  const target = `./?notificationAction=${encodeURIComponent(action)}`;
+  const action = event.action === 'rest-day' ? 'rest-day' : (event.action === 'open-workout' ? 'open-workout' : 'clicked');
+  const kind = (event.notification.data && event.notification.data.kind) || 'workout';
+  const target = `./?notificationAction=${encodeURIComponent(action)}&notificationKind=${encodeURIComponent(kind)}`;
   event.waitUntil((async () => {
     const windows = await clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of windows) {
