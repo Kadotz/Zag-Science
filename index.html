@@ -295,7 +295,21 @@ function sets(ex){
  return wu.concat(plans[w]).map(x=>({p:x[0],r:x[1],kg:Math.round(m*x[0]*10)/10}))
 }
 function k(ex,i){return st.day+"|"+ex+"|"+i}
-function setActiveNav(name){let current=document.querySelector(".nav button.active")?.id;if(current==="nav-maxes"&&name!=="maxes"){st.maxesScrollY=window.scrollY||0;save()}document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));document.getElementById("nav-"+name)?.classList.add("active")}
+function setActiveNav(name){
+ st.pageScrolls=st.pageScrolls||{};
+ // Migrate the older Maxes-only scroll value once, if present.
+ if(st.pageScrolls.maxes==null&&st.maxesScrollY!=null)st.pageScrolls.maxes=Number(st.maxesScrollY)||0;
+ let currentId=document.querySelector(".nav button.active")?.id||"";
+ let current=currentId.startsWith("nav-")?currentId.slice(4):"";
+ // Every main tab owns its own scroll position. Never carry one tab's Y into another.
+ if(current)st.pageScrolls[current]=window.scrollY||0;
+ save();
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ document.getElementById("nav-"+name)?.classList.add("active");
+ let target=Number(st.pageScrolls[name]||0);
+ // Page renderers replace #screen synchronously after setActiveNav(). Restore only after that render.
+ requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:target,left:0,behavior:"instant"})));
+}
 function audioCtx(){window._zagAudio=window._zagAudio||new(window.AudioContext||window.webkitAudioContext)();if(window._zagAudio.state==="suspended")window._zagAudio.resume();return window._zagAudio}
 function noise(duration=.025,gain=.07,filter=2400,delay=0){if(!st.sound)return;let a=audioCtx(),n=Math.floor(a.sampleRate*duration),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);let s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+delay;s.buffer=b;f.type="bandpass";f.frequency.value=filter;g.gain.value=gain;s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
 function tone(freq,dur,gain=.03,type="sine",delay=0){if(!st.sound)return;let a=audioCtx(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur)}
@@ -545,7 +559,7 @@ function deleteSavedSplit(n){delete st.customSplits[n];if(st.splitName===n)st.sp
 function loadOriginal(){st.days=JSON.parse(JSON.stringify(ORIGINAL));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName="The Goat Split";st.day=0;save();editSplit()}
 function uniqueSections(){let seen=new Set(),out=[];st.days.forEach((d,i)=>{let key=d[0]+"|"+JSON.stringify(d[1])+"|"+JSON.stringify(d[2]);if(!seen.has(key)){seen.add(key);out.push({name:d[0],mains:d[1],extras:d[2],day:i})}});return out}
 function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number value="${kgToDisplay(st.max[x]||0)}" onchange="st.max['${q(x)}']=+displayToKg(this.value);save()"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
-function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach(sec=>{s+=`<section class=maxsection><h2>${esc(sec.name)}</h2>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</section>`});document.getElementById("screen").innerHTML=s;requestAnimationFrame(()=>window.scrollTo(0,Number(st.maxesScrollY||0)))}
+function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach(sec=>{s+=`<section class=maxsection><h2>${esc(sec.name)}</h2>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
 function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
 function groupMembers(){let all=[{name:"Kieron",vals:{"Squats":200,"Bench Press":170,"Deadlifts":220,"Weighted Lat Pull Up":50,"Barbell Row":115},bw:90,streak:12,prs:4,trend:1},{name:"James",vals:{"Squats":180,"Bench Press":165,"Deadlifts":210,"Weighted Lat Pull Up":45,"Barbell Row":110},bw:84,streak:8,prs:2,trend:-1},{name:"Bill",vals:{"Squats":160,"Bench Press":150,"Deadlifts":200,"Weighted Lat Pull Up":40,"Barbell Row":120},bw:82,streak:16,prs:3,trend:2},{name:"Keelan",vals:{"Squats":150,"Bench Press":140,"Deadlifts":190,"Weighted Lat Pull Up":60,"Barbell Row":110},bw:78,streak:6,prs:1,trend:0},{name:"Anna",vals:{"Squats":120,"Bench Press":125,"Deadlifts":160,"Weighted Lat Pull Up":25,"Barbell Row":80},bw:65,streak:10,prs:3,trend:1},{name:"Betsy",vals:{"Squats":100,"Bench Press":90,"Deadlifts":140,"Weighted Lat Pull Up":20,"Barbell Row":70},bw:60,streak:5,prs:2,trend:-1}];if(!st.demoGroup)return all;let allowed=new Set(["Kieron",...(st.demoGroup.members||[])]);return all.filter(x=>allowed.has(x.name))}
