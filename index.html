@@ -372,7 +372,7 @@ function maybeBrowserStreakReminder(){
  if(sessionStorage.getItem(key))return;
  sessionStorage.setItem(key,"1");
  if("Notification" in window && Notification.permission==="granted"){
-   try{new Notification("ZAG SCIENCE — Don't lose your streak",{body:`Keep your ${st.streak.count||0}-day streak going. Get today's workout in.`})}catch(e){}
+   try{zagShowNotification("streak")}catch(e){}
  }
 }
 // One-time demo: begin at a broken 0-day streak, then return to real streak logic after a completed workout.
@@ -582,7 +582,47 @@ function streakRestSelector(){
 }
 async function requestZagNotifications(){
  if(!("Notification" in window)){alert("This browser does not support web notifications.");return}
- try{let p=await Notification.requestPermission();alert(p==="granted"?"Notifications enabled.":"Notification permission was not enabled.");settings()}catch(e){alert("Notifications could not be enabled in this browser.")}
+ try{
+   let p=await Notification.requestPermission();
+   if(p==="granted" && "serviceWorker" in navigator) await navigator.serviceWorker.ready;
+   alert(p==="granted"?"Notifications enabled.":"Notification permission was not enabled.");settings();
+ }catch(e){alert("Notifications could not be enabled in this browser.")}
+}
+async function zagShowNotification(kind){
+ if(!("Notification" in window)){alert("Notifications are not supported on this device.");return}
+ if(Notification.permission!=="granted"){await requestZagNotifications();if(Notification.permission!=="granted")return}
+ if(!("serviceWorker" in navigator)){alert("The Zag Science service worker is not available yet.");return}
+ const reg=await navigator.serviceWorker.ready;
+ const streak=Number(st.streak?.count||0);
+ const isStreak=kind==="streak";
+ await reg.showNotification(isStreak?"Zag Science — Keep your streak alive":"Zag Science — Workout reminder",{
+   body:isStreak?`Your ${streak}-day streak is waiting. Train today or use a rest day.`:`${st.days?.[st.day]?.[0]||"Today's workout"} is ready when you are.`,
+   icon:"./assets/icons/icon-192.png",
+   badge:"./assets/icons/icon-192.png",
+   tag:isStreak?"zag-streak-reminder":"zag-workout-reminder",
+   renotify:true,
+   data:{kind},
+   actions:isStreak?[{action:"open-workout",title:"Open Workout"},{action:"rest-day",title:"Rest Day"}]:[{action:"open-workout",title:"Open Workout"},{action:"rest-day",title:"Rest Day"}]
+ });
+}
+function zagUseRestDayFromNotification(){
+ processStreakCalendar();
+ const today=streakDayKey(),wk=streakWeekKey();
+ const historyDone=Array.isArray(st.history)&&st.history.some(h=>{let raw=h.date||h.when||h.timestamp||h.time;if(!raw)return false;let d=new Date(raw);return !isNaN(d)&&streakDayKey(d)===today;});
+ if(st.streak.lastWorkout===today||historyDone){alert("Today's workout is already complete, so you do not need to use a rest day.");return}
+ st.streak.weekRest=st.streak.weekRest||{};
+ const used=Number(st.streak.weekRest[wk]||0),allowed=Number(st.streakRestDays||0);
+ if(st.streak.lastRestDay===today){alert("Today is already marked as a rest day.");return}
+ if(used>=allowed){alert("You have already used all of your allowed rest days this week.");return}
+ st.streak.weekRest[wk]=used+1;st.streak.restUsed=used+1;st.streak.lastRestDay=today;st.streak.lastProcessed=today;st.streak.justLost=false;st.streak.lastPopup="";save();
+ try{workout()}catch(e){}
+ setTimeout(()=>{try{showStreakPopup(true)}catch(e){}},100);
+}
+function zagHandleNotificationAction(){
+ const u=new URL(location.href),a=u.searchParams.get("notificationAction");if(!a)return;
+ u.searchParams.delete("notificationAction");history.replaceState({},"",u.pathname+u.search+u.hash);
+ if(a==="rest-day")setTimeout(zagUseRestDayFromNotification,250);
+ else if(a==="open-workout")setTimeout(()=>{try{workout()}catch(e){}},150);
 }
 setInterval(()=>{try{maybeBrowserStreakReminder()}catch(e){}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)try{processStreakCalendar();maybeBrowserStreakReminder()}catch(e){}});
@@ -599,12 +639,13 @@ ${notificationToggle("groupPRs","Group PRs","Alerts when a group member sets a n
 ${notificationToggle("streakScore","Streak score","Daily streak reminders and streak-status alerts.")}
 ${streakRestSelector()}
 ${streakReminderTimeSetting()}
-<div class=settingLine><div class=grow><b style="font-size:15px">Browser notification permission</b><div class=note style="margin-top:4px">Enable browser alerts while testing the GitHub-hosted app.</div></div><button class=btn onclick="requestZagNotifications()">Enable</button></div>
-<div class=note style="margin-top:10px">Streak rest days preserve your streak rather than adding to it. Phone push delivery can be connected when push notifications are enabled in the packaged app.</div>
+<div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">Enable</button></div>
+<div class=settingLine><div class=grow><b style="font-size:15px">Test notifications</b><div class=note style="margin-top:4px">Send a test to check the iPhone notification design and Rest Day action.</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class=btn onclick="zagShowNotification('workout')">Workout</button><button class=btn onclick="zagShowNotification('streak')">Streak</button></div></div>
+<div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. Test notifications work now. Reliable timed delivery while the app is fully closed requires the push backend that will be connected in the next notification stage.</div>
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
-processStreakCalendar();save();workout();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
+processStreakCalendar();save();workout();zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
 </script>
 
 <style id="zag-info-replacement-v6">

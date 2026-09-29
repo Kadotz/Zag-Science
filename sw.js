@@ -1,4 +1,4 @@
-const CACHE = 'zag-science-v1';
+const CACHE = 'zag-science-v2-notifications';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
@@ -25,4 +25,34 @@ self.addEventListener('fetch', event => {
     }
     return response;
   })));
+});
+
+self.addEventListener('push', event => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data ? event.data.text() : '' }; }
+  const kind = data.kind || 'workout';
+  const isStreak = kind === 'streak';
+  event.waitUntil(self.registration.showNotification(data.title || (isStreak ? 'Zag Science — Keep your streak alive' : 'Zag Science — Workout reminder'), {
+    body: data.body || (isStreak ? 'Your streak is waiting. Train today or use a rest day.' : 'Your workout is ready when you are.'),
+    icon: './assets/icons/icon-192.png',
+    badge: './assets/icons/icon-192.png',
+    tag: isStreak ? 'zag-streak-reminder' : 'zag-workout-reminder',
+    renotify: true,
+    data: { kind },
+    actions: [{ action: 'open-workout', title: 'Open Workout' }, { action: 'rest-day', title: 'Rest Day' }]
+  }));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const action = event.action === 'rest-day' ? 'rest-day' : 'open-workout';
+  const target = `./?notificationAction=${encodeURIComponent(action)}`;
+  event.waitUntil((async () => {
+    const windows = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      if ('navigate' in client) await client.navigate(target);
+      if ('focus' in client) return client.focus();
+    }
+    return clients.openWindow(target);
+  })());
 });
