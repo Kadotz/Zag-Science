@@ -297,6 +297,7 @@ function sets(ex){
 function k(ex,i){return st.day+"|"+ex+"|"+i}
 let zagScrollRestoreToken=0;
 let zagSkipNextScrollSave=false;
+let zagForceWorkoutTop=false;
 function setActiveNav(name){
  st.pageScrolls=st.pageScrolls||{};
  // Migrate the older Maxes-only scroll value once, if present.
@@ -304,18 +305,23 @@ function setActiveNav(name){
  let currentId=document.querySelector(".nav button.active")?.id||"";
  let current=currentId.startsWith("nav-")?currentId.slice(4):"";
  // Every main tab owns its own scroll position. Never carry one tab's Y into another.
- // Finishing a workout deliberately resets Workout to the top, so do not immediately overwrite that reset.
- if(current && !zagSkipNextScrollSave)st.pageScrolls[current]=window.scrollY||0;
+ // Finish Workout can explicitly force Workout to top without re-saving its old position.
+ if(current && !zagSkipNextScrollSave && !(zagForceWorkoutTop && current==="workout"))st.pageScrolls[current]=window.scrollY||0;
  zagSkipNextScrollSave=false;
+ if(zagForceWorkoutTop && name==="workout")st.pageScrolls.workout=0;
  save();
  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
  document.getElementById("nav-"+name)?.classList.add("active");
- let target=Number(st.pageScrolls[name]||0);
- // Only the newest navigation is allowed to restore scroll. This prevents an older queued
- // restore from springing the page back down after Finish Workout resets it to the top.
+ let target=(zagForceWorkoutTop && name==="workout")?0:Number(st.pageScrolls[name]||0);
+ // Hide the old/new page during the one-frame scroll restore so a distant section never flashes.
+ const screen=document.getElementById("screen");
+ if(screen)screen.style.visibility="hidden";
  const restoreToken=++zagScrollRestoreToken;
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-   if(restoreToken===zagScrollRestoreToken)window.scrollTo({top:target,left:0,behavior:"instant"});
+   if(restoreToken===zagScrollRestoreToken){
+     window.scrollTo({top:target,left:0,behavior:"instant"});
+     if(screen)screen.style.visibility="visible";
+   }
  }));
 }
 function audioCtx(){window._zagAudio=window._zagAudio||new(window.AudioContext||window.webkitAudioContext)();if(window._zagAudio.state==="suspended")window._zagAudio.resume();return window._zagAudio}
@@ -471,7 +477,7 @@ d[1].forEach(ex=>{
 st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
 recordStreakWorkout();save();returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
-function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;++zagScrollRestoreToken;save();workout();requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"instant"})));}}
+function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
 function home(){setActiveNav("home");let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b>ⓘ Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class=btn style="width:100%;margin:3px 0;text-align:left;font-size:11px" onclick="st.day=${i};save();workout()">Day ${i+1} — ${esc(d[0])} <span style="float:right">›</span></button>`).join("")}`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function editSplit(){
   let saved=Object.keys(st.customSplits||{});
@@ -683,7 +689,17 @@ ${streakReminderTimeSetting()}
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
-processStreakCalendar();save();home();zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
+processStreakCalendar();save();
+// A fresh app load always starts on Home. Per-page scroll memory is still used during navigation.
+document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+home();
+zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
+// iOS PWAs often resume instead of reloading. Treat returning to the app as opening it: show Home.
+let zagHiddenAt=0;
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="hidden")zagHiddenAt=Date.now();
+ else if(zagHiddenAt && Date.now()-zagHiddenAt>800){zagHiddenAt=0;home();}
+});
 </script>
 
 <style id="zag-info-replacement-v6">
