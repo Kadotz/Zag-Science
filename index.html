@@ -3,85 +3,878 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#02040a"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>Zag Science - Streak State Fixed</title>
+<style>
+:root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
+*{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
+.logo{display:block;width:100%;height:92px;object-fit:cover;object-position:center;background:#050712;border-bottom:1px solid #8526ac}
+main{padding:7px 8px 16px}.btn,.week{color:#fff;background:#090a13;border:1px solid #d838f1;border-radius:7px;padding:6px 9px;box-shadow:0 0 8px #d13cff35}.title{text-align:center}.title h1{font-size:24px;margin:2px 0}.title p{font-size:12px;color:#d88cff;margin:2px 0}
+.top{display:grid;grid-template-columns:75px 1fr 80px;align-items:center;margin:2px 0 7px}.top>:last-child{justify-self:end}
+.exercise{display:grid;grid-template-columns:76px minmax(0,1fr) 82px;grid-template-rows:34px auto;margin:6px 0;border:1px solid #bc28dc;border-radius:8px;background:#050914;overflow:hidden;box-shadow:0 0 8px #9e28ca25}
+.head{grid-column:1;grid-row:1/3;position:relative;padding:5px 3px;border-right:1px solid var(--line);min-height:138px;text-align:center}.n{position:absolute;left:50%;top:30px;transform:translateX(-50%);width:22px;height:22px;margin:0;border:1px solid var(--purple);border-radius:50%;display:grid;place-items:center;font-size:11px}.name{position:absolute;left:3px;right:3px;top:55%;transform:translateY(-50%);text-align:center;font-size:7px;font-weight:800;line-height:1.15;white-space:normal;word-break:normal;overflow-wrap:normal;hyphens:none;letter-spacing:-.15px;padding:0 2px}.editMain{position:absolute;bottom:5px;left:4px;width:66px;padding:4px 1px;font-size:8px}
+table{grid-column:2;grid-row:1/3;width:100%;border-collapse:collapse;table-layout:fixed;font-size:7px}th,td{text-align:center;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:1px 0;height:13px}th{color:#dca6ff;font-weight:600;line-height:1.02;height:21px}.cell{width:92%;min-width:0;padding:2px 1px;background:#040812;border:1px solid #46506c;color:#fff;border-radius:4px;text-align:center;font-size:9px}.fist{padding:0;border:1px solid #3b455f;border-radius:4px;background:#080b14 url("assets/images/asset-001-4394b03b6f48.png") center/25px 25px no-repeat;font-size:0;min-width:28px;min-height:28px}.fist.done{border-color:#23f1a1;box-shadow:0 0 7px #23f1a177}
+.maxbox{grid-column:3;grid-row:1;padding:5px 1px 2px;text-align:center;font-weight:800;font-size:8px;border-bottom:1px solid #8b28ad}.maxbox span{color:#ec79ff}.exComplete{grid-column:3;grid-row:2;margin:3px;padding:2px;border:1px solid #e23cff;border-radius:7px;background:linear-gradient(135deg,#22072b,#3d0a49,#15051b);color:#fff;font-size:7px;font-weight:900;font-style:italic;box-shadow:0 0 9px #dd37ff4c;display:flex;align-items:center;justify-content:center;gap:2px}.flameimg{width:30px;height:30px;object-fit:cover;object-position:center;border-radius:5px}
+.finish{width:100%;margin:8px 0;padding:10px;border:1px solid #24f2a0;border-radius:8px;background:linear-gradient(90deg,#05271b,#075b3e,#05271b);color:#fff;font-weight:900;font-style:italic;box-shadow:0 0 11px #20f3a044}
+.extras,.section,.pagecard{border:1px solid #642083;border-radius:8px;background:#060912;padding:8px;margin:7px 0}.extras h2,.section h2{font-size:15px;margin:0 0 6px}.extra{display:grid;grid-template-columns:1fr 55px 52px;gap:4px;align-items:center;border-top:1px solid #20273a;padding:4px 0;font-size:10px}.extra .cell{font-size:9px}.note{color:#bca3ce;font-size:9px}.small{font-size:9px;color:#c9afd9}.row{display:flex;gap:5px;align-items:center}.grow{flex:1}.danger{border-color:#ff5278!important}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#040610f8;border-top:1px solid #76249a;z-index:30;padding-bottom:env(safe-area-inset-bottom)}.navin{max-width:1000px;margin:auto;display:grid;grid-template-columns:repeat(6,1fr)}.nav button{border:0;border-right:1px solid #281331;background:transparent;color:#df76ff;padding:4px 1px 5px;font-size:9px;min-height:52px}.nav img{display:block;width:24px;height:24px;margin:0 auto 1px;filter:drop-shadow(0 0 5px #d63cff)}.nav button.active{color:#fff;background:linear-gradient(#3a104e,#190722);box-shadow:inset 0 0 14px #d63cff88;border:1px solid #dd43ff;border-radius:7px}
+.modal{position:fixed;inset:0;background:#000c;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px}.modalbox{width:min(430px,96vw);max-height:80vh;overflow:auto;background:#080b15;border:1px solid #e33cff;border-radius:14px;padding:14px;box-shadow:0 0 35px #c32cff66}.modalbox h2{margin:0 0 4px}.pick{display:block;width:100%;text-align:left;margin:6px 0;padding:10px;border:1px solid #742495;background:#0d0b17;color:#fff;border-radius:8px}.close{float:right}
+.dayedit{display:grid;grid-template-columns:30px 1fr auto;gap:5px;align-items:center;margin:5px 0}.dayedit input{width:100%;background:#050812;color:#fff;border:1px solid #3e4963;border-radius:5px;padding:6px}.maxsection{padding:7px;margin:7px 0;border:1px solid #752493;border-radius:8px;background:#050812}.maxsection h2{margin:0 0 4px;font-size:14px;color:#fff}.maxrow{display:grid;grid-template-columns:1fr 58px 35px;gap:4px;align-items:center;padding:3px 0;border-top:1px solid #1e2638;font-size:9.5px}.extraslabel{font-size:9px;letter-spacing:1.5px;color:#df74ff;margin:6px 0 2px}
+@media(min-width:900px){.logo{height:125px}.exercise{grid-template-columns:180px minmax(0,1fr) 155px}.head{min-height:185px;padding-left:65px}.n{width:43px;height:43px;font-size:21px;left:12px}.name{font-size:16px}table{font-size:11px}.cell{font-size:11px}.maxbox{font-size:14px}.exComplete{font-size:12px}.flameimg{width:45px;height:45px}}
 
-<link rel="stylesheet" href="assets/app.css">
+.groupsTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:8px 0}.groupsTabs button{padding:9px 2px}.groupsTabs .sel{background:linear-gradient(#64167d,#280634);box-shadow:inset 0 0 14px #e73cff88}.groupHero{display:flex;gap:8px;align-items:center}.groupBadge{width:58px;height:48px;border:1px solid #9d2bc0;border-radius:8px;background:radial-gradient(circle,#371047,#080a13);display:grid;place-items:center;font-size:27px}.groupTitle{font-size:18px;font-weight:900}.leadTable{width:100%;font-size:10px}.leadTable th,.leadTable td{padding:7px 3px;height:auto}.leadTable td:nth-child(2){text-align:left}.podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:7px;align-items:end;margin:12px 0}.pod{border:1px solid #9c28bd;border-radius:10px;padding:9px 4px;text-align:center;background:#070912}.pod.first{border-color:#ffd84a;box-shadow:0 0 16px #ffd84a55;padding-top:14px}.pod .medal{font-size:25px}.pod b{display:block;font-size:12px}.pod span{font-size:10px;color:#e5b8f7}.exerciseTabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:3px}.exerciseTabs button{white-space:nowrap}.accountRow{display:flex;align-items:center;gap:9px}.accountIcon{width:42px;height:42px;border-radius:50%;border:1px solid #d83cf1;display:grid;place-items:center;font-size:21px}.settingLine{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #20273a}.coming{font-size:9px;color:#d88cff}.createChoices label{display:block;padding:8px;margin:5px 0;border:1px solid #54206d;border-radius:7px}.createChoices input{margin-right:7px}
 
-<meta name="apple-mobile-web-app-title" content="Zag Science">
+.groupIcon{width:27px;height:27px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 6px #d63cff);margin-right:5px}
+.statIcon{width:25px;height:25px;object-fit:contain;display:block;margin:0 auto 2px;filter:drop-shadow(0 0 5px #d63cff)}
+.medalImg{width:39px;height:39px;object-fit:contain;filter:none;-webkit-mask-image:radial-gradient(circle at center,#000 0%,#000 44%,rgba(0,0,0,.96) 50%,rgba(0,0,0,.78) 56%,rgba(0,0,0,.48) 62%,rgba(0,0,0,.18) 68%,transparent 75%);mask-image:radial-gradient(circle at center,#000 0%,#000 44%,rgba(0,0,0,.96) 50%,rgba(0,0,0,.78) 56%,rgba(0,0,0,.48) 62%,rgba(0,0,0,.18) 68%,transparent 75%);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.pod .medalImg{width:48px;height:48px;margin:auto;display:block}
+.groupStats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px;text-align:center}
+.groupStat{font-size:10px;line-height:1.1}
+
+.groupEmptyFigurine{margin:-10px auto 10px;overflow:hidden;border-radius:18px;background:#05050d;line-height:0;border:2px solid #e969ff;box-shadow:0 0 10px rgba(233,105,255,.18),inset 0 0 8px rgba(233,105,255,.10)}.groupEmptyFigurine img{width:100%;height:auto;display:block}.pagecard:has(.groupEmptyFigurine){padding:18px 18px 28px!important;background:linear-gradient(180deg,#070711 0%,#090510 100%);border-color:#9f2bc7;box-shadow:inset 0 0 28px rgba(170,34,220,.08)}
+
+.groupMainTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 12px}.groupMainTab{background:#0c0b16;color:#f7f2fb;border:1.5px solid #d82cff;border-radius:10px;padding:12px 6px;font-size:14px}.groupMainTab.sel{border:2.5px solid #ef4cff;box-shadow:0 0 13px #b900ff88;background:#25102f}.exerciseTabStrip{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.exerciseTab{flex:0 0 auto;background:#0b0b14;color:#fff;border:1.5px solid #d82cff;border-radius:9px;padding:10px 12px;font-size:13px}.exerciseTab.sel{border:2.5px solid #ef4cff;box-shadow:0 0 12px #c300ff99;background:#25102f}.groupPodium{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-items:end;margin:10px 0 12px}.podiumCard{border:1.5px solid #a82bc5;border-radius:12px;padding:12px 5px;text-align:center;background:#090a12}.podiumCard.winner{border-color:#ffd84a;box-shadow:0 0 14px #ffd84a33;padding-top:18px}.podiumMedal{font-size:28px;margin-bottom:5px}.groupBoard{padding:12px!important}.groupBoard h2{margin:0 0 10px;font-size:20px}.boardHead,.boardRow{display:grid;grid-template-columns:54px 1fr 100px;align-items:center}.boardHead{color:#dc8cf0;font-size:12px;font-weight:700;border-bottom:1px solid #35405a;padding:8px 4px}.boardRow{min-height:50px;border-bottom:1px solid #29334a;padding:4px}.boardRow:last-child{border-bottom:0}.boardRow span:first-child{text-align:center;font-size:18px}.boardRow b:last-child{text-align:right;padding-right:6px}@media(max-width:430px){.groupMainTab{font-size:12px;padding:11px 3px}.boardHead,.boardRow{grid-template-columns:48px 1fr 86px}}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
+<style>
+.streakWidget{margin:10px 0 14px;padding:14px;border:1px solid #a92bc7;border-radius:16px;background:linear-gradient(135deg,#090914,#16071e);box-shadow:0 0 22px #a629c733;display:flex;align-items:center;gap:14px}
+.streakArm{width:76px;height:76px;object-fit:contain;filter:drop-shadow(0 0 5px #b83bd999) drop-shadow(0 0 11px #6818c777)}
+.streakNum{font-size:32px;font-weight:900;line-height:1;color:#fff;text-shadow:0 0 12px #d94dff}
+.streakWeek{display:flex;gap:7px;margin-top:9px} .streakDot{width:20px;height:20px;border-radius:50%;border:1px solid #764482;display:grid;place-items:center;font-size:10px} .streakDot.on{background:#b832d0;color:white;box-shadow:0 0 9px #d94dff}
+.streakOverlay{position:fixed;inset:0;z-index:99999;background:#02030bd9;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:22px}
+.streakPopup{width:min(360px,92vw);border:1px solid #b72fd0;border-radius:22px;padding:24px;text-align:center;background:radial-gradient(circle at 50% 25%,#3b084f 0,#100616 42%,#05060d 78%);box-shadow:0 0 45px #a92bc766}
+.streakHero{position:relative;height:185px;display:grid;place-items:center} .streakHero img{width:180px;max-height:180px;object-fit:contain;filter:drop-shadow(0 0 6px #bd40db99) drop-shadow(0 0 16px #6117c277)} .streakHero .big{position:absolute;bottom:13px;font-size:66px;font-weight:1000;color:white;text-shadow:0 0 10px #d83cff,0 0 25px #8b24ff}
+.streakPopup h2{margin:0;font-size:25px} .streakPopup p{color:#d9a7e5} .streakPopup .pick{width:100%;font-size:16px;margin-top:10px}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style><meta name="apple-mobile-web-app-title" content="Zag Science">
+<style id="streak-arm-png-fix">
+.streakMuscle,.streak-muscle,.streakArm,.streak-arm,.streak-arm-art{
+background:none!important;background-image:url("assets/images/asset-002-b618424d07b9.png")!important;background-position:center!important;
+background-repeat:no-repeat!important;background-size:contain!important;background-color:transparent!important;
+box-shadow:none!important;filter:none!important;border:0!important;outline:0!important;
+color:transparent!important;text-shadow:none!important;font-size:0!important;overflow:visible!important;
+}
+.streakMuscle::before,.streakMuscle::after,.streak-muscle::before,.streak-muscle::after,
+.streakArm::before,.streakArm::after,.streak-arm::before,.streak-arm::after,
+.streak-arm-art::before,.streak-arm-art::after{content:none!important;display:none!important;background:none!important;box-shadow:none!important}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
+<style id="streak-arm-actual-img-fix">
+.streakArm,
+.streakHero img {
+  content: url("assets/images/asset-002-b618424d07b9.png") !important;
+  background: none !important;
+  filter: drop-shadow(0 0 5px #a62cff70) !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
+
+<style id="streak-new-arm-art">
+.streakArm,
+.streakHero img {
+  content: url("assets/images/asset-003-aa33073ba683.png") !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  filter: none !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
+
+<style id="streak-transparent-arm-final">
+.streakArm,
+.streakHero img {
+  content: url("assets/images/asset-004-831bb6235a98.png") !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  filter: none !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
 
 
 
 
+<style id="zag-final-iphone-header">
+html, body { margin-top:0 !important; padding-top:0 !important; }
+img.logo[alt="Zag Science"]{
+  display:block !important;
+  width:100% !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  object-fit:cover !important;
+  object-position:center top !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
 
+<style>
+.zagNeedle{width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:3px;filter:drop-shadow(0 0 4px #e73cff)}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
+<style id="zag-final-home-fixes">
+/* Final home fixes: hide duplicate top-right Info button and show full transparent ZAG PRO logo. */
+#zagHomeInfoV7{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+.zagProCard{overflow:hidden!important;}
+.zagProCard b{display:flex!important;align-items:center!important;width:100%!important;height:48px!important;margin:0 0 2px!important;padding:0!important;overflow:visible!important;background:transparent!important;}
+.zagProCard .zagNeedle{display:block!important;width:100%!important;height:48px!important;object-fit:contain!important;object-position:center center!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;filter:none!important;clip-path:none!important;mask:none!important;}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
+<link rel="icon" type="image/png" href="assets/images/asset-005-a0d53544f0bb.png">
+<link rel="apple-touch-icon" href="assets/images/asset-005-a0d53544f0bb.png">
 
+<style id="streak-lost-effect">
+.streakArmWrap{position:relative;display:inline-grid;place-items:center}
+.streakLost .streakArm{filter:grayscale(.8) brightness(.62) contrast(1.15)!important;opacity:.82}
+.streakHero.streakLost img{filter:none!important;opacity:1}
+.streakLost .streakArmWrap::before,.streakLost .streakArmWrap::after{content:none!important;display:none!important}
+.streakLost .streakArmWrap::before{content:none!important;display:none!important}
+.streakLost .streakArmWrap::after{content:none!important;display:none!important}
+.streakHero.streakLost .streakArmWrap::before{content:none!important;display:none!important}
+.streakHero.streakLost .streakArmWrap::after{content:none!important;display:none!important}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
+<style id="streak-home-state-final-fix">
+/* The arm artwork itself controls the streak state. Do not layer the old lightning PNG behind it. */
+.streakArm,.streakHero img,.streakArmWrap img{
+  background-image:none !important;
+  background:none !important;
+}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
+<style id="streak-asset-src-override">
+/* Critical fix: earlier prototype CSS replaced every streak <img> via the CSS content property.
+   Restore each image element's actual src so the state-specific artwork can render. */
+.streakArm, .streakHero img, .streakArmWrap img {
+  content: normal !important;
+  background: none !important;
+  background-image: none !important;
+}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
-<link rel="icon" type="image/png" href="assets/images/asset-005-2cbb649845d3.png">
-<link rel="apple-touch-icon" href="assets/images/asset-005-2cbb649845d3.png">
+<style id="streak-full-swap-fix">
+/* Each streak state is a real IMG src swap. No CSS artwork replacement. */
+#homeStreakStateArm,.streakHero .streakPopupStateArm{content:normal!important;background:none!important;background-image:none!important;object-fit:contain!important;}
+#homeStreakStateArm{width:76px;height:76px;display:block;}
+.streakHero .streakPopupStateArm{width:180px;height:180px;display:block;}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
+<style id="group-create-redesign">
+.groupCreateTop{margin-top:10px}.groupModeGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.groupSelectBox{border:1px solid #54206d;border-radius:10px;background:#070912;padding:14px 8px;text-align:center;font-weight:800;cursor:pointer;transition:.15s}.groupSelectBox.selected,.bodyRatioBox.selected{border-color:#e53cff;box-shadow:inset 0 0 18px #d52df344,0 0 10px #b526d455;background:linear-gradient(180deg,#180820,#090a13)}.bodyRatioBox{border:1px solid #54206d;border-radius:10px;padding:11px;margin:10px 0;background:#070912}.bodyRatioTitle{font-size:14px;font-weight:900;margin-bottom:8px}.ratioMiniGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.ratioMini{border:1px solid #54206d;border-radius:8px;padding:10px 5px;text-align:center;font-size:11px;font-weight:800;cursor:pointer}.ratioMini.selected{border-color:#e53cff;background:#2b0a36;box-shadow:inset 0 0 12px #e53cff55}.exerciseChooser{border:1px solid #54206d;border-radius:10px;margin:10px 0;background:#070912;overflow:hidden}.exerciseChooserHead{display:flex;align-items:center;justify-content:space-between;padding:13px 12px;cursor:pointer;font-weight:900}.exerciseChooserHead.selected{border-color:#e53cff;box-shadow:inset 0 0 14px #d52df322}.exerciseChooserList{display:none;border-top:1px solid #54206d;max-height:330px;overflow:auto;padding:6px}.exerciseChooserList.open{display:block}.exerciseChoice{display:flex!important;align-items:center;gap:7px;padding:9px!important;margin:4px 0!important;border:1px solid #3d194f!important;border-radius:7px}.exerciseCount{font-size:10px;color:#d88cff;font-weight:500}.createGroupAction{width:100%;margin-top:12px}
+.groupExerciseSection{margin:8px 2px 13px}.groupExerciseSectionTitle{font-size:12px;font-weight:900;color:#e5a1ff;letter-spacing:.08em;text-transform:uppercase;padding:7px 4px 5px;border-bottom:1px solid #4b1a5f}.groupExerciseSectionTitle.extras{font-size:10px;color:#bd79d5;margin-top:7px}.groupExercisePill{display:block;width:100%;box-sizing:border-box;text-align:left;border:2px solid #3d194f;border-radius:12px;background:#070912;color:#fff;padding:11px 12px;margin:6px 0;font:inherit;cursor:pointer;transition:.14s}.groupExercisePill:active{transform:scale(.99)}.groupExercisePill.selected{border:4px solid #d92cff;padding:9px 10px;box-shadow:0 0 10px #e52fff,inset 0 0 14px #9e20c744;background:#110716}.groupSelectedBlock{margin:5px 0 14px;padding:8px;border:1px solid #70258a;border-radius:10px;background:#0a0710}.groupSelectedTitle{font-size:12px;font-weight:1000;letter-spacing:.12em;color:#f0b4ff;text-transform:uppercase;margin:1px 2px 7px}.groupEmptySelected{font-size:11px;color:#8e8199;padding:8px 4px}.createGroupAction{width:100%;margin-top:12px}
 
-
-
-
-
-
-
-
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 </head>
 <body><div class="app">
-<img class="logo" alt="Zag Science" src="assets/images/asset-006-a23e4431d06b.jpg">
+<img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.jpg">
 <main id="screen"></main></div>
 <div class="nav"><div class="navin">
-<button id="nav-home" onclick="home()"><img src="assets/images/asset-007-482aca65369e.svg">Home</button>
-<button id="nav-workout" onclick="workout()"><img src="assets/images/asset-008-a4930e258610.svg">Workout</button>
-<button id="nav-maxes" onclick="maxes()"><img src="assets/images/asset-009-1c283424d7cb.svg">Maxes</button>
-<button id="nav-groups" onclick="groupsPage()"><img src="assets/images/asset-010-46e893fe0d6e.svg">Groups</button>
-<button id="nav-history" onclick="historyPage()"><img src="assets/images/asset-011-ce9da499b37b.svg">History</button>
-<button id="nav-settings" onclick="settings()"><img src="assets/images/asset-012-03f004adf421.svg">Settings</button>
+<button id="nav-home" onclick="home()"><img src="assets/images/asset-007-5b5539b65b95.svg">Home</button>
+<button id="nav-workout" onclick="workout()"><img src="assets/images/asset-008-9eb60644d4ba.svg">Workout</button>
+<button id="nav-maxes" onclick="maxes()"><img src="assets/images/asset-009-7bf50195de98.svg">Maxes</button>
+<button id="nav-groups" onclick="groupsPage()"><img src="assets/images/asset-010-182a0f95f88c.svg">Groups</button>
+<button id="nav-history" onclick="historyPage()"><img src="assets/images/asset-011-2ef5e92c1282.svg">History</button>
+<button id="nav-settings" onclick="settings()"><img src="assets/images/asset-012-d09e717dde98.svg">Settings</button>
 </div></div><div id="modalRoot"></div>
+<script>
+const warm=[[.2,20],[.4,8],[.6,5],[.75,3],[.9,2]];
+const plans={1:[[.7,8],[.725,8],[.75,8],[.725,8],[.7,10]],2:[[.725,8],[.75,7],[.775,6],[.725,8],[.7,10]],3:[[.75,6],[.8,5],[.825,4],[.75,6],[.7,10]],4:[[.775,5],[.825,4],[.85,3],[.775,5],[.725,8]],5:[[.8,5],[.85,3],[.875,3],[.8,5],[.75,8]],6:[[.825,4],[.875,2],[.9,2],[.8,5]],7:[[.6,8],[.65,6],[.7,5]],8:[[.8,3],[.9,1],[.95,1],[1,1],[1.05,1]]};
+const base=[["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 1",["Smith Shoulder Press","Pin Machine Decline Chest Press","Pin Machine Lateral Raise","Pin Machine Cable Fly","Pin Machine Shoulder Press Blue","Cable Front Raise"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Cable Upward Chest Fly","Dumbbell Flat Chest Press","Pin Machine Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlifts","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Chest 1",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Decline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Cable Fly","Bench Press Flat","Dumbbell Flat Press","Pin Machine Chest Fly"]],["Shoulders 1",["Smith Shoulder Press","Dumbbell Seated Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug"]],["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 2",["Smith Flat Chest Press","Pin Machine Chest Fly","Pin Machine Lateral Raise","Pin Machine Decline Chest Press","Cable Front Raise","Cable Upward Chest Fly"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Smith Shoulder Press","Pin Machine Cable Fly","Pin Machine Shoulder Press Blue","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlifts","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Shoulders 2",["Smith Shoulder Press","Dumbbell Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug"]],["Chest 2",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Incline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Decline Chest Press","Pin Machine Cable Fly","Bench Press Flat","Dumbbell Flat Press","Pin Machine Chest Fly"]]];
 
 
+const ORIGINAL=JSON.parse(JSON.stringify(base));
+const FLAME="assets/images/asset-013-9039dcc5f86c.png";
+const seed={"Weighted Lat Pull Up":25,"Wide Pulldown B":250,"Wide Pulldown R":275,"Barbell Row":170,"Free Weight Row":100,"Close Pulldown B":225,"Close Pulldown R":230,"Advanced Lat Pull Down":150,"Straight Arm Pulldown":90,"Shoulder Smyth Press":100,"Lateral Raise Pin":70,"Cable Fly Pin":100,"Tri Dips":129,"DB Preacher Curl":60,"Tri EZ Extension":105,"Rope Curl":90,"Single Rope Extension":40,"Bicep Machine":175,"Deadlifts":170,"Siting Hammy Curl":132,"Leg Extension":40,"Leg Extension (R)":40,"Squats":100,"Sitting Calfs":100};
+let raw=JSON.parse(localStorage.getItem("zagScienceV2")||"null");
+let st=raw||{day:0,weeks:{},max:{...seed},draft:{},history:[],sound:true,days:JSON.parse(JSON.stringify(base)),splitName:"The Goat Split",customSplits:{},prHistory:{},repsAtMax:{}};
+
+// First-ever launch only: stagger exercise weeks in ascending order.
+// Exercise 1 = Week 1, Exercise 2 = Week 2 ... Exercise 8 = Week 8,
+// then the sequence repeats 1–8 for later exercises.
+// Because this only runs when `raw` is empty, reopening the app never resets progression.
+if(!raw){
+  let ordered=[],seen=new Set();
+  st.days.forEach(day=>{
+    (day[1]||[]).forEach(ex=>{
+      if(!seen.has(ex)){seen.add(ex);ordered.push(ex)}
+    });
+  });
+  ordered.forEach((ex,i)=>st.weeks[ex]=(i%8)+1);
+}
+
+st.max={...seed,...(st.max||{})}; st.days=st.days||JSON.parse(JSON.stringify(base)); st.splitName=st.splitName||"The Goat Split"; st.customSplits=st.customSplits||{}; st.prHistory=st.prHistory||{}; st.repsAtMax=st.repsAtMax||{}; st.history=st.history||[]; st.draft=st.draft||{}; st.weeks=st.weeks||{}; st.units=st.units||"kg"; st.groups=st.groups||[]; st.groupView=st.groupView||"total"; st.groupExercise=st.groupExercise||"Bench Press";
+if(st.groupsOnboardingBuild!==1){st.demoGroup=null;st.groupsOnboardingBuild=1;save&&save();}
+st.notifications=st.notifications||{};
+if(st.notifications.workoutReminder===undefined)st.notifications.workoutReminder=true;
+if(st.notifications.leaderboardChanges===undefined)st.notifications.leaderboardChanges=true;
+if(st.notifications.groupPRs===undefined)st.notifications.groupPRs=true;
+if(st.notifications.streakScore===undefined)st.notifications.streakScore=true;
+if(st.streakRestDays===undefined)st.streakRestDays=2;
+if(st.streakReminderTime===undefined)st.streakReminderTime="19:00";
+if(st.stickWeek===undefined)st.stickWeek=false;
+st.streak=st.streak||{count:0,lastWorkout:"",weekKey:"",restUsed:0,lastPopup:""};
+
+st.plannedDays=st.plannedDays||JSON.parse(JSON.stringify(st.days));
+function syncPlannedDays(){st.plannedDays=JSON.parse(JSON.stringify(st.days))}
 
 
+// ZAG exercise-library migration v3: preserve historical/max/week data under renamed exercises.
+(function(){
+ if(localStorage.getItem("zagExerciseLibraryV3")) return;
+ const aliases={"Free Weight Row":"Plate Loaded Row","Close Pulldown B":"Pin Machine Lat Pulldown Close Grip B","Close Pulldown R":"Pin Machine Lat Pulldown Close Grip Red","Wide Pulldown B":"Pin Machine Lat Pulldown Wide Grip B","Wide Pulldown R":"Pin Machine Lat Pulldown Wide Grip Red","Shoulder Smyth Press":"Smith Shoulder Press","Shoulder Smyth Machine":"Smith Shoulder Press","Decline Machine Press":"Pin Machine Decline Chest Press","Decline Chest Machine":"Pin Machine Decline Chest Press","Lateral Raise Pin":"Pin Machine Lateral Raise","Cable Fly Pin":"Pin Machine Cable Fly","Pin Shoulder Blue":"Pin Machine Shoulder Press Blue","Front Raise Cable":"Cable Front Raise","Stand Square BB Shoulder":"Square Barbell Shoulder Press","Arnold DB":"Dumbbell Arnold Press","Single Lat Raise Pin":"Cable Lateral Raise","Incline Smith":"Smith Incline Chest Press","Incline Smyth":"Smith Incline Chest Press","Bench":"Bench Press Flat","DB Press":"Dumbbell Flat Press","Db press / bench":"Dumbbell Flat Chest Press","Cable Fly / pin":"Pin Machine Chest Fly","Lateral Raise / pin":"Pin Machine Lateral Raise","Chest pin red / blue / incline":"Pin Machine Decline Chest Press","Front raise db / plate":"Cable Front Raise","Upward cable fly":"Cable Upward Chest Fly","Dumbell Flat":"Dumbbell Flat Chest Press","Cable Fly":"Cable Chest Fly","Upward Cable Fly":"Cable Upward Chest Fly","Incline Chest Machine":"Pin Machine Incline Chest Press","Close Grip Shoulder Machine Blue":"Pin Machine Shoulder Press Blue","Close Grip Shoulder Red":"Pin Machine Shoulder Press Red","Rear Delt Machine":"Pin Machine Rear Deltoids","Cable Side Raise":"Dumbbell Seated Side Raise","Dumbell Side Raise":"Dumbbell Side Raise","Tri Dips":"Weighted Tricep Dips","DB Preacher Curl":"Dumbbell Preacher Curl","Tri EZ Extension":"Cable EZ Bar Tricep Extension","Rope Curl":"Cable Rope Bicep Curl","Single Rope Extension":"Cable Single Arm Tricep Extension","Bicep Machine":"Pin Machine Bicep Curl","Single Cable Curl":"Cable Single Arm Bicep Curl","Single Spider":"Dumbbell Spider Bicep Curl","Double Rope Extension":"Cable Double Rope Tricep Extension","Uni Press / Leg Press":"Unilateral Leg Press","Sitting Calfs":"Sitting Calf Raises","Press Calf":"Donkey Calf Raise","Stiff Deads":"Romanian Deadlifts","Lying Curl":"Lying Hamstring Curl","Siting Hammy Curl":"Sitting Hamstring Curl","Sitting Hammy Curl":"Sitting Hamstring Curl"};
+ function moveMap(obj){
+   if(!obj) return;
+   Object.keys(aliases).forEach(old=>{
+     const neu=aliases[old];
+     if(obj[old]!==undefined && obj[neu]===undefined) obj[neu]=obj[old];
+   });
+ }
+ moveMap(st.max); moveMap(st.weeks); moveMap(st.prHistory); moveMap(st.repsAtMax);
+ if(st.splitName==="The Goat Split" || !st.splitName){
+   st.days=JSON.parse(JSON.stringify(base));
+   st.plannedDays=JSON.parse(JSON.stringify(base));
+ }
+ localStorage.setItem("zagExerciseLibraryV3","1");
+ save();
+})();
 
+
+// Push 2 exercise 1 migration: update existing saved installs as well as fresh installs.
+(function(){
+ if(localStorage.getItem("zagPush2SmithFlatV1")) return;
+ [st.days,st.plannedDays].forEach(days=>{
+   if(!Array.isArray(days)) return;
+   days.forEach(day=>{
+     if(day && day[0]==="Push 2" && Array.isArray(day[1]) && day[1][0]==="Dumbbell Flat Chest Press") day[1][0]="Smith Flat Chest Press";
+   });
+ });
+ localStorage.setItem("zagPush2SmithFlatV1","1");
+ save();
+})();
+
+function save(){localStorage.setItem("zagScienceV2",JSON.stringify(st))}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function q(s){return String(s).replaceAll("\\","\\\\").replaceAll("'","\\'")}
+function sets(ex){
+ let m=+st.max[ex]||0,w=st.stickWeek?"stick":(st.weeks[ex]||1);
+ if(w==="stick"){
+   let prescribed=warm.slice(0,4).concat(plans[8]).map(x=>({p:x[0],r:x[1],kg:Math.round(m*x[0]*10)/10}));
+   return prescribed.concat(Array.from({length:4},()=>({p:"",r:"",kg:"",backoff:true})));
+ }
+ let wu=w===8?warm.slice(0,4):warm;
+ return wu.concat(plans[w]).map(x=>({p:x[0],r:x[1],kg:Math.round(m*x[0]*10)/10}))
+}
+function k(ex,i){return st.day+"|"+ex+"|"+i}
+function setActiveNav(name){document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));document.getElementById("nav-"+name)?.classList.add("active")}
+function audioCtx(){window._zagAudio=window._zagAudio||new(window.AudioContext||window.webkitAudioContext)();if(window._zagAudio.state==="suspended")window._zagAudio.resume();return window._zagAudio}
+function noise(duration=.025,gain=.07,filter=2400,delay=0){if(!st.sound)return;let a=audioCtx(),n=Math.floor(a.sampleRate*duration),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);let s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+delay;s.buffer=b;f.type="bandpass";f.frequency.value=filter;g.gain.value=gain;s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
+function tone(freq,dur,gain=.03,type="sine",delay=0){if(!st.sound)return;let a=audioCtx(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur)}
+function clickSound(){noise(.025,.07,2400);tone(160,.025,.018,"square")}
+function slide(strength=.025,start=.12,len=.22){if(!st.sound)return;let a=audioCtx(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime+start;o.type="sawtooth";o.frequency.setValueAtTime(115,t);o.frequency.exponentialRampToValueAtTime(55,t+len);g.gain.setValueAtTime(strength,t);g.gain.exponentialRampToValueAtTime(.0001,t+len);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+len);noise(len,.035,700,start)}
+function returnSound(){noise(.045,.11,1700);tone(125,.04,.03,"square");tone(280,.025,.012,"triangle",.012);tone(1320,.18,.055,"sine",.055);tone(1760,.11,.025,"sine",.07);slide()}
+const streakArmAsset='assets/images/asset-014-2b4f11f8fc21.png';
+const streakRestArmAsset='assets/images/asset-015-397941a25483.png';
+const streakLostArmAsset='assets/images/asset-016-561dcda5cdea.png';
+function streakDayKey(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function parseStreakDay(k){let [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)}
+function streakWeekKey(d=new Date()){let x=new Date(d);x.setHours(0,0,0,0);let day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);return streakDayKey(x)}
+function daysBetween(a,b){return Math.round((parseStreakDay(b)-parseStreakDay(a))/86400000)}
+function ensureStreakState(){
+ st.streak=st.streak||{};
+ st.streak.count=Number(st.streak.count||0);
+ st.streak.lastWorkout=st.streak.lastWorkout||"";
+ st.streak.lastProcessed=st.streak.lastProcessed||"";
+ st.streak.weekKey=st.streak.weekKey||streakWeekKey();
+ st.streak.restUsed=Number(st.streak.restUsed||0);
+ st.streak.lastPopup=st.streak.lastPopup||"";
+ st.streak.weekRest=st.streak.weekRest||{};
+ st.streak.justLost=!!st.streak.justLost;
+}
+function processStreakCalendar(){
+ ensureStreakState();
+ let today=streakDayKey(), todayDate=parseStreakDay(today);
+ // Start processing from the day after the last processed day. For existing installs,
+ // don't retroactively punish days before this feature was installed.
+ if(!st.streak.lastProcessed){st.streak.lastProcessed=today;save();return}
+ let cursor=parseStreakDay(st.streak.lastProcessed);cursor.setDate(cursor.getDate()+1);
+ let changed=false;
+ while(cursor<todayDate){
+   let key=streakDayKey(cursor), wk=streakWeekKey(cursor);
+   st.streak.weekRest[wk]=Number(st.streak.weekRest[wk]||0);
+   let trained=(st.streak.lastWorkout===key) || (Array.isArray(st.history)&&st.history.some(h=>{
+     let raw=h.date||h.when||h.timestamp||h.time;
+     if(!raw)return false;
+     let d=new Date(raw);return !isNaN(d)&&streakDayKey(d)===key;
+   }));
+   if(!trained){
+     if(st.streak.weekRest[wk] < Number(st.streakRestDays||0)){
+       st.streak.weekRest[wk]++; // protected rest day
+       st.streak.lastRestDay=key;
+     }else{
+       if((st.streak.count||0)>0) st.streak.justLost=true;
+       st.streak.count=0; // allowance exceeded
+     }
+   }
+   st.streak.lastProcessed=key;changed=true;cursor.setDate(cursor.getDate()+1);
+ }
+ let wk=streakWeekKey();
+ st.streak.weekKey=wk;
+ st.streak.restUsed=Number(st.streak.weekRest[wk]||0);
+ if(changed)save();
+}
+function ensureStreakWeek(){processStreakCalendar()}
+function recordStreakWorkout(){
+ processStreakCalendar();const k=streakDayKey();
+ const alreadyToday=st.streak.lastWorkout===k;
+ if(!alreadyToday) st.streak.count=(st.streak.count||0)+1;
+ st.streak.justLost=false;
+ zagBrokenZeroPreview=false;
+ zagRestDayCheckPreview=false;
+ st.streak.lastWorkout=k;
+ st.streak.lastPopup="";
+ st.streak.lastProcessed=k;
+ save();
+}
+function streakReminderDue(){
+ if(!st.notifications.streakScore)return false;
+ processStreakCalendar();
+ if(st.streak.lastWorkout===streakDayKey())return false;
+ let [hh,mm]=(st.streakReminderTime||"19:00").split(":").map(Number), now=new Date();
+ return now.getHours()>hh || (now.getHours()===hh && now.getMinutes()>=mm);
+}
+function maybeBrowserStreakReminder(){
+ if(!streakReminderDue())return;
+ let key="zagStreakReminder:"+streakDayKey();
+ if(sessionStorage.getItem(key))return;
+ sessionStorage.setItem(key,"1");
+ if("Notification" in window && Notification.permission==="granted"){
+   try{new Notification("ZAG SCIENCE — Don't lose your streak",{body:`Keep your ${st.streak.count||0}-day streak going. Get today's workout in.`})}catch(e){}
+ }
+}
+// One-time demo: begin at a broken 0-day streak, then return to real streak logic after a completed workout.
+let zagBrokenZeroPreview=false;
+let zagRestDayCheckPreview=false;
+function streakWidgetHTML(){
+ processStreakCalendar();
+ if(zagRestDayCheckPreview){
+  const arm=streakRestArmAsset;
+  const shownCount=Math.max(1,Number(st.streak.count||0));
+  const shownRest=Math.max(1,Number(st.streak.restUsed||0));
+  const dots=[0,1,2,3,4,5,6].map((_,i)=>`<span class="streakDot ${i<Math.min(7,shownCount%8)?'on':''}">${i<Math.min(7,shownCount%8)?'✓':''}</span>`).join("");
+  return `<div class="streakWidget"><div class=streakArmWrap><img id=homeStreakStateArm src="${arm}" alt="Rest day arm"></div><div class=grow><div><span class=streakNum>${shownCount}</span> <b>Day Streak</b></div><div class=note>🛡️ Rest day used — streak saved</div><div class=streakWeek>${dots}</div><div class=note style="margin-top:6px">${shownRest}/${st.streakRestDays} rest days used this week</div></div></div>`;
+ }
+ if(zagBrokenZeroPreview){
+  const arm=streakLostArmAsset;
+  const dots=[0,1,2,3,4,5,6].map(()=>`<span class="streakDot"></span>`).join("");
+  return `<div class="streakWidget streakLost"><div class=streakArmWrap><img id=homeStreakStateArm src="${arm}" alt="Broken streak arm"></div><div class=grow><div><span class=streakNum>0</span> <b>Day Streak</b></div><div class=note>Streak lost — complete a workout to start again.</div><div class=streakWeek>${dots}</div><div class=note style="margin-top:6px">${Number(st.streak.restUsed||0)}/${st.streakRestDays} rest days used this week</div></div></div>`;
+ }
+ const today=streakDayKey();
+ const historyDone=Array.isArray(st.history)&&st.history.some(h=>{let raw=h.date||h.when||h.timestamp||h.time;if(!raw)return false;let d=new Date(raw);return !isNaN(d)&&streakDayKey(d)===today;});
+ const done=(st.streak.lastWorkout===today)||historyDone;
+ if(done && st.streak.lastWorkout!==today){st.streak.lastWorkout=today;st.streak.justLost=false;save();}
+ // Rest is a real recorded state, never inferred just because rest days were used earlier this week.
+ const restSaved=!done && !st.streak.justLost && !!st.streak.lastRestDay && st.streak.lastRestDay===st.streak.lastProcessed;
+ const arm=st.streak.justLost?streakLostArmAsset:(done?streakArmAsset:(restSaved?streakRestArmAsset:streakRestArmAsset));
+ const status=st.streak.justLost?"Streak lost — start again today.":(done?"Workout complete — streak extended ⚡":(restSaved?"🛡️ Rest day used — streak saved":"Keep your streak alive today."));
+ let dots=[0,1,2,3,4,5,6].map((_,i)=>`<span class="streakDot ${i<Math.min(7,(st.streak.count||0)%8)?'on':''}">${i<Math.min(7,(st.streak.count||0)%8)?'✓':''}</span>`).join("");
+ return `<div class="streakWidget ${st.streak.justLost?'streakLost':''}"><div class=streakArmWrap><img id=homeStreakStateArm src="${arm}" alt="Streak state arm"></div><div class=grow><div><span class=streakNum>${st.streak.count||0}</span> <b>Day Streak</b></div><div class=note>${status}</div><div class=streakWeek>${dots}</div><div class=note style="margin-top:6px">${Number(st.streak.restUsed||0)}/${st.streakRestDays} rest days used this week</div></div></div>`;
+}
+let zagFinishAdvancePending=false;
+function showStreakPopup(force=false){
+ if(!force&&!st.notifications.streakScore)return;ensureStreakWeek();let k=streakDayKey();
+ if(!force&&st.streak.lastPopup===k)return;
+ const historyDone=Array.isArray(st.history)&&st.history.some(h=>{let raw=h.date||h.when||h.timestamp||h.time;if(!raw)return false;let d=new Date(raw);return !isNaN(d)&&streakDayKey(d)===k;});
+ let done=(zagBrokenZeroPreview||zagRestDayCheckPreview)?false:(st.streak.lastWorkout===k)||historyDone;
+ let lost=zagBrokenZeroPreview?true:(zagRestDayCheckPreview?false:!!st.streak.justLost);
+ let restSaved=zagRestDayCheckPreview||(!done&&!lost&&!!st.streak.lastRestDay&&st.streak.lastRestDay===st.streak.lastProcessed);
+ // Don't show a REST DAY popup merely because today has no workout yet.
+ if(!force&&!done&&!lost&&!restSaved)return;
+ let title=lost?"STREAK LOST":(done?"WORKOUT COMPLETE":"REST DAY");
+ let msg=lost?"Start again today and build it back up.":(done?"Workout complete. Your streak has been extended.":`Streak protected. Rest day ${Number(st.streak.restUsed||0)} of ${st.streakRestDays} used.`);
+ let arm=lost?streakLostArmAsset:(done?streakArmAsset:streakRestArmAsset);
+ let o=document.createElement("div");o.className="streakOverlay";o.innerHTML=`<div class=streakPopup><div class="streakHero ${lost?'streakLost':''}"><div class=streakArmWrap><img class=streakPopupStateArm src="${arm}" alt="Streak state arm"></div><div class=big>${st.streak.count||0}</div></div><h2>${title}</h2><div style="font-size:18px;font-weight:900;color:#ef9cff">DAY STREAK</div><p>${msg}</p><button class=pick onclick="zagStreakPopupContinue(this)">LET'S GO</button></div>`;
+ document.body.appendChild(o);st.streak.lastPopup=k;save();
+}
+function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
+d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section class=exercise><div class=head><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><select class=week style="position:absolute;left:4px;right:4px;top:4px;width:${st.stickWeek?'64':'68'}px;padding:3px 1px;font-size:8px" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><button class="btn editMain" onclick="chooseExtraForMain(${e})">Edit</button></div><div class=maxbox><span>↗</span> Max: ${st.max[ex]||0}kg</div><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":t.kg}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg??""}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i})">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></section>`});
+s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section class=extras><h2>Extras / Replacements</h2>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]||""}" placeholder="Max" onchange="st.max['${q(x)}']=+this.value;save()"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></section>`;document.getElementById("screen").innerHTML=s}
+function setExerciseWeek(ex,w){if(st.stickWeek)return;st.weeks[ex]=+w||1;save();workout()}
+function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
+function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=v;save()}
+function one(ex,i){let key=k(ex,i),t=sets(ex)[i];if(st.draft[key]?.done)delete st.draft[key];else st.draft[key]={kg:t.kg,r:t.r,done:true};clickSound();save();workout()}
+function allExercise(ex){sets(ex).forEach((t,i)=>st.draft[k(ex,i)]={kg:t.kg,r:t.r,done:true});clickSound();save();workout()}
+function move(n){st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
+function closeModal(){document.getElementById("modalRoot").innerHTML=""}
+function modal(title,body){document.getElementById("modalRoot").innerHTML=`<div class=modal onclick="if(event.target===this)closeModal()"><div class=modalbox><button class="btn close" onclick=closeModal()>×</button><h2>${title}</h2>${body}</div></div>`}
+function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`<p class=small>Tap the current exercise you want to replace.</p>${mains.map((x,i)=>`<button class=pick onclick="doSwap('${q(extra)}',${i})">${i+1}. ${esc(x)}</button>`).join("")}`)}
+function doSwap(extra,i){let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
+function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
+function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+(prompt("Max weight (kg):")||0);save();workout()}
+function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(+v.r>=t.r&&+v.kg>(st.max[ex]||0)){let old=st.max[ex]||0;st.prHistory[ex]=st.prHistory[ex]||[];st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:+v.kg,reps:+v.r});st.max[ex]=+v.kg;st.repsAtMax[ex]=+v.r;prs.push(ex+" "+v.kg+"kg")}}}));st.history.unshift(rec);
+d[1].forEach(ex=>{
+ let w=Number(st.weeks[ex]||1);
+ st.weeks[ex]=w>=8?1:w+1;
+});
+st.draft={};
+if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
+recordStreakWorkout();save();returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
+function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;save();workout();requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"instant"}));}}
+function home(){setActiveNav("home");let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b>ⓘ Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class=btn style="width:100%;margin:3px 0;text-align:left;font-size:11px" onclick="st.day=${i};save();workout()">Day ${i+1} — ${esc(d[0])} <span style="float:right">›</span></button>`).join("")}`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
+function editSplit(){
+  let saved=Object.keys(st.customSplits||{});
+  let savedHtml=saved.length?`<div class=extraslabel style="margin-top:12px">CUSTOM SPLITS</div>${saved.map(n=>`<div class=extra><button type="button" class=pick style="margin:0;flex:1;text-align:left" onclick="loadSplitFromEditor('${q(n)}')">${esc(n)}</button><button type="button" class=btn onclick="renameSavedSplit('${q(n)}')">Rename</button><button type="button" class="btn danger" onclick="deleteSavedSplit('${q(n)}')">×</button></div>`).join("")}`:"";
+  let body=`<p class=small>Edit day names/order, duplicate or delete days, then save it as your own split.</p>
+  <div id=dayEditor>${st.days.map((d,i)=>dayEditRow(d,i)).join("")}</div>
+  <button type="button" class=pick onclick="openAddDay()">+ Add Day</button>
+  <button type="button" class=pick onclick="editDayExercises()">Edit exercises in a day</button>
+  <button type="button" class=pick onclick="saveAsSplit()">Save as New Split</button>
+  <button type="button" class=pick onclick="loadOriginal()">Load Original Goat Split</button>${savedHtml}`;
+  modal("Edit Split",body)
+}
+function dayEditRow(d,i){return `<div class=dayedit><b>${i+1}</b><input value="${esc(d[0])}" onchange="renameDay(${i},this.value)"><span><button type="button" class=btn onclick="moveDay(${i},-1)">↑</button><button type="button" class=btn onclick="moveDay(${i},1)">↓</button><button type="button" class=btn onclick="dupDay(${i})">＋</button><button type="button" class="btn danger" onclick="event.preventDefault();event.stopPropagation();deleteSplitDay(${i});return false;">×</button></span></div>`}
+function renameDay(i,v){st.days[i][0]=v.trim()||st.days[i][0];syncPlannedDays();save()}
+function moveDay(i,n){let j=i+n;if(j<0||j>=st.days.length)return;[st.days[i],st.days[j]]=[st.days[j],st.days[i]];syncPlannedDays();save();editSplit()}
+function dupDay(i){st.days.splice(i+1,0,JSON.parse(JSON.stringify(st.days[i])));syncPlannedDays();save();editSplit()}
+function deleteSplitDay(i){if(!Number.isInteger(i)||i<0||i>=st.days.length)return;if(st.days.length<=1){alert("A split needs at least one day.");return;}st.days.splice(i,1);st.day=Math.min(st.day,st.days.length-1);syncPlannedDays();save();editSplit()}
+function textEntryModal(title,label,value,onSave){
+  modal(title,`<p class=small>${esc(label)}</p><input id=textEntryInput class=cell style="width:100%;box-sizing:border-box;font-size:16px" value="${esc(value||"")}" autocomplete=off><button type="button" class=pick id=textEntrySave>Save</button>`);
+  let inp=document.getElementById("textEntryInput"),btn=document.getElementById("textEntrySave");
+  btn.onclick=()=>{let v=inp.value.trim();if(!v)return;onSave(v)};
+  inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();btn.click()}};
+  setTimeout(()=>inp.focus(),50)
+}
+function openAddDay(){textEntryModal("Add Day","Day name","",n=>{st.days.push([n,[],[]]);syncPlannedDays();save();editSplit()})}
+function addDay(){openAddDay()}
+function editDayExercises(){modal("Choose Day",st.days.map((d,i)=>`<button type="button" class=pick onclick="dayExerciseEditor(${i})">${i+1}. ${esc(d[0])}</button>`).join(""))}
+function dayExerciseEditor(i){
+ let d=st.days[i];
+ const row=(x,j,type)=>`<div class="extra splitDragExercise" draggable="true" data-day="${i}" data-type="${type}" data-index="${j}">
+   <span class=splitDragHandle aria-hidden=true>⋮⋮</span><span class=splitDragName>${esc(x)}</span>
+   <button type="button" class="btn danger" onclick="event.stopPropagation();removeExercise(${i},${type},${j})">×</button>
+ </div>`;
+ modal("Edit "+esc(d[0]),`
+   <p class="small splitDragHelp">Drag exercises between Main Exercises and Extras, or drag within a section to change the order.</p>
+   <div class="extraslabel">MAIN EXERCISES</div>
+   <div class="splitDropZone" data-day="${i}" data-type="0">${d[1].map((x,j)=>row(x,j,0)).join("")}<div class="splitEmptyHint">Drop exercises here</div></div>
+   <button type="button" class=pick onclick="addExerciseTo(${i},0)">+ Main Exercise</button>
+   <div class="extraslabel">EXTRAS</div>
+   <div class="splitDropZone" data-day="${i}" data-type="1">${d[2].map((x,j)=>row(x,j,1)).join("")}<div class="splitEmptyHint">Drop exercises here</div></div>
+   <button type="button" class=pick onclick="addExerciseTo(${i},1)">+ Extra Exercise</button>`);
+ setTimeout(initSplitExerciseDrag,0);
+}
+function renameExercise(di,type,j){let arr=st.days[di][type?2:1];textEntryModal("Edit Exercise","Exercise name",arr[j],n=>{arr[j]=n;syncPlannedDays();save();dayExerciseEditor(di)})}
+
+let splitExerciseDrag=null;
+function splitDragTargetIndex(zone,y){
+ const rows=[...zone.querySelectorAll(".splitDragExercise:not(.dragging)")];
+ for(let n=0;n<rows.length;n++){
+   const r=rows[n].getBoundingClientRect();
+   if(y<r.top+r.height/2)return n;
+ }
+ return rows.length;
+}
+function initSplitExerciseDrag(){
+ document.querySelectorAll(".splitDragExercise").forEach(row=>{
+   row.addEventListener("dragstart",e=>{
+     splitExerciseDrag={day:+row.dataset.day,type:+row.dataset.type,index:+row.dataset.index};
+     row.classList.add("dragging");
+     if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain","move")}catch(_){}}
+   });
+   row.addEventListener("dragend",()=>{row.classList.remove("dragging");document.querySelectorAll(".splitDropZone").forEach(z=>z.classList.remove("dragOver"))});
+ });
+ document.querySelectorAll(".splitDropZone").forEach(zone=>{
+   zone.addEventListener("dragover",e=>{e.preventDefault();zone.classList.add("dragOver");if(e.dataTransfer)e.dataTransfer.dropEffect="move"});
+   zone.addEventListener("dragleave",e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove("dragOver")});
+   zone.addEventListener("drop",e=>{
+     e.preventDefault();e.stopPropagation();zone.classList.remove("dragOver");
+     if(!splitExerciseDrag)return;
+     const di=splitExerciseDrag.day, fromType=splitExerciseDrag.type, fromIndex=splitExerciseDrag.index;
+     const toType=+zone.dataset.type;
+     if(+zone.dataset.day!==di)return;
+     const from=st.days[di][fromType?2:1], to=st.days[di][toType?2:1];
+     if(!from || !to || fromIndex<0 || fromIndex>=from.length)return;
+     let target=splitDragTargetIndex(zone,e.clientY);
+     const [exercise]=from.splice(fromIndex,1);
+     if(from===to && target>fromIndex)target--;
+     target=Math.max(0,Math.min(target,to.length));
+     to.splice(target,0,exercise);
+     syncPlannedDays();save();splitExerciseDrag=null;dayExerciseEditor(di);
+   });
+ });
+}
+
+function removeExercise(di,type,j){st.days[di][type?2:1].splice(j,1);syncPlannedDays();save();dayExerciseEditor(di)}
+function addExerciseTo(di,type){textEntryModal(type?"Add Extra Exercise":"Add Main Exercise","Exercise name","",n=>{st.days[di][type?2:1].push(n);syncPlannedDays();save();dayExerciseEditor(di)})}
+function nextCustomSplitName(){let i=1;while(st.customSplits["Custom Split "+i])i++;return "Custom Split "+i}
+function saveAsSplit(){let n=nextCustomSplitName();st.splitName=n;st.customSplits[n]=JSON.parse(JSON.stringify(st.days));save();editSplit()}
+function loadSplit(n){st.days=JSON.parse(JSON.stringify(st.customSplits[n]));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName=n;st.day=0;save();home()}
+function loadSplitFromEditor(n){st.days=JSON.parse(JSON.stringify(st.customSplits[n]));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName=n;st.day=0;save();editSplit()}
+function renameSavedSplit(n){textEntryModal("Rename Split","Split name",n,v=>{if(v!==n&&st.customSplits[v]){alert("A split with that name already exists.");return;}let data=st.customSplits[n];delete st.customSplits[n];st.customSplits[v]=data;if(st.splitName===n)st.splitName=v;save();editSplit()})}
+function deleteSavedSplit(n){delete st.customSplits[n];if(st.splitName===n)st.splitName="The Goat Split";save();editSplit()}
+function loadOriginal(){st.days=JSON.parse(JSON.stringify(ORIGINAL));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName="The Goat Split";st.day=0;save();editSplit()}
+function uniqueSections(){let seen=new Set(),out=[];st.days.forEach((d,i)=>{let key=d[0]+"|"+JSON.stringify(d[1])+"|"+JSON.stringify(d[2]);if(!seen.has(key)){seen.add(key);out.push({name:d[0],mains:d[1],extras:d[2],day:i})}});return out}
+function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]||0}" onchange="st.max['${q(x)}']=+this.value;save()"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
+function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach(sec=>{s+=`<section class=maxsection><h2>${esc(sec.name)}</h2>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</section>`});document.getElementById("screen").innerHTML=s}
+function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${st.max[ex]||0}kg &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${x.from}kg → <b>${x.to}kg</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
+function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
+function groupMembers(){let all=[{name:"Kieron",vals:{"Squats":200,"Bench Press":170,"Deadlifts":220,"Weighted Lat Pull Up":50,"Barbell Row":115},bw:90,streak:12,prs:4,trend:1},{name:"James",vals:{"Squats":180,"Bench Press":165,"Deadlifts":210,"Weighted Lat Pull Up":45,"Barbell Row":110},bw:84,streak:8,prs:2,trend:-1},{name:"Bill",vals:{"Squats":160,"Bench Press":150,"Deadlifts":200,"Weighted Lat Pull Up":40,"Barbell Row":120},bw:82,streak:16,prs:3,trend:2},{name:"Keelan",vals:{"Squats":150,"Bench Press":140,"Deadlifts":190,"Weighted Lat Pull Up":60,"Barbell Row":110},bw:78,streak:6,prs:1,trend:0},{name:"Anna",vals:{"Squats":120,"Bench Press":125,"Deadlifts":160,"Weighted Lat Pull Up":25,"Barbell Row":80},bw:65,streak:10,prs:3,trend:1},{name:"Betsy",vals:{"Squats":100,"Bench Press":90,"Deadlifts":140,"Weighted Lat Pull Up":20,"Barbell Row":70},bw:60,streak:5,prs:2,trend:-1}];if(!st.demoGroup)return all;let allowed=new Set(["Kieron",...(st.demoGroup.members||[])]);return all.filter(x=>allowed.has(x.name))}
+const groupMedalGold="assets/images/asset-019-c71d4429545b.png",groupMedalSilver="assets/images/asset-020-03270e433097.png",groupMedalBronze="assets/images/asset-021-d979d8b3369c.png";
+function medalImg(i,cls='rankMedalImg'){let a=[groupMedalGold,groupMedalSilver,groupMedalBronze];return i<3?`<img class="${cls}" src="${a[i]}" alt="${i+1} place medal">`:String(i+1)}
+function rankBadge(i){return medalImg(i)}
+function groupScore(m){let total=m.vals["Squats"]+m.vals["Bench Press"]+m.vals["Deadlifts"];return Math.round((total/m.bw)*100)}
+function memberCard(m,i,metric){let tr=m.trend>0?`<span style="color:#e969ff">↑${m.trend}</span>`:m.trend<0?`<span style="opacity:.65">↓${Math.abs(m.trend)}</span>`:`<span style="opacity:.45">—</span>`;return `<div class="pagecard" style="padding:12px;margin:8px 0"><div class=row><div style="font-size:24px;width:42px;text-align:center">${rankBadge(i)}</div><div class=grow><b>${esc(m.name)}${m.name==='Kieron'?' <span class=small>(You)</span>':''}</b><div class=small>${m.prs} PRs this month • ⚡ ${m.streak} day streak</div></div><div style="text-align:right"><b style="font-size:19px">${metric(m)}</b><div class=small>${tr}</div></div></div></div>`}
+function showcaseSecondGroup(){let ms=groupMembers().slice().sort((a,b)=>(b.vals['Deadlifts']||0)-(a.vals['Deadlifts']||0));return `<div class="groupSectionBox"><div class=groupSectionLabel>Group 2</div><div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>Strength Crew</div><div class=small>${ms.length} Members • Push each other</div><div class=showcaseNote>Demo group for layout testing</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs><button class="groupMainTab">Total</button><button class="groupMainTab">Bodyweight</button><button class="groupMainTab sel">Individual Exercises</button></div><div class=exerciseTabStrip><button class="exerciseTab sel">Deadlifts</button><button class=exerciseTab>Bench Press</button><button class=exerciseTab>Squats</button></div>${groupPodium(ms,m=>(m.vals['Deadlifts']||0)+' kg')}${groupTable('Deadlifts Leaderboard',ms,m=>(m.vals['Deadlifts']||0)+' kg','Best Lift')}</div>`}function groupsPage(view){setActiveNav("groups");st.groupView=view||st.groupView||"overall";save();if(!st.demoGroup){document.getElementById("screen").innerHTML=`<div class=title><h1>Groups</h1><p>Compete • improve • celebrate PRs</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><div class="groupEmptyFigurine"><img src="assets/images/asset-022-0703892d0bc1.png" alt="Zag Science trophy figurine"></div><h2 style="margin:0 0 6px">No groups yet</h2><div class=small style="margin-bottom:18px">Create a group to start a leaderboard with friends.</div><button class=pick style="width:100%" onclick=createGroup()>＋ Create Group</button></div>`;window.scrollTo(0,0);return}let tabs=[['total','Total'],['bodyweight','Bodyweight'],['exercises','Individual Exercises']];if(!view&&(!st.groupView||!['total','bodyweight','exercises'].includes(st.groupView)))st.groupView='total';let inner=`<div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>${esc(st.demoGroup.name||'The Lads')}</div><div class=small>${groupMembers().length} Members • Train harder together</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs>${tabs.map(t=>`<button class="groupMainTab ${st.groupView===t[0]?'sel':''}" onclick="groupsPage('${t[0]}')">${t[1]}</button>`).join('')}</div>`;if(st.groupView==='exercises')inner+=groupExercises();else if(st.groupView==='bodyweight')inner+=groupBodyweightLayout();else inner+=groupTotalLayout();let s=`<div class=title><h1>Groups</h1><p>Friendly competition • train harder together</p></div><div class="groupSectionBox"><div class=groupSectionLabel>Group 1</div>${inner}</div>${showcaseSecondGroup()}<button class="pick createAnotherGroup" onclick="createGroup()">＋ Create Group</button>`;document.getElementById("screen").innerHTML=s;window.scrollTo(0,0)}
+function groupOverall(){let ms=groupMembers().sort((a,b)=>groupScore(b)-groupScore(a));return `<div class=pagecard><h2 style="margin:0 0 4px">⚡ Zag Score</h2><div class=small>Preview score based on the group's selected lifts relative to bodyweight. We can refine the formula before cloud launch.</div></div>${ms.map((m,i)=>memberCard(m,i,x=>groupScore(x)+' pts')).join('')}`}
+function groupStreaks(){let ms=groupMembers().sort((a,b)=>b.streak-a.streak);return `<div class=pagecard><h2 style="margin:0">🔥 Streak Leaderboard</h2><div class=small>Current workout streaks</div></div>${ms.map((m,i)=>memberCard(m,i,x=>x.streak+' days')).join('')}`}
+function groupPodium(ms,metric){let top=ms.slice(0,3), order=[1,0,2].filter(i=>top[i]);return `<div class=groupPodium>${order.map(i=>{let m=top[i];return `<div class=podiumCard ${i===0?'winner':''}><div class=podiumMedal>${medalImg(i,'podiumMedalImg')}</div><b>${esc(m.name)}</b><div class=small>${metric(m)}</div></div>`}).join('')}</div>`}
+function groupTable(title,ms,metric,label){return `<div class=pagecard groupBoard><h2> ${esc(title)}</h2><div class=boardHead><span>#</span><span>Member</span><span>${esc(label)}</span></div>${ms.map((m,i)=>`<div class=boardRow><span>${rankBadge(i)}</span><b>${esc(m.name)}</b><b>${metric(m)}</b></div>`).join('')}</div>`}
+function combinedValue(m){let ex=(st.demoGroup?.exercises||[]);if(!ex.length)ex=['Squats','Bench Press','Deadlifts'];return ex.reduce((n,x)=>n+(m.vals[x]||0),0)}
+function groupTotalLayout(){let ms=groupMembers().sort((a,b)=>combinedValue(b)-combinedValue(a));return groupPodium(ms,m=>combinedValue(m)+' kg')+groupTable('Combined Weight Leaderboard',ms,m=>combinedValue(m)+' kg','Combined')}
+function groupBodyweightLayout(){let ms=groupMembers().sort((a,b)=>(combinedValue(b)/b.bw)-(combinedValue(a)/a.bw));return groupPodium(ms,m=>(combinedValue(m)/m.bw).toFixed(2)+'×')+groupTable('Bodyweight Ratio Leaderboard',ms,m=>(combinedValue(m)/m.bw).toFixed(2)+'×','Ratio')}
+function groupExercises(){let opts=(st.demoGroup?.exercises||[]).filter(Boolean);if(!opts.length)opts=['Squats','Bench Press','Deadlifts','Weighted Lat Pull Up','Barbell Row'];if(!opts.includes(st.groupExercise))st.groupExercise=opts[0];let ex=st.groupExercise;let ms=groupMembers().sort((a,b)=>(b.vals[ex]||0)-(a.vals[ex]||0));return `<div class=exerciseTabStrip>${opts.map(x=>`<button class="exerciseTab ${x===ex?'sel':''}" onclick="st.groupExercise='${q(x)}';save();groupsPage('exercises')">${esc(x)}</button>`).join('')}</div>${groupPodium(ms,m=>(m.vals[ex]||0)+' kg')}${groupTable(ex+' Leaderboard',ms,m=>(m.vals[ex]||0)+' kg','Best Lift')}`}
+function groupActivity(){let a=[['Kieron','Bench Press','170 kg','New group #1'],['Anna','Deadlifts','160 kg','+5 kg PR'],['Bill','Barbell Row','120 kg','+2.5 kg PR'],['James','Squats','180 kg','Matched PR'],['Betsy','Bench Press','90 kg','+5 kg PR']];return `<div class=pagecard><h2 style="margin:0">🏅 Recent PRs</h2><div class=small>Mock activity for testing the future live group feed</div></div>${a.map((x,i)=>`<div class=pagecard style="padding:13px;margin:8px 0"><div class=row><div style="font-size:24px">${i===0?'⚡':'🏋️'}</div><div class=grow><b>${x[0]}</b><div class=small>${x[1]} • ${x[3]}</div></div><b>${x[2]}</b></div></div>`).join('')}`}
+function groupTotal(){return groupOverall()}
+function groupBody(){let ms=groupMembers().sort((a,b)=>groupScore(b)-groupScore(a));return `<div class=pagecard><h2>⚖️ Bodyweight Ranking</h2></div>${ms.map((m,i)=>memberCard(m,i,x=>(groupScore(x)/100).toFixed(2)+'×')).join('')}`}
+let groupCreateState={combined:false,bodyweight:false,individual:false,ratioCombined:false,ratioIndividual:false,selectedExercises:new Set()};
+function allGroupExerciseNames(){let a=[];(st.days||base).forEach(d=>{(d[1]||[]).forEach(x=>a.push(x));(d[2]||[]).forEach(x=>a.push(x))});return [...new Set(a)].sort((a,b)=>a.localeCompare(b))}
+function groupExerciseSections(){return uniqueSections()}
+function syncGroupCreateUI(){let set=(id,on)=>document.getElementById(id)?.classList.toggle('selected',!!on);set('gCombinedBox',groupCreateState.combined);set('gIndividualBox',groupCreateState.individual);set('gRatioCombined',groupCreateState.ratioCombined);set('gRatioIndividual',groupCreateState.ratioIndividual);set('gRatioOuter',groupCreateState.ratioCombined||groupCreateState.ratioIndividual);let n=groupCreateState.selectedExercises?.size||0;let c=document.getElementById('gExerciseCount');if(c)c.textContent=n?`${n} selected`:'None selected'}
+function toggleGroupMode(k){groupCreateState[k]=!groupCreateState[k];syncGroupCreateUI()}
+function toggleExerciseChooser(){document.getElementById('gExerciseList')?.classList.toggle('open');document.getElementById('gExerciseArrow').textContent=document.getElementById('gExerciseList')?.classList.contains('open')?'⌃':'⌄'}
+function toggleGroupExercise(name){let set=groupCreateState.selectedExercises||(groupCreateState.selectedExercises=new Set());set.has(name)?set.delete(name):set.add(name);renderGroupExercisePicker();syncGroupCreateUI()}
+function groupExerciseButton(x,selected=false){return `<button type="button" class="groupExercisePill ${selected?'selected':''}" onclick="toggleGroupExercise('${q(x)}')">${esc(x)}</button>`}
+function renderGroupExercisePicker(){let host=document.getElementById('gExerciseList');if(!host)return;let selected=groupCreateState.selectedExercises||new Set();let selectedHTML=[...selected].map(x=>groupExerciseButton(x,true)).join('');let seen=new Set();let sections=groupExerciseSections().map(sec=>{let mains=(sec.mains||[]).filter(x=>!selected.has(x)&&!seen.has(x));mains.forEach(x=>seen.add(x));let extras=(sec.extras||[]).filter(x=>!selected.has(x)&&!seen.has(x));extras.forEach(x=>seen.add(x));if(!mains.length&&!extras.length)return '';return `<div class=groupExerciseSection><div class=groupExerciseSectionTitle>${esc(sec.name)}</div>${mains.map(x=>groupExerciseButton(x)).join('')}${extras.length?`<div class="groupExerciseSectionTitle extras">${esc(sec.name)} EXTRAS</div>${extras.map(x=>groupExerciseButton(x)).join('')}`:''}</div>`}).join('');host.innerHTML=`<div class=groupSelectedBlock><div class=groupSelectedTitle>Selected</div>${selectedHTML||'<div class=groupEmptySelected>No exercises selected yet.</div>'}</div>${sections}`}
+function createGroup(){groupCreateState={combined:false,bodyweight:false,individual:false,ratioCombined:false,ratioIndividual:false,selectedExercises:new Set()};modal("Create Group",`<p class=small>Set up your group, then you can add the test accounts.</p><input id=gname class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name"><div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div><div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div><div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount>None selected</span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div><button class="pick createGroupAction" onclick="finishCreateGroup()">Create Group</button>`);renderGroupExercisePicker();syncGroupCreateUI()}
+function finishCreateGroup(){let n=(document.getElementById('gname')?.value||'').trim();if(!n){alert('Give your group a name first.');return}let exercises=[...(groupCreateState.selectedExercises||new Set())];st.demoGroup={name:n,members:[],exercises:exercises,leaderboards:{combined:groupCreateState.combined,bodyweight:groupCreateState.bodyweight,individual:groupCreateState.individual,bodyweightCombined:groupCreateState.ratioCombined,bodyweightIndividual:groupCreateState.ratioIndividual}};st.groupView='total';save();closeModal();groupsPage();setTimeout(inviteMembers,180)}
+function inviteMembers(){let chosen=new Set((st.demoGroup&&st.demoGroup.members)||[]);let people=groupMembers().filter(x=>x.name!=='Kieron');modal("Add Members",`<p class=small>Test accounts are available so you can try the group setup before real accounts are connected.</p><div class=createChoices>${people.map(p=>`<label><input class=demoMember type=checkbox value="${esc(p.name)}" ${chosen.has(p.name)?'checked':''}><b>${esc(p.name)}</b><span class=small> • ⚡ ${p.streak} day streak</span></label>`).join('')}</div><button class=pick onclick="saveDemoMembers()">Add to Group</button>`)}
+function saveDemoMembers(){if(!st.demoGroup)return;st.demoGroup.members=[...document.querySelectorAll('.demoMember:checked')].map(x=>x.value);save();closeModal();groupsPage()}
+function notificationToggle(key,label,desc){
+  const on=!!st.notifications[key];
+  return `<div class=settingLine style="align-items:center;gap:14px"><div class=grow><b style="font-size:15px">${label}</b><div class=note style="margin-top:4px">${desc}</div></div><button class=btn onclick="st.notifications.${key}=!st.notifications.${key};save();settings()">${on?"On":"Off"}</button></div>`;
+}
+function streakRestSelector(){
+  return `<div class=settingLine><div class=grow><b style="font-size:15px">Allowed rest days</b><div class=note style="margin-top:4px">Rest days available each week without breaking your streak.</div></div><select class=week onchange="st.streakRestDays=Number(this.value);save();settings()">${[1,2,3,4,5].map(n=>`<option value="${n}" ${st.streakRestDays===n?'selected':''}>${n}</option>`).join('')}</select></div>`;
+}
+async function requestZagNotifications(){
+ if(!("Notification" in window)){alert("This browser does not support web notifications.");return}
+ try{let p=await Notification.requestPermission();alert(p==="granted"?"Notifications enabled.":"Notification permission was not enabled.");settings()}catch(e){alert("Notifications could not be enabled in this browser.")}
+}
+setInterval(()=>{try{maybeBrowserStreakReminder()}catch(e){}},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)try{processStreakCalendar();maybeBrowserStreakReminder()}catch(e){}});
+function streakReminderTimeSetting(){
+  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="st.streakReminderTime=this.value;save();settings()" style="min-width:110px"></div>`;
+}
+function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon>👤</div><div class=grow><b>Account & Cloud</b><div class=coming>Accounts & Cloud Sync — Coming Soon</div></div><button class=btn onclick="alert('Sign in and cloud sync will be connected when the Zag Science account backend is ready.')">Account</button></div></div><div class=pagecard><b>Training</b>
+<div class=settingLine><div class=grow><b style="font-size:15px">Stick Week</b><div class=note style="margin-top:4px">Locks every exercise to Stick Week: the Week 8 PB sets through 105%, followed by 4 empty back-off set slots.</div></div><button class="btn stickWeekSwitch ${st.stickWeek?'on':''}" onclick="toggleStickWeek()">${st.stickWeek?"On":"Off"}</button></div>
+<div class=settingLine><span>Weight Units</span><select class=week onchange="st.units=this.value;save();settings()"><option value=kg ${st.units==='kg'?'selected':''}>kg</option><option value=lb ${st.units==='lb'?'selected':''}>lb</option></select></div><div class=note>Unit preference is saved now. Existing programme values remain unchanged until full unit conversion is enabled.</div></div><div class=pagecard><b>Notifications</b>
+<div class=note style="margin:6px 0 4px">Choose which Zag Science notifications you want to receive.</div>
+${notificationToggle("workoutReminder","Workout reminder","Reminders for your scheduled workouts.")}
+${notificationToggle("leaderboardChanges","Leaderboard changes","Group alerts when leaderboard positions change.")}
+${notificationToggle("groupPRs","Group PRs","Alerts when a group member sets a new personal record.")}
+${notificationToggle("streakScore","Streak score","Daily streak reminders and streak-status alerts.")}
+${streakRestSelector()}
+${streakReminderTimeSetting()}
+<div class=settingLine><div class=grow><b style="font-size:15px">Browser notification permission</b><div class=note style="margin-top:4px">Enable browser alerts while testing the GitHub-hosted app.</div></div><button class=btn onclick="requestZagNotifications()">Enable</button></div>
+<div class=note style="margin-top:10px">Streak rest days preserve your streak rather than adding to it. Phone push delivery can be connected when push notifications are enabled in the packaged app.</div>
+</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
+function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
+function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
+processStreakCalendar();save();workout();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);
+</script>
+
+<style id="zag-info-replacement-v6">
+#zagInfoOverlayV6 {
+ position:fixed; inset:0; z-index:2147483000;
+ display:none; align-items:center; justify-content:center;
+ padding:12px; background:rgba(2,2,9,.90); backdrop-filter:blur(6px);
+}
+#zagInfoOverlayV6.open {display:flex!important}
+#zagInfoPanelV6 {
+ position:relative;
+ width:min(94vw,700px);
+ max-height:94vh;
+ aspect-ratio:1024/1536;
+ background:#05050c url("assets/images/asset-023-ea8255c026ac.png") center/contain no-repeat;
+ border-radius:22px;
+}
+#zagInfoGoV6 {
+ position:absolute; left:20%; bottom:2.5%; width:60%; height:9%;
+ border:0; background:transparent; z-index:3; cursor:pointer;
+ -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button><button id="zagInfoGoV6" type="button" aria-label="Close information"></button>
  </div>
 </div>
+<script id="zag-info-replacement-v6-script">
+(function(){
+ const overlay=document.getElementById("zagInfoOverlayV6");
+ function closeInfo(e){
+   if(e){e.preventDefault();e.stopPropagation();}
+   overlay.classList.remove("open");
+   overlay.setAttribute("aria-hidden","true");
+ }
+ window.openZagInfo=function(e){
+   if(e){e.preventDefault();e.stopPropagation();}
+   overlay.classList.add("open");
+   overlay.setAttribute("aria-hidden","false");
+ };
+ window.closeZagInfo=closeInfo;
+ document.getElementById("zagInfoCloseTop").addEventListener("click",closeInfo);document.getElementById("zagInfoGoV6").addEventListener("click",closeInfo);
+ document.getElementById("zagInfoGoV6").addEventListener("pointerup",closeInfo);
+ overlay.addEventListener("click",function(e){if(e.target===overlay)closeInfo(e)});
+
+ // Make every existing Home info control open THIS popup, regardless of old handlers.
+ document.addEventListener("click",function(e){
+   const b=e.target.closest("#zagPersistentInfo,.zagSplitInfoButton,.zagInfoBtn");
+   if(b) window.openZagInfo(e);
+ },true);
+
+ // Migrate persisted state names too, not just the HTML defaults.
+ try {
+   const seen=new Set();
+   for(let i=0;i<localStorage.length;i++){
+     const key=localStorage.key(i);
+     const val=localStorage.getItem(key);
+     if(!val || seen.has(key)) continue;
+     seen.add(key);
+     if(/Latissimus\s+Dorsi/i.test(val)){
+       localStorage.setItem(key,val.replace(/Latissimus\s+Dorsi/gi,"Lat"));
+     }
+   }
+ } catch(err) {}
+
+ // Also fix any currently-rendered text immediately.
+ function fixRenderedLat(){
+   const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+   let n;
+   while(n=walker.nextNode()){
+     if(/Latissimus\s+Dorsi/i.test(n.nodeValue))
+       n.nodeValue=n.nodeValue.replace(/Latissimus\s+Dorsi/gi,"Lat");
+   }
+ }
+ document.addEventListener("DOMContentLoaded",fixRenderedLat);
+ new MutationObserver(fixRenderedLat).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 
 
+<style id="zag-home-info-button-v7">
+#zagHomeInfoV7{
+  position:fixed !important;
+  top:198px !important;
+  right:24px !important;
+  width:70px !important;
+  height:70px !important;
+  z-index:9000 !important;
+  border:1.5px solid #d52cf2 !important;
+  border-radius:13px !important;
+  background:linear-gradient(160deg,#160b20,#090810) !important;
+  box-shadow:0 0 16px #b72bd766,inset 0 0 12px #8e25aa22 !important;
+  color:#fff !important;
+  padding:0 !important;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#zagHomeInfoV7 .zagInfoIconV7{
+  width:29px;height:29px;
+  border:2px solid #df45fa;
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:#efadff;
+  font:800 19px/1 system-ui;
+}
+#zagHomeInfoV7 .zagInfoTextV7{
+  color:#fff;
+  font:600 11px/1 system-ui;
+}
+@media(max-width:500px){
+  #zagHomeInfoV7{right:18px !important;width:66px !important;height:66px !important;}
+}
 
-
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
 <button id="zagHomeInfoV7" type="button" aria-label="Zag Science information">
  <span class="zagInfoIconV7">i</span>
  <span class="zagInfoTextV7">Info</span>
 </button>
 
+<script id="zag-home-info-button-v7-script">
+(function(){
+ const btn=document.getElementById('zagHomeInfoV7');
+
+ function onHome(){
+   // The Home page uniquely shows the split heading + Workout Split card.
+   const bodyText=document.body.innerText||'';
+   return bodyText.includes('Workout Split') &&
+          (bodyText.includes('The Goat Split') || bodyText.includes('day rotation'));
+ }
+
+ function sync(){
+   btn.style.display=onHome()?'flex':'none';
+ }
+
+ function open(e){
+   if(e){e.preventDefault();e.stopPropagation();}
+   if(typeof window.openZagInfo==='function') window.openZagInfo(e);
+ }
+
+ btn.addEventListener('click',open);
+ btn.addEventListener('pointerup',open);
+
+ document.addEventListener('DOMContentLoaded',sync);
+ new MutationObserver(sync).observe(document.body,{
+   subtree:true,childList:true,attributes:true,attributeFilter:['class','style']
+ });
+ setTimeout(sync,50);
+ setTimeout(sync,300);
+ setTimeout(sync,1000);
+})();
+</script>
 
 
+<style id="zag-home-info-anchored-v8">
+#zagHomeInfoV7{
+  position:absolute !important;
+  top:auto !important;
+  right:18px !important;
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
+<script id="zag-home-info-anchored-v8-script">
+(function(){
+ const btn=document.getElementById('zagHomeInfoV7');
+ if(!btn) return;
+
+ function anchorToHome(){
+   const candidates=[...document.querySelectorAll('h1,h2,h3,div,span')];
+   const title=candidates.find(el=>{
+     if(el.offsetParent===null) return false;
+     const t=(el.textContent||'').trim();
+     return t==='The Goat Split' || (window.st && t===st.splitName);
+   });
+   if(!title) return;
+
+   // Find the local Home header block containing the split title and rotation.
+   let host=title.parentElement;
+   while(host && host!==document.body){
+     const txt=(host.innerText||'');
+     if(/day rotation/i.test(txt) && host.getBoundingClientRect().height < 220) break;
+     host=host.parentElement;
+   }
+   if(!host || host===document.body) host=title.parentElement;
+
+   if(getComputedStyle(host).position==='static') host.style.position='relative';
+
+   // Move the existing button into the Home header itself.
+   if(btn.parentElement!==host) host.appendChild(btn);
+
+   btn.style.setProperty('position','absolute','important');
+   btn.style.setProperty('right','18px','important');
+   btn.style.setProperty('top','50%','important');
+   btn.style.setProperty('transform','translateY(-50%)','important');
+   btn.style.setProperty('display','flex','important');
+ }
+
+ document.addEventListener('DOMContentLoaded',()=>setTimeout(anchorToHome,50));
+ window.addEventListener('load',()=>setTimeout(anchorToHome,100));
+
+ // Re-anchor after the app redraws Home, but never use viewport-fixed positioning.
+ new MutationObserver(()=>{
+   if(document.body.innerText.includes('Workout Split')) anchorToHome();
+ }).observe(document.body,{subtree:true,childList:true});
+
+ setTimeout(anchorToHome,300);
+})();
+</script>
 
 
+<style id="zag-home-info-compact-v9">
+/* Compact Info control: sized to fit between the split-title and rotation lines. */
+#zagHomeInfoV7{
+  width:52px !important;
+  height:52px !important;
+  right:22px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  border-radius:10px !important;
+  gap:1px !important;
+  box-shadow:0 0 10px #b72bd755,inset 0 0 8px #8e25aa18 !important;
+}
+#zagHomeInfoV7 .zagInfoIconV7{
+  width:23px !important;
+  height:23px !important;
+  border-width:1.5px !important;
+  font-size:16px !important;
+}
+#zagHomeInfoV7 .zagInfoTextV7{
+  font-size:9px !important;
+  line-height:10px !important;
+}
+@media(max-width:500px){
+  #zagHomeInfoV7{
+    width:50px !important;
+    height:50px !important;
+    right:18px !important;
+  }
+}
+
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
 
+<style id="zag-pro-v1">
+.zagHomeCards{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 10px}.zagHomeCard{min-height:62px;padding:9px 7px;border:1px solid #742495;border-radius:10px;background:linear-gradient(135deg,#080a14,#100717);color:#fff;text-align:left;box-shadow:0 0 10px #9d2bc02c}.zagHomeCard b{display:block;font-size:12px;color:#f0b4ff;margin-bottom:4px}.zagHomeCard span{display:block;font-size:9px;color:#c9afd9}.zagProCard{border-color:#df3cff;background:linear-gradient(135deg,#190620,#33083f,#100514);box-shadow:0 0 14px #d63cff45}.zagProCard b{color:#fff;text-shadow:0 0 9px #e73cff}.zagProOverlay{position:fixed;inset:0;z-index:100001;background:#000d;display:none;align-items:center;justify-content:center;padding:18px}.zagProOverlay.open{display:flex}.zagProPanel{width:min(390px,95vw);max-height:88vh;overflow:auto;border:1px solid #e73cff;border-radius:18px;padding:17px;background:radial-gradient(circle at 50% 0,#341044,#0a0710 40%,#05060c 100%);box-shadow:0 0 36px #c32cff66}.zagProClose{float:right;width:31px;height:31px;border:1px solid #74308b;border-radius:50%;background:#090812;color:#fff;font-size:18px}.zagProPanel h2{margin:3px 0 2px;font-size:25px}.zagProSub{margin:0 0 13px;color:#dca6ff;font-size:11px}.zagProFeatures{padding:10px;border:1px solid #4f205f;border-radius:10px;background:#070810;margin-bottom:10px;font-size:11px;line-height:1.8}.zagPlan{display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #d93cf2;border-radius:11px;background:linear-gradient(135deg,#21072b,#480957,#1a0520);color:#fff;text-align:left;box-shadow:0 0 12px #d63cff38}.zagPlan strong{display:block;font-size:16px}.zagPlan small{display:block;color:#e2b4ef;margin-top:3px}.zagLifetime{border-color:#ff5cff;box-shadow:0 0 17px #e73cff55}.zagEarly{display:inline-block;font-size:8px;font-weight:900;letter-spacing:.7px;padding:3px 6px;border-radius:20px;background:#e73cff;color:#120016;margin-bottom:5px}.zagFine{font-size:8.5px;color:#9e8ba7;text-align:center;margin-top:9px}
+.zagNeedle{display:block;width:100%;height:44px;object-fit:contain;object-position:left center;vertical-align:middle;margin:0;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}.zagProCard b{display:flex!important;align-items:center!important;width:100%;margin:0 0 3px!important;overflow:visible!important}.zagProCard{overflow:visible!important}
 
-
-
-
-
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 <div id="zagProOverlay" class="zagProOverlay" aria-hidden="true"><div class="zagProPanel"><button class="zagProClose" type="button" onclick="closeZagPro(event)">×</button><h2>ZAG PRO</h2><p class="zagProSub">More control. More ways to train.</p><div class="zagProFeatures">✓ Edit your workout splits<br>✓ Edit exercises on individual days<br>✓ Add &amp; remove exercises<br>✓ Leaderboards &amp; group features<br>✓ Future Zag Pro features</div><button class="zagPlan" type="button" onclick="zagPurchase('monthly')"><strong>£1.99 / month</strong><small>First month FREE · Cancel anytime</small></button><button class="zagPlan zagLifetime" type="button" onclick="zagPurchase('lifetime')"><span class="zagEarly">EARLY ACCESS OFFER</span><strong>£9.99 LIFETIME</strong><small>Pay once · Keep Zag Pro for life</small></button><div class="zagFine">Free version includes the GOAT Split, percentage workout plan and core workout tracking.</div></div></div>
+<script>
+function openZagPro(e){if(e){e.preventDefault();e.stopPropagation()}const o=document.getElementById('zagProOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false')}
+function closeZagPro(e){if(e){e.preventDefault();e.stopPropagation()}const o=document.getElementById('zagProOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true')}
+function zagPurchase(plan){alert(plan==='monthly'?'Zag Pro monthly purchasing will connect here when the App Store / payment checkout is enabled.':'Zag Pro lifetime purchasing will connect here when the App Store / payment checkout is enabled.')}
+document.getElementById('zagProOverlay').addEventListener('click',function(e){if(e.target===this)closeZagPro(e)});
+</script>
 
+<style id="zag-pro-image-clean-fix">
+.zagProCard{position:relative!important;overflow:hidden!important;}
+.zagProCard b{display:block!important;width:100%!important;height:44px!important;margin:0 0 3px!important;padding:0!important;background:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;overflow:visible!important;}
+.zagProCard .zagNeedle{display:block!important;width:100%!important;height:44px!important;max-width:none!important;object-fit:contain!important;object-position:left center!important;margin:0!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;filter:none!important;clip-path:none!important;mask:none!important;opacity:1!important;}
 
+.groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
+</style>
 
 
 
@@ -106,102 +899,1509 @@
 
 
 
+<style id="zagGroupsCleanFix">
+.groupHero{flex-wrap:wrap}
+.groupHeroActions{margin-left:auto;display:flex;gap:7px;align-items:center}
+.groupHeroActions .btn{white-space:nowrap}
+.groupInviteInline{flex:0 0 100%;width:100%;margin-top:10px;padding:11px;border-top:1px solid #6d247e;background:#070812;border-radius:0 0 10px 10px}
+.groupInviteSearch{width:100%;padding:10px 11px;background:#040711;color:#fff;border:1px solid #505872;border-radius:9px;margin-bottom:10px}
+.groupInviteTitle{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#df8cff;margin:3px 0 5px}
+.groupFriendRow{display:grid;grid-template-columns:36px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-top:1px solid #252b3d}
+.groupFriendAvatar{width:34px;height:34px;border:1.5px solid #c433e4;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#efc7fa;background:radial-gradient(circle,#471153,#080a13)}
+.groupFriendRow small{display:block;color:#b99fc7;margin-top:2px}
+.groupFriendAdd{border:1px solid #d838f1;border-radius:8px;padding:6px 10px;background:#100716;color:#fff}
+.groupFriendAdd:disabled{opacity:.45}
+.groupMainTabs.dynamic{grid-template-columns:repeat(var(--tab-count),1fr)}
+.groupBodySubtabs{display:grid;grid-template-columns:repeat(var(--sub-count),1fr);gap:6px;margin:0 0 12px}
+.groupBodySubtab{background:#0b0b14;color:#fff;border:1.5px solid #b42bd1;border-radius:9px;padding:10px 6px}
+.groupBodySubtab.sel{border:2.5px solid #ef4cff;box-shadow:0 0 12px #c300ff88;background:#25102f}
+.groupNoLeaderboard{border:1px solid #51245f;border-radius:10px;padding:18px;text-align:center;color:#c3aecb}
+.groupBadgeNoEmoji{width:58px;height:48px;border:1px solid #9d2bc0;border-radius:8px;background:radial-gradient(circle,#371047,#080a13);display:grid;place-items:center}
+.groupBadgeNoEmoji:before{content:"";width:25px;height:18px;border:2px solid #e33cff;border-radius:12px 12px 8px 8px;box-shadow:0 0 8px #d93cff}
+.groupBoard h2 .boardTitleMark{display:inline-block;width:18px;height:18px;border:2px solid #df3cff;border-radius:50%;vertical-align:-3px;margin-right:7px;box-shadow:0 0 7px #cf35ff}
+</style>
+
+<script id="zag-emblem-assets-only">window.zagEmblemNames=["statue","dumbbell","skateboard","bike","alien","frog","lion","wolf","bear","swordshield","battleaxe","viking","r8","chopper","heart","bones","arm","lightning","bodybuilder","wizard"];window.zagEmblemAssets={"statue":"assets/images/asset-024-7f08e354c0c5.webp","dumbbell":"assets/images/asset-025-880f426cd192.webp","skateboard":"assets/images/asset-026-73f0b96dd2d4.webp","bike":"assets/images/asset-027-5ea16565ded9.webp","alien":"assets/images/asset-028-7c9b2ead389a.webp","frog":"assets/images/asset-029-9f594a496b8d.webp","lion":"assets/images/asset-030-8721329f50d6.webp","wolf":"assets/images/asset-031-de90dbb88b47.webp","bear":"assets/images/asset-032-c4ddfe43a7b6.webp","swordshield":"assets/images/asset-033-34dd55822fcd.webp","battleaxe":"assets/images/asset-034-11d3acb79f5c.webp","viking":"assets/images/asset-035-bb5186b3b627.webp","r8":"assets/images/asset-036-a6450fe2db06.webp","chopper":"assets/images/asset-037-54ab85917d40.webp","heart":"assets/images/asset-038-a7a8a179c513.webp","bones":"assets/images/asset-039-000813377de1.webp","arm":"assets/images/asset-040-6d0fd3a772f4.webp","lightning":"assets/images/asset-041-881ea1f5924a.webp","bodybuilder":"assets/images/asset-042-35c45a120adf.webp","wizard":"assets/images/asset-043-334a374364dd.webp"};window.zagEmblemSrc=function(id){return window.zagEmblemAssets[id]||""};</script>
+<script id="zagGroupsCleanFixScript">
+(function(){
+  window.zagInviteOpen=false;
+  window.zagBodyMode="combined";
+
+  window.zagAllGroupPeople=function(){
+    return [
+      {name:"Kieron",vals:{"Squats":200,"Bench Press":170,"Deadlifts":220,"Weighted Lat Pull Up":50,"Barbell Row":115},bw:90,streak:12,prs:4,trend:1,username:"kieron"},
+      {name:"James",vals:{"Squats":180,"Bench Press":165,"Deadlifts":210,"Weighted Lat Pull Up":45,"Barbell Row":110},bw:84,streak:8,prs:2,trend:-1,username:"jamesfit"},
+      {name:"Bill",vals:{"Squats":160,"Bench Press":150,"Deadlifts":200,"Weighted Lat Pull Up":40,"Barbell Row":120},bw:82,streak:16,prs:3,trend:2,username:"billlifts"},
+      {name:"Keelan",vals:{"Squats":150,"Bench Press":140,"Deadlifts":190,"Weighted Lat Pull Up":60,"Barbell Row":110},bw:78,streak:6,prs:1,trend:0,username:"keelanstrong"},
+      {name:"Anna",vals:{"Squats":120,"Bench Press":125,"Deadlifts":160,"Weighted Lat Pull Up":25,"Barbell Row":80},bw:65,streak:10,prs:3,trend:1,username:"annatrains"},
+      {name:"Betsy",vals:{"Squats":100,"Bench Press":90,"Deadlifts":140,"Weighted Lat Pull Up":20,"Barbell Row":70},bw:60,streak:5,prs:2,trend:-1,username:"betsyfit"}
+    ];
+  };
+
+  window.groupMembers=function(){
+    let all=zagAllGroupPeople();
+    if(!st.demoGroup)return all;
+    let allowed=new Set(["Kieron",...(st.demoGroup.members||[])]);
+    return all.filter(x=>allowed.has(x.name));
+  };
+
+  function config(){
+    if(!st.demoGroup.leaderboards){
+      st.demoGroup.leaderboards={combined:true,bodyweight:true,individual:true,bodyweightCombined:true,bodyweightIndividual:true};
+    }
+    if(typeof st.demoGroup.leaderboards.bodyweight!=="boolean"){
+      st.demoGroup.leaderboards.bodyweight=!!(st.demoGroup.leaderboards.bodyweightCombined||st.demoGroup.leaderboards.bodyweightIndividual);
+    }
+    return st.demoGroup.leaderboards;
+  }
+
+  function visibleMainTabs(){
+    let c=config(), out=[];
+    if(c.combined)out.push(["total","Total"]);
+    if(c.bodyweight)out.push(["bodyweight","Bodyweight"]);
+    if(c.individual)out.push(["exercises","Individual Exercises"]);
+    return out;
+  }
+
+  function ensureValidView(){
+    let allowed=visibleMainTabs().map(x=>x[0]);
+    if(!allowed.includes(st.groupView))st.groupView=allowed[0]||"none";
+  }
+
+  window.zagToggleInvite=function(){
+    zagInviteOpen=!zagInviteOpen;
+    groupsPage(st.groupView);
+  };
+
+  window.zagFilterFriends=function(v){
+    let q=(v||"").trim().toLowerCase();
+    document.querySelectorAll(".groupFriendRow").forEach(r=>{
+      r.style.display=!q||r.dataset.search.includes(q)?"grid":"none";
+    });
+  };
+
+  window.zagAddFriend=function(name){
+    if(!st.demoGroup)return;
+    st.demoGroup.members=st.demoGroup.members||[];
+    if(!st.demoGroup.members.includes(name))st.demoGroup.members.push(name);
+    save();
+    groupsPage(st.groupView);
+  };
+
+  window.zagRemoveFriend=function(name){
+    if(!st.demoGroup)return;
+    st.demoGroup.members=(st.demoGroup.members||[]).filter(x=>x!==name);
+    save();
+    groupsPage(st.groupView);
+  };
+
+  function inviteHTML(){
+    let chosen=new Set(st.demoGroup.members||[]);
+    let people=zagAllGroupPeople().filter(x=>x.name!=="Kieron");
+    return `<div class=groupInviteInline>
+      <input class=groupInviteSearch placeholder="Search username" oninput="zagFilterFriends(this.value)">
+      <div class=groupInviteTitle>Friends List</div>
+      ${people.map(p=>`<div class=groupFriendRow data-search="${esc((p.name+" "+p.username).toLowerCase())}">
+        <div class=groupFriendAvatar>${esc(p.name.charAt(0))}</div>
+        <div><b>${esc(p.name)}</b><small>@${esc(p.username)} · ${p.bw} kg</small></div>
+        <button class=groupFriendAdd ${chosen.has(p.name)?"disabled":""} onclick="event.stopPropagation();zagAddFriend('${q(p.name)}')">${chosen.has(p.name)?"Added":"Add"}</button>
+      </div>`).join("")}
+    </div>`;
+  }
+
+  window.editGroup=function(){
+    let c=config();
+    groupCreateState={
+      combined:!!c.combined,
+      individual:!!c.individual,
+      bodyweight:!!c.bodyweight,
+      ratioCombined:!!c.bodyweightCombined,
+      ratioIndividual:!!c.bodyweightIndividual,
+      emblem:st.demoGroup.emblem||"",
+      selectedExercises:new Set(st.demoGroup.exercises||[])
+    };
+    modal("Edit Group",`
+      <div class="zagEditGroupTopRow">
+        <button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Change group image">
+          ${st.demoGroup.emblem?`<img class="zagGroupImagePreview" src="${zagEmblemSrc(st.demoGroup.emblem)}" alt="">`:`<span class="zagGroupImagePlaceholder"></span>`}
+        </button>
+        <input id=gname class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" value="${esc(st.demoGroup.name||"")}" placeholder="Group name">
+      </div>
+      <div class=groupModeGrid>
+        <div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div>
+        <div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div>
+      </div>
+      <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')">
+        <div class=bodyRatioTitle>Bodyweight Ratio</div>
+        <div class=ratioMiniGrid>
+          <div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div>
+          <div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div>
+        </div>
+      </div>
+      <div class=exerciseChooser>
+        <div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div>
+        <div id=gExerciseList class=exerciseChooserList></div>
+      </div>
+      <button class="pick createGroupAction" onclick="saveEditedGroup()">Save Group</button>`);
+    renderGroupExercisePicker();
+    syncGroupCreateUI();
+  };
+
+  window.saveEditedGroup=function(){
+    let name=(document.getElementById("gname")?.value||"").trim();
+    if(!name){alert("Give your group a name first.");return}
+    const g=st.demoGroup;
+    g.name=name;
+    g.emblem=groupCreateState.emblem||g.emblem||"";
+    g.exercises=[...(groupCreateState.selectedExercises||new Set())];
+    g.leaderboards={
+      combined:!!groupCreateState.combined,
+      bodyweight:!!groupCreateState.bodyweight,
+      individual:!!groupCreateState.individual,
+      bodyweightCombined:!!groupCreateState.ratioCombined,
+      bodyweightIndividual:!!groupCreateState.ratioIndividual
+    };
+    const allowed=[];
+    if(g.leaderboards.combined)allowed.push("total");
+    if(g.leaderboards.bodyweight)allowed.push("bodyweight");
+    if(g.leaderboards.individual)allowed.push("exercises");
+    g._groupView=allowed.includes(g._groupView)?g._groupView:(allowed[0]||"none");
+    st.groupView=g._groupView;
+    save();closeModal();groupsPage();
+  };
+
+  window.zagSetBodyMode=function(mode){
+    zagBodyMode=mode;
+    groupsPage("bodyweight");
+  };
+
+  function bodyweightIndividual(){
+    let opts=(st.demoGroup.exercises||[]).filter(Boolean);
+    if(!opts.length)opts=["Squats","Bench Press","Deadlifts","Weighted Lat Pull Up","Barbell Row"];
+    if(!opts.includes(st.groupExercise))st.groupExercise=opts[0];
+    let ex=st.groupExercise;
+    let ms=groupMembers().sort((a,b)=>((b.vals[ex]||0)/b.bw)-((a.vals[ex]||0)/a.bw));
+    return `<div class=exerciseTabStrip>${opts.map(x=>`<button class="exerciseTab ${x===ex?'sel':''}" onclick="st.groupExercise='${q(x)}';save();groupsPage('bodyweight')">${esc(x)}</button>`).join("")}</div>
+      ${groupPodium(ms,m=>((m.vals[ex]||0)/m.bw).toFixed(2)+"×")}
+      ${groupTable(ex+" Bodyweight Leaderboard",ms,m=>((m.vals[ex]||0)/m.bw).toFixed(2)+"×","Ratio")}`;
+  }
+
+  function bodyweightContent(){
+    let c=config(), modes=[];
+    if(c.bodyweight && !c.bodyweightCombined && !c.bodyweightIndividual)c.bodyweightCombined=true;
+    if(c.bodyweightCombined)modes.push(["combined","Combined Exercises"]);
+    if(c.bodyweightIndividual)modes.push(["individual","Individual Exercises"]);
+    if(!modes.some(x=>x[0]===zagBodyMode))zagBodyMode=modes[0]?.[0]||"none";
+    if(!modes.length)return `<div class=groupNoLeaderboard>No bodyweight leaderboard is enabled.</div>`;
+    let subs=`<div class=groupBodySubtabs style="--sub-count:${modes.length}">${modes.map(m=>`<button class="groupBodySubtab ${zagBodyMode===m[0]?'sel':''}" onclick="zagSetBodyMode('${m[0]}')">${m[1]}</button>`).join("")}</div>`;
+    return subs+(zagBodyMode==="combined"?groupBodyweightLayout():bodyweightIndividual());
+  }
+
+  window.groupsPage=function(view){
+    setActiveNav("groups");
+    if(!st.demoGroup){
+      document.getElementById("screen").innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
+      <div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin-top:0">No groups yet</h2><div class=small style="margin-bottom:18px">Create a group to start a leaderboard with friends.</div><button class=pick style="width:100%" onclick=createGroup()>Create Group</button></div>`;
+      window.scrollTo(0,0);return;
+    }
+
+    if(view)st.groupView=view;
+    ensureValidView();save();
+    let tabs=visibleMainTabs();
+
+    let content="";
+    if(st.groupView==="total"&&config().combined)content=groupTotalLayout();
+    else if(st.groupView==="bodyweight")content=bodyweightContent();
+    else if(st.groupView==="exercises"&&config().individual)content=groupExercises();
+    else content=`<div class=groupNoLeaderboard>No leaderboard selections are enabled. Use Edit Group to choose which leaderboards this group shows.</div>`;
+
+    let hero=`<div class="pagecard groupHero">
+      <div class=groupBadgeNoEmoji>${st.demoGroup.emblem?`<img class="zagSavedGroupEmblem" src="${zagEmblemSrc(st.demoGroup.emblem)}" alt="">`:""}</div>
+      <div class=grow><div class=groupTitle>${esc(st.demoGroup.name||"Group")}</div><div class=small>${groupMembers().length} Members · Train harder together</div></div>
+      <div class=groupHeroActions><button class=btn onclick="zagToggleInvite()">Invite</button><button class=btn onclick="editGroup()">Edit Group</button></div>
+      ${zagInviteOpen?inviteHTML():""}
+    </div>`;
+
+    let tabHTML=tabs.length?`<div class="groupMainTabs dynamic" style="--tab-count:${tabs.length}">${tabs.map(t=>`<button class="groupMainTab ${st.groupView===t[0]?'sel':''}" onclick="groupsPage('${t[0]}')">${t[1]}</button>`).join("")}</div>`:"";
+
+    document.getElementById("screen").innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
+      <div class=groupSectionBox><div class=groupSectionLabel>Group 1</div>${hero}${tabHTML}${content}</div>
+      <button class="pick createAnotherGroup" onclick=createGroup()>Create Group</button>`;
+    window.scrollTo(0,0);
+  };
+
+  // Make new groups open on a valid selected leaderboard instead of forcing Total.
+  window.finishCreateGroup=function(){
+    let n=(document.getElementById("gname")?.value||"").trim();
+    if(!n){alert("Give your group a name first.");return}
+    let exercises=[...(groupCreateState.selectedExercises||new Set())];
+    st.demoGroup={name:n,members:[],exercises:exercises,leaderboards:{
+      combined:groupCreateState.combined,
+      bodyweight:groupCreateState.bodyweight,
+      individual:groupCreateState.individual,
+      bodyweightCombined:groupCreateState.ratioCombined,
+      bodyweightIndividual:groupCreateState.ratioIndividual
+    }};
+    st.groupView=groupCreateState.combined?"total":(groupCreateState.bodyweight?"bodyweight":(groupCreateState.individual?"exercises":"none"));
+    save();closeModal();groupsPage(st.groupView);
+  };
+})();
+</script>
+
+
+<script id="zag-multiple-groups-fix">
+(function(){
+  function migrateGroups(){
+    if(!Array.isArray(st.demoGroups)) st.demoGroups=[];
+    if(st.demoGroup){
+      const exists=st.demoGroups.some(g=>g && g.id && st.demoGroup.id && g.id===st.demoGroup.id);
+      if(!exists) st.demoGroups.push(st.demoGroup);
+    }
+    st.demoGroups.forEach((g,i)=>{ if(g && !g.id) g.id="zag-group-"+Date.now()+"-"+i; });
+    if(st.demoGroups.length && !st.demoGroup) st.demoGroup=st.demoGroups[0];
+  }
+  migrateGroups();
+
+  const originalSave=window.save;
+  window.save=function(){
+    migrateGroups();
+    if(st.demoGroup){
+      const i=st.demoGroups.findIndex(g=>g.id===st.demoGroup.id);
+      if(i>=0) st.demoGroups[i]=st.demoGroup;
+    }
+    return originalSave.apply(this,arguments);
+  };
+
+  const originalFinish=window.finishCreateGroup;
+  window.finishCreateGroup=function(){
+    const previousGroups=Array.isArray(st.demoGroups)?st.demoGroups.slice():[];
+    const previousActive=st.demoGroup;
+
+    /* Let the app create the new group once. */
+    originalFinish.apply(this,arguments);
+    const created=st.demoGroup;
+    if(!created || created===previousActive)return;
+
+    if(!created.id)created.id="zag-group-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+
+    /* originalFinish calls save(), and the multi-group save wrapper may already
+       have inserted the new active group. Rebuild the array by ID/reference so
+       the new group can exist exactly once. */
+    const candidates=[...previousGroups, ...(Array.isArray(st.demoGroups)?st.demoGroups:[]), created];
+    const unique=[];
+    const seenIds=new Set();
+    const seenRefs=new Set();
+
+    candidates.forEach(g=>{
+      if(!g)return;
+      if(g.id){
+        if(seenIds.has(g.id))return;
+        seenIds.add(g.id);
+      }else{
+        if(seenRefs.has(g))return;
+        seenRefs.add(g);
+      }
+      unique.push(g);
+    });
+
+    st.demoGroups=unique;
+    st.demoGroup=created;
+    save();
+    groupsPage();
+  };
+
+  const originalGroupsPage=window.groupsPage;
+  window.groupsPage=function(view){
+    migrateGroups();
+    if(!st.demoGroups.length) return originalGroupsPage.call(this,view);
+
+    const screen=document.getElementById("screen");
+    if(!screen) return originalGroupsPage.call(this,view);
+
+    let rendered=[];
+    const activeId=st.demoGroup&&st.demoGroup.id;
+    const activeView=st.groupView;
+
+    for(const g of st.demoGroups){
+      st.demoGroup=g;
+      let allowed=(typeof visibleMainTabs==="function"?visibleMainTabs():[]).map(x=>x[0]);
+      /* A clicked tab calls groupsPage(view). Apply that requested view only
+         to the group that was activated by the box's capture listener. */
+      let requested=(g.id===activeId && view && allowed.includes(view))?view:null;
+      let v=requested || ((g._groupView && allowed.includes(g._groupView))?g._groupView:(allowed[0]||"none"));
+      g._groupView=v;
+      st.groupView=v;
+      originalGroupsPage.call(this,v);
+      const section=screen.querySelector(".groupSectionBox");
+      let content=section ? section.outerHTML : "";
+      rendered.push(`<div class="zagPersistentGroup" data-group-id="${g.id}">${content}</div>`);
+      g._groupView=st.groupView;
+    }
+
+    st.demoGroup=st.demoGroups.find(g=>g.id===activeId)||st.demoGroups[0];
+    st.groupView=(st.demoGroup&&st.demoGroup._groupView)||activeView||"total";
+    screen.innerHTML=`<div class="title"><h1>Groups</h1><p>Friendly competition · train harder together</p></div>`+
+      rendered.join("")+
+      `<button class="pick createAnotherGroup" onclick="createGroup()">+ Create Group</button>`;
+
+    /* Make controls inside each rendered group activate that group before their normal action. */
+    screen.querySelectorAll(".zagPersistentGroup").forEach(box=>{
+      box.addEventListener("click",function(e){
+        const id=this.dataset.groupId;
+        const g=st.demoGroups.find(x=>x.id===id);
+        if(g) st.demoGroup=g;
+      },true);
+    });
+  };
+
+  /* Keep each group's selected leaderboard view independently. */
+  document.addEventListener("click",function(e){
+    const box=e.target.closest&&e.target.closest(".zagPersistentGroup");
+    if(!box)return;
+    const g=st.demoGroups&&st.demoGroups.find(x=>x.id===box.dataset.groupId);
+    if(!g)return;
+    const t=(e.target.textContent||"").trim();
+    if(t==="Total") g._groupView="total";
+    else if(t==="Bodyweight") g._groupView="bodyweight";
+    else if(t==="Individual Exercises") g._groupView="exercises";
+  },true);
+
+  setTimeout(()=>{try{migrateGroups();save()}catch(e){}},50);
+})();
+</script>
+
+
+<style id="zag-exile-group-style">
+.exileGroupBtn{
+  width:100%;margin-top:14px;padding:12px;
+  border:1.5px solid #a72bc4;border-radius:10px;
+  background:#120714;color:#ffb8ff;font-weight:800;
+}
+</style>
+
+
+
+
+
+
+<style id="zag-exile-inline-style-v2">
+.exileConfirmBox{margin-top:10px;padding:12px;border:1.5px solid #b72bd2;border-radius:10px;background:#0c0710;text-align:center}
+.exileConfirmBox b{display:block;margin-bottom:5px}
+.exileConfirmBox .small{margin-bottom:10px}
+.exileConfirmActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exileConfirmActions button{padding:10px;border-radius:9px;font-weight:800}
+.exileCancel{background:#090b12;color:#fff;border:1px solid #64677a}
+.exileConfirm{background:#2b082e;color:#ffd5ff;border:1.5px solid #e63cff}
+</style>
+
+<script id="zag-exile-inline-fix-v3">
+(function(){
+ const previousEdit=window.editGroup;
+
+ window.editGroup=function(){
+   previousEdit.apply(this,arguments);
+   setTimeout(function(){
+     const saveBtn=[...document.querySelectorAll("button")].find(b=>(b.textContent||"").trim()==="Save Group");
+     if(!saveBtn)return;
+     const panel=saveBtn.parentElement;
+     if(panel.querySelector(".exileGroupBtn"))return;
+     const b=document.createElement("button");
+     b.type="button"; b.className="exileGroupBtn"; b.textContent="Exile Group";
+     b.onclick=function(e){
+       e.preventDefault();e.stopPropagation();
+       let old=panel.querySelector(".exileConfirmBox");
+       if(old){old.remove();return;}
+       const box=document.createElement("div");
+       box.className="exileConfirmBox";
+       box.innerHTML='<b>Exile this group?</b><div class="small">This will permanently delete this group.</div><div class="exileConfirmActions"><button type="button" class="exileCancel">Cancel</button><button type="button" class="exileConfirm">Exile Group</button></div>';
+       box.querySelector(".exileCancel").onclick=function(){box.remove()};
+       box.querySelector(".exileConfirm").onclick=function(ev){
+         ev.preventDefault();ev.stopPropagation();deleteActiveZagGroup();
+       };
+       b.insertAdjacentElement("afterend",box);
+     };
+     saveBtn.insertAdjacentElement("afterend",b);
+   },0);
+ };
+
+ window.deleteActiveZagGroup=function(){
+   const doomed=st.demoGroup;
+   if(!doomed)return;
+   const id=doomed.id;
+
+   if(Array.isArray(st.demoGroups)){
+     st.demoGroups=st.demoGroups.filter(g=>g && (id ? g.id!==id : g!==doomed));
+   }else st.demoGroups=[];
+
+   st.demoGroup=st.demoGroups[0]||null;
+   st.groupView=st.demoGroup ? (st.demoGroup._groupView||"total") : "none";
+
+   try{
+     if(typeof KEY!=="undefined")localStorage.setItem(KEY,JSON.stringify(st));
+   }catch(e){}
+
+   try{closeModal()}catch(e){}
+   setTimeout(function(){
+     try{groupsPage(st.groupView)}catch(e){}
+   },20);
+ };
+})();
+</script>
+
+
+<style id="zag-bodyweight-edit-repair-style">
+/* Keep Bodyweight Ratio visually active from its own parent setting. */
+.bodyRatioBox.selected{border:2.5px solid #ef4cff!important;box-shadow:0 0 12px #c300ff88!important}
+</style>
+<script id="zag-groups-no-arm-emoji">
+(function(){
+  function clean(){
+    const root=document.getElementById("screen");
+    if(!root)return;
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    let n;
+    while(n=w.nextNode()){
+      n.nodeValue=n.nodeValue.replace(/(?:🏻|🏼|🏽|🏾|🏿)?/gu,"").replace(/\s{2,}/g," ");
+    }
+  }
+  const gp=window.groupsPage;
+  window.groupsPage=function(){
+    const r=gp.apply(this,arguments);
+    clean();
+    return r;
+  };
+  clean();
+})();
+</script>
+
+
+
+
+<script id="zag-groups-direct-dom-switch">
+(function(){
+  function groupForBox(box){
+    if(!box || !Array.isArray(st.demoGroups))return null;
+    return st.demoGroups.find(g=>g && String(g.id)===String(box.dataset.groupId))||null;
+  }
+
+  function renderView(g,view){
+    const prev=st.demoGroup, prevView=st.groupView;
+    st.demoGroup=g;
+    st.groupView=view;
+    let result="";
+    try{
+      if(view==="total") result=groupTotalLayout();
+      else if(view==="bodyweight"){
+        const lb=g.leaderboards||{};
+        const available=[];
+        if(lb.bodyweightCombined)available.push(["combined","Combined Weight"]);
+        if(lb.bodyweightIndividual)available.push(["individual","Individual Exercise"]);
+        if(!available.length)available.push(["combined","Combined Weight"],["individual","Individual Exercise"]);
+        if(!available.some(x=>x[0]===g._bodyweightMode))g._bodyweightMode=available[0][0];
+
+        let body="";
+        if(g._bodyweightMode==="individual"){
+          let opts=(g.exercises||[]).filter(Boolean);
+          if(!opts.length)opts=["Squats","Bench Press","Deadlifts","Weighted Lat Pull Up","Barbell Row"];
+          if(!opts.includes(g._bodyweightExercise))g._bodyweightExercise=opts[0];
+          const ex=g._bodyweightExercise;
+          const ms=groupMembers().sort((a,b)=>((b.vals[ex]||0)/b.bw)-((a.vals[ex]||0)/a.bw));
+          body=`<div class="exerciseTabStrip zagBwExerciseTabs">${opts.map(x=>`<button type="button" data-exercise="${esc(x)}" class="exerciseTab zagBwExerciseTab ${x===ex?'sel':''}">${esc(x)}</button>`).join("")}</div>
+            ${groupPodium(ms,m=>((m.vals[ex]||0)/m.bw).toFixed(2)+"×")}
+            ${groupTable(ex+" Bodyweight Ratio Leaderboard",ms,m=>((m.vals[ex]||0)/m.bw).toFixed(2)+"×","Ratio")}`;
+        }else{
+          body=groupBodyweightLayout();
+        }
+
+        result=`<div class="zagBwSubTabs">${available.map(([mode,label])=>`<button type="button" class="zagBwSubTab ${g._bodyweightMode===mode?'sel':''}" data-bw-mode="${mode}">${label}</button>`).join("")}</div>${body}`;
+      }
+      else if(view==="exercises") result=groupExercises();
+    }finally{
+      st.demoGroup=prev;
+      st.groupView=prevView;
+    }
+    return result;
+  }
+
+  function prepareBoxes(){
+    document.querySelectorAll(".zagPersistentGroup").forEach(function(box){
+      const g=groupForBox(box);
+      if(!g)return;
+
+      const tabs=[...box.querySelectorAll(".groupMainTab")];
+      if(!tabs.length)return;
+
+      /* Identify the leaderboard content as everything after the main tab row
+         inside this group's groupSectionBox, and put it in one replaceable host. */
+      const tabRow=tabs[0].parentElement;
+      const section=tabRow && tabRow.parentElement;
+      if(!section)return;
+
+      let host=section.querySelector(":scope > .zagLeaderboardHost");
+      if(!host){
+        host=document.createElement("div");
+        host.className="zagLeaderboardHost";
+        let node=tabRow.nextSibling;
+        while(node){
+          const next=node.nextSibling;
+          host.appendChild(node);
+          node=next;
+        }
+        section.appendChild(host);
+      }
+
+      tabs.forEach(function(b){
+        const text=(b.textContent||"").replace(/\s+/g," ").trim();
+        if(text==="Total")b.dataset.zagView="total";
+        else if(text==="Bodyweight")b.dataset.zagView="bodyweight";
+        else if(text==="Individual Exercises")b.dataset.zagView="exercises";
+        b.removeAttribute("onclick");
+        b.type="button";
+      });
+    });
+  }
+
+  document.addEventListener("click",function(e){
+    const b=e.target.closest && e.target.closest(".zagPersistentGroup .groupMainTab[data-zag-view]");
+    if(!b)return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    const box=b.closest(".zagPersistentGroup");
+    const g=groupForBox(box);
+    if(!g)return;
+
+    const view=b.dataset.zagView;
+    const section=b.parentElement.parentElement;
+    const host=section.querySelector(":scope > .zagLeaderboardHost");
+    if(!host)return;
+
+    g._groupView=view;
+    st.demoGroup=g;
+    st.groupView=view;
+
+    [...b.parentElement.querySelectorAll(".groupMainTab")].forEach(x=>x.classList.toggle("sel",x===b));
+
+    /* Replace only this leaderboard's content. The whole page is not rebuilt,
+       so the scroll position cannot jump to the top. */
+    host.innerHTML=renderView(g,view);
+
+    try{
+      if(typeof KEY!=="undefined")localStorage.setItem(KEY,JSON.stringify(st));
+    }catch(err){}
+  },true);
+
+  const existing=window.groupsPage;
+  window.groupsPage=function(){
+    const y=window.scrollY;
+    const r=existing.apply(this,arguments);
+    prepareBoxes();
+    requestAnimationFrame(()=>window.scrollTo(0,y));
+    return r;
+  };
+
+  prepareBoxes();
+})();
+</script>
+
+
+<script id="zag-edit-toggle-clean">
+(function(){
+  window.syncGroupCreateUI=function(){
+    const c=groupCreateState||{};
+    const set=(id,on)=>document.getElementById(id)?.classList.toggle("selected",!!on);
+    set("gCombinedBox",c.combined);
+    set("gIndividualBox",c.individual);
+    set("gRatioOuter",c.bodyweight);
+    set("gRatioCombined",c.ratioCombined);
+    set("gRatioIndividual",c.ratioIndividual);
+    const count=document.getElementById("gExerciseCount");
+    if(count)count.textContent=(c.selectedExercises?.size||0)?`${c.selectedExercises.size} selected`:"None selected";
+  };
+  window.toggleGroupMode=function(k){
+    if(!groupCreateState)return;
+    groupCreateState[k]=!groupCreateState[k];
+    if((k==="ratioCombined"||k==="ratioIndividual") && groupCreateState[k])groupCreateState.bodyweight=true;
+    syncGroupCreateUI();
+  };
+})();
+</script>
+
+
+<style id="zag-groups-final-controls-style">
+.zagBwSubTabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.zagBwSubTab{min-height:48px;border:1.5px solid #d52bf0;border-radius:12px;background:#090812;color:#f4eafa;font-size:15px}
+.zagBwSubTab.sel{border:2.5px solid #f04cff;background:#2a0d31;box-shadow:0 0 12px rgba(227,52,255,.45)}
+</style>
+<script id="zag-groups-final-controls">
+(function(){
+  function findGroup(box){
+    if(!box||!Array.isArray(st.demoGroups))return null;
+    return st.demoGroups.find(g=>g&&String(g.id)===String(box.dataset.groupId))||null;
+  }
+  function persist(){
+    try{ if(typeof KEY!=="undefined") localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){}
+  }
+  function renderBodyweightIndividual(g){
+    let opts=(g.exercises||[]).filter(Boolean);
+    if(!opts.length)opts=["Squats","Bench Press","Deadlifts","Weighted Lat Pull Up","Barbell Row"];
+    if(!opts.includes(g._bodyweightExercise))g._bodyweightExercise=opts[0];
+    const ex=g._bodyweightExercise;
+    const ms=groupMembers().sort((a,b)=>((b.vals[ex]||0)/b.bw)-((a.vals[ex]||0)/a.bw));
+    return `<div class="exerciseTabStrip zagBwExerciseTabs">${opts.map(x=>`<button type="button" data-exercise="${esc(x)}" class="exerciseTab zagBwExerciseTab ${x===ex?'sel':''}">${esc(x)}</button>`).join("")}</div>
+      ${groupPodium(ms,m=>((m.vals[ex]||0)/m.bw).toFixed(2)+"×")}
+      ${groupTable(ex+" Bodyweight Ratio Leaderboard",ms,m=>((m.vals[ex]||0)/m.bw).toFixed(2)+"×","Ratio")}`;
+  }
+
+  function renderFor(g,view){
+    const oldG=st.demoGroup, oldV=st.groupView;
+    st.demoGroup=g; st.groupView=view;
+    let s="";
+    if(view==="total")s=groupTotalLayout();
+    else if(view==="bodyweight"){
+      s=(g._bodyweightMode==="individual")?renderBodyweightIndividual(g):groupBodyweightLayout();
+    }
+    else if(view==="exercises")s=groupExercises();
+    st.demoGroup=oldG; st.groupView=oldV;
+    return s;
+  }
+
+  /* Bodyweight gets its own two-option switch inside the Bodyweight page. */
+  function installBodyweightSubtabs(box,g){
+    if(!box||!g||g._groupView!=="bodyweight")return;
+    const host=box.querySelector(".zagLeaderboardHost");
+    if(!host)return;
+    if(host.querySelector(".zagBwSubTabs"))return;
+
+    const lb=g.leaderboards||{};
+    const available=[];
+    if(lb.bodyweightCombined)available.push(["combined","Combined Weight"]);
+    if(lb.bodyweightIndividual)available.push(["individual","Individual Exercise"]);
+    /* If an older group has Bodyweight enabled but neither child stored,
+       expose both choices rather than an empty Bodyweight page. */
+    if(!available.length){
+      available.push(["combined","Combined Weight"],["individual","Individual Exercise"]);
+    }
+    g._bodyweightMode=g._bodyweightMode||available[0][0];
+
+    const row=document.createElement("div");
+    row.className="zagBwSubTabs";
+    available.forEach(([mode,label])=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="zagBwSubTab"+(g._bodyweightMode===mode?" sel":"");
+      b.dataset.bwMode=mode;
+      b.textContent=label;
+      row.appendChild(b);
+    });
+    host.prepend(row);
+  }
+
+  function prepare(){
+    document.querySelectorAll(".zagPersistentGroup").forEach(box=>{
+      const g=findGroup(box);
+      if(g)installBodyweightSubtabs(box,g);
+    });
+  }
+
+  /* Save Edit Group from the actual current controls and rebuild the page once.
+     This is capture-phase so no older Save Group handler can overwrite it. */
+  document.addEventListener("click",function(e){
+    const b=e.target.closest?.("button");
+    if(!b || (b.textContent||"").trim()!=="Save Group")return;
+    if(typeof groupCreateState==="undefined" || !groupCreateState || !document.getElementById("gname"))return;
+    const g=st.demoGroup;
+    if(!g)return;
+
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+
+    const name=(document.getElementById("gname").value||"").trim();
+    if(!name){alert("Give your group a name first.");return}
+
+    g.name=name;
+    g.emblem=groupCreateState.emblem||g.emblem||"";
+    g.exercises=[...(groupCreateState.selectedExercises||new Set())];
+    g.leaderboards={
+      combined:!!groupCreateState.combined,
+      bodyweight:!!groupCreateState.bodyweight,
+      individual:!!groupCreateState.individual,
+      bodyweightCombined:!!groupCreateState.ratioCombined,
+      bodyweightIndividual:!!groupCreateState.ratioIndividual
+    };
+
+    const allowed=[];
+    if(g.leaderboards.combined)allowed.push("total");
+    if(g.leaderboards.bodyweight)allowed.push("bodyweight");
+    if(g.leaderboards.individual)allowed.push("exercises");
+    if(!allowed.includes(g._groupView))g._groupView=allowed[0]||"none";
+
+    const i=Array.isArray(st.demoGroups)?st.demoGroups.findIndex(x=>x&&String(x.id)===String(g.id)):-1;
+    if(i>=0)st.demoGroups[i]=g;
+    st.demoGroup=g; st.groupView=g._groupView;
+    persist();
+    try{closeModal()}catch(err){}
+    const y=window.scrollY;
+    groupsPage();
+    requestAnimationFrame(()=>{window.scrollTo(0,y);prepare()});
+  },true);
+
+  /* Bodyweight sub-option: change only the content under the two boxes. */
+  document.addEventListener("click",function(e){
+    const b=e.target.closest?.(".zagBwSubTab");
+    if(!b)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const box=b.closest(".zagPersistentGroup"), g=findGroup(box);
+    if(!g)return;
+    g._bodyweightMode=b.dataset.bwMode;
+    persist();
+
+    const host=box.querySelector(".zagLeaderboardHost");
+    if(!host)return;
+    /* Let the app's bodyweight renderer use its existing mode variable too. */
+    window.zgBodyMode=g._bodyweightMode;
+    host.innerHTML=renderFor(g,"bodyweight");
+    installBodyweightSubtabs(box,g);
+  },true);
+
+  /* Inside Bodyweight > Individual Exercise, switch between the selected
+     exercises without leaving Bodyweight or rebuilding the whole Groups page. */
+  document.addEventListener("click",function(e){
+    const b=e.target.closest?.(".zagBwExerciseTab");
+    if(!b)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+
+    const box=b.closest(".zagPersistentGroup"), g=findGroup(box);
+    if(!g)return;
+    g._bodyweightMode="individual";
+    g._bodyweightExercise=b.dataset.exercise || (b.textContent||"").trim();
+    persist();
+
+    const host=box.querySelector(".zagLeaderboardHost");
+    if(!host)return;
+    host.innerHTML=renderFor(g,"bodyweight");
+    installBodyweightSubtabs(box,g);
+  },true);
+
+  /* Individual-exercise selector buttons must stay inside Exercises.
+     Stop their old handler from causing groupsPage() to restore Total. */
+  document.addEventListener("click",function(e){
+    const box=e.target.closest?.(".zagPersistentGroup");
+    if(!box)return;
+    const g=findGroup(box);
+    if(!g || g._groupView!=="exercises")return;
+
+    const target=e.target.closest("button");
+    if(!target)return;
+    const main=target.closest(".groupMainTabs");
+    if(main)return;
+
+    /* Exercise choice controls in groupExercises carry exercise text/data.
+       Preserve the chosen exercise, then rerender only Exercises. */
+    const ex=target.dataset.exercise || target.dataset.ex || target.getAttribute("data-exercise");
+    if(!ex)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    g._exerciseView=ex;
+    st.demoGroup=g; st.groupView="exercises";
+    window.groupExerciseView=ex;
+    persist();
+    const host=box.querySelector(".zagLeaderboardHost");
+    if(host)host.innerHTML=renderFor(g,"exercises");
+  },true);
+
+  const oldGP=window.groupsPage;
+  window.groupsPage=function(){
+    const r=oldGP.apply(this,arguments);
+    prepare();
+    return r;
+  };
+  prepare();
+})();
+</script>
+
+
+
+<script id="zag-individual-exercise-selection-fix-v3">
+(function(){
+  document.addEventListener("click",function(e){
+    const btn=e.target.closest?.(".zagPersistentGroup .exerciseTab");
+    if(!btn)return;
+
+    const box=btn.closest(".zagPersistentGroup");
+    if(!box || !Array.isArray(st.demoGroups))return;
+    const g=st.demoGroups.find(x=>x && String(x.id)===String(box.dataset.groupId));
+    if(!g)return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    const exercise=(btn.textContent||"").trim();
+
+    /* groupExercises() reads st.groupExercise. This was the missing piece in
+       the previous fix: changing a separate custom variable did nothing. */
+    g._groupView="exercises";
+    g._groupExercise=exercise;
+    st.demoGroup=g;
+    st.groupView="exercises";
+    st.groupExercise=exercise;
+
+    try{
+      if(typeof KEY!=="undefined")localStorage.setItem(KEY,JSON.stringify(st));
+    }catch(err){}
+
+    const host=box.querySelector(".zagLeaderboardHost");
+    if(host){
+      host.innerHTML=groupExercises();
+    }
+
+    /* Keep the main Individual Exercises tab visibly selected. */
+    box.querySelectorAll(".groupMainTab").forEach(function(t){
+      const label=(t.textContent||"").replace(/\s+/g," ").trim();
+      t.classList.toggle("sel",label==="Individual Exercises");
+    });
+  },true);
+})();
+</script>
+
+
+
+
+
+<style id="zag-new-separate-medals-final">
+/* Completely replace the previous podium images with three new independent assets. */
+.zagPersistentGroup .groupPodium .podiumCard{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  min-height:205px!important;
+  background:#05040b!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-end!important;
+  padding:14px 8px 16px!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard .podiumMedal{display:none!important}
+
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  content:"";
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:cover!important;
+}
+/* Visual podium order: 2nd, 1st, 3rd. */
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/asset-044-f3c336eaadfa.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/asset-045-6f01951f66bf.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/asset-046-557604854fec.webp")!important}
+
+.zagPersistentGroup .groupPodium .podiumCard::after{
+  content:"";
+  position:absolute!important;
+  left:0!important;right:0!important;bottom:0!important;
+  height:35%!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  background:linear-gradient(to bottom,transparent,rgba(3,2,9,.74) 52%,rgba(3,2,9,.96))!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard > b,
+.zagPersistentGroup .groupPodium .podiumCard > .small{
+  position:relative!important;
+  z-index:3!important;
+  text-shadow:0 2px 6px #000,0 0 10px #000!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard.winner{
+  border:3px solid #f14cff!important;
+  box-shadow:0 0 10px #f14cff,0 0 25px rgba(229,45,255,.95),0 0 44px rgba(168,31,255,.72),inset 0 0 18px rgba(235,65,255,.30)!important;
+  z-index:3!important;
+}
+</style>
+
+
+<style id="zag-medals-larger-final">
+/* Increase the three podium artworks slightly while preserving their proportions.
+   The card clips the small overflow, so they fill the available area more strongly. */
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  inset:-7%!important;
+  background-size:cover!important;
+  background-position:center center!important;
+}
+</style>
+
+
+<style id="zag-medals-full-glow-final">
+/* Zoom artwork a little further so there is no visible gap at top/bottom. */
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  inset:-12%!important;
+  background-size:cover!important;
+  background-position:center center!important;
+}
+
+/* Make the actual edge of the 1st-place podium card glow strongly. */
+.zagPersistentGroup .groupPodium .podiumCard.winner{
+  border:3px solid #f34cff!important;
+  box-shadow:
+    0 0 5px #ff59ff,
+    0 0 12px #f03cff,
+    0 0 24px rgba(226,45,255,.95),
+    0 0 38px rgba(174,32,255,.72),
+    inset 0 0 10px rgba(244,76,255,.48)!important;
+  z-index:5!important;
+}
+</style>
+
+
+
+
+
+<style id="zag-first-place-clean-glow">
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2){
+  border-color:#f35cff!important;
+  box-shadow:
+    0 0 5px rgba(255,94,255,.95),
+    0 0 11px rgba(238,61,255,.78),
+    0 0 19px rgba(181,45,255,.52)!important;
+}
+</style>
+
+
+<style id="zag-edit-group-image-box-style">
+.zagEditGroupTopRow{
+  display:grid;
+  grid-template-columns:62px minmax(0,1fr);
+  gap:10px;
+  align-items:stretch;
+  margin-bottom:10px;
+}
+.zagEditGroupTopRow .groupCreateTop{margin:0!important;height:62px}
+.zagGroupImageBox{
+  width:62px;height:62px;padding:0;
+  border:1.5px solid #d838f1;border-radius:9px;
+  background:#080a14;
+  display:grid;place-items:center;
+  box-shadow:0 0 8px #d13cff35;
+  overflow:hidden;
+}
+.zagGroupImageBox:active{transform:scale(.97)}
+.zagGroupImagePlaceholder{
+  width:31px;height:23px;
+  border:2px solid #e73cff;
+  border-radius:11px;
+  box-shadow:0 0 8px rgba(231,60,255,.65),inset 0 0 6px rgba(231,60,255,.18);
+}
+</style>
+<style id="zag-emblem-selector-only-style">
+.zagGroupImagePreview,.zagSavedGroupEmblem{width:100%;height:100%;display:block;object-fit:cover}
+.groupBadgeNoEmoji:has(.zagSavedGroupEmblem):before{display:none!important}
+.zagEmblemPickerOnly{margin:0 0 10px;padding:10px;border:1.5px solid #a72ac4;border-radius:10px;background:#050711}
+.zagEmblemPickerOnlyTitle{font-size:12px;font-weight:800;color:#dfa8ff;margin:0 0 8px}
+.zagEmblemPickerOnlyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:290px;overflow:auto}
+.zagEmblemPickerOnlyChoice{aspect-ratio:1;padding:0;border:1.5px solid #76228b;border-radius:8px;background:#05040b;overflow:hidden}
+.zagEmblemPickerOnlyChoice img{width:100%;height:100%;display:block;object-fit:cover}
+.zagEmblemPickerOnlyChoice.selected{border:3px solid #ef47ff;box-shadow:0 0 10px rgba(239,71,255,.8)}
+</style>
+<script id="zag-edit-group-image-box-script">
+window.zagChooseGroupImage=function(){
+  const existing=document.getElementById("zagEmblemPickerOnly");
+  if(existing){existing.remove();return}
+  const row=document.querySelector(".zagEditGroupTopRow");
+  if(!row)return;
+  const current=(window.groupCreateState&&groupCreateState.emblem)||st.demoGroup?.emblem||"";
+  const picker=document.createElement("div");
+  picker.id="zagEmblemPickerOnly";
+  picker.className="zagEmblemPickerOnly";
+  picker.innerHTML='<div class="zagEmblemPickerOnlyTitle">Select Group Emblem</div><div class="zagEmblemPickerOnlyGrid">'+
+    zagEmblemNames.map(function(id){
+      return '<button type="button" class="zagEmblemPickerOnlyChoice '+(id===current?'selected':'')+'" data-emblem="'+id+'" onclick="zagSelectGroupEmblem(\''+id+'\')"><img src="'+zagEmblemSrc(id)+'" alt=""></button>';
+    }).join("")+'</div>';
+  row.insertAdjacentElement("afterend",picker);
+};
+window.zagSelectGroupEmblem=function(id){
+  if(typeof groupCreateState==="undefined" || !groupCreateState)return;
+  groupCreateState.emblem=id;
+  const btn=document.querySelector(".zagGroupImageBox");
+  if(btn)btn.innerHTML='<img class="zagGroupImagePreview" src="'+zagEmblemSrc(id)+'" alt="">';
+  document.querySelectorAll(".zagEmblemPickerOnlyChoice").forEach(function(b){
+    b.classList.toggle("selected",b.dataset.emblem===id);
+  });
+};
+</script>
+
+<style id="zag-transparent-emblem-boxes">
+.zagEmblemPickerOnlyGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;max-height:340px!important}
+.zagEmblemPickerOnlyChoice{aspect-ratio:1!important;padding:5px!important;border:1.5px solid #8d29a5!important;border-radius:11px!important;background:#060711!important;overflow:hidden!important}
+.zagEmblemPickerOnlyChoice img{width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important}
+.zagEmblemPickerOnlyChoice.selected{border:3px solid #f04cff!important;box-shadow:0 0 8px #ef47ff,0 0 16px rgba(221,53,255,.65)!important}
+.zagGroupImagePreview,.zagSavedGroupEmblem{object-fit:contain!important;background:transparent!important}
+</style>
+
+<style id="zag-emblem-size-and-click-fix">
+.zagEmblemPickerOnlyChoice{padding:4px!important}
+.zagEmblemPickerOnlyChoice img{
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+.zagGroupImagePreview,.zagSavedGroupEmblem{
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+  background:transparent!important;
+}
+</style>
+
+
+<style id="zag-emblem-bigger-higher-final">
+.zagEmblemPickerOnlyChoice{
+  padding:0!important;
+}
+.zagEmblemPickerOnlyChoice img{
+  width:112%!important;
+  height:112%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-6%!important;
+  top:-9%!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+</style>
+
+
+<style id="zag-emblems-larger-group-aligned-final">
+/* Selection boxes: larger artwork, still centred and fully contained. */
+.zagEmblemPickerOnlyChoice img{
+  width:122%!important;
+  height:122%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-11%!important;
+  top:-14%!important;
+  transform:none!important;
+}
+
+/* Edit Group preview: enlarge the chosen emblem while keeping it centred. */
+.zagGroupImagePreview{
+  width:118%!important;
+  height:118%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-9%!important;
+  top:-9%!important;
+}
+
+/* Main Groups page emblem: larger and shifted upward slightly. */
+.groupBadgeNoEmoji .zagSavedGroupEmblem{
+  width:122%!important;
+  height:122%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  position:relative!important;
+  left:-11%!important;
+  top:-16%!important;
+  transform:none!important;
+}
+</style>
+
+
+<style id="zag-main-group-emblem-no-outline">
+/* Main Groups page only: remove the emblem container outline/background/glow.
+   The emblem image itself is unchanged. */
+.groupBadgeNoEmoji:has(.zagSavedGroupEmblem){
+  border:none!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+</style>
+
+<style id="zag-stick-week-style">
+.stickWeekSwitch{min-width:64px}
+.stickWeekSwitch.on{border-color:#f04cff!important;box-shadow:0 0 14px rgba(240,76,255,.55),inset 0 0 12px rgba(240,76,255,.15)!important;background:rgba(113,22,122,.28)!important}
+</style>
+
+<style id="zag-info-stick-week-v8">
+#zagInfoPanelV6{overflow:auto!important;aspect-ratio:auto!important;height:min(94vh,1050px)!important;background-size:100% auto!important;background-position:center top!important;}
+#zagInfoPanelV6:before{content:"";display:block;padding-top:150%;pointer-events:none;}
+.zagInfoUpdateV8{position:relative;margin:-17% 4.2% 11%;padding:10px;border:1.5px solid #d93cf2;border-radius:14px;background:linear-gradient(180deg,rgba(12,7,23,.98),rgba(5,5,13,.99));box-shadow:0 0 16px rgba(218,60,242,.25);color:#f8efff;z-index:2;}
+.zagInfoUpdateBlock{padding:8px 10px;text-align:left;}
+.zagInfoUpdateBlock+.zagInfoUpdateBlock{border-top:1px solid rgba(218,60,242,.35);}
+.zagInfoUpdateBlock b{display:block;color:#f0a7ff;font-size:13px;letter-spacing:.7px;margin-bottom:4px;}
+.zagInfoUpdateBlock span{display:block;font-size:11px;line-height:1.38;color:#eee2f5;}
+#zagInfoGoV6{position:relative!important;left:20%!important;bottom:auto!important;width:60%!important;height:54px!important;margin:0 0 18px!important;border:1.5px solid #e33cff!important;border-radius:12px!important;background:rgba(84,12,104,.45)!important;}
+#zagInfoGoV6:after{content:"LET’S GET STRONGER";color:#fff;font-weight:900;font-size:15px;letter-spacing:.5px;}
+</style>
+
+<style id="zag-info-approved-redesign">
+#zagInfoPanelV6{
+  width:min(94vw,700px)!important;
+  height:auto!important;
+  max-height:94vh!important;
+  aspect-ratio:1024/2048!important;
+  overflow:hidden!important;
+  background-size:100% 100%!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  border-radius:22px!important;
+}
+#zagInfoPanelV6:before{display:none!important;content:none!important;padding:0!important}
+.zagInfoUpdateV8{display:none!important}
+#zagInfoGoV6{
+  position:absolute!important;
+  left:25%!important;
+  bottom:2.1%!important;
+  width:50%!important;
+  height:5.5%!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  z-index:5!important;
+}
+#zagInfoGoV6:after{content:none!important}
+#zagInfoCloseTop{
+  position:absolute;
+  right:1.5%;
+  top:1.2%;
+  width:10%;
+  aspect-ratio:1;
+  border:0;
+  background:transparent;
+  z-index:6;
+  cursor:pointer;
+}
+</style>
+
+
+<style id="zag-split-drag-drop-style">
+.splitDragHelp{margin:0 0 14px!important;color:#d9b8e5!important}
+.splitDropZone{
+ min-height:54px;border:1px dashed rgba(224,62,255,.38);border-radius:14px;
+ padding:7px;margin:5px 0 9px;transition:.15s ease;background:rgba(5,5,14,.22)
+}
+.splitDropZone.dragOver{border-color:#ef4cff;box-shadow:0 0 16px rgba(239,76,255,.35);background:rgba(103,18,117,.18)}
+.splitDragExercise{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
+.splitDragExercise:active{cursor:grabbing}
+.splitDragExercise.dragging{opacity:.35}
+.splitDragHandle{font-size:21px;line-height:1;color:#e34dff;letter-spacing:-5px;width:26px;flex:0 0 26px}
+.splitDragName{flex:1;min-width:0}
+.splitEmptyHint{display:none;text-align:center;color:#a883b5;font-size:11px;padding:10px}
+.splitDropZone:not(:has(.splitDragExercise)) .splitEmptyHint{display:block}
+</style>
+
+
+<style id="zag-split-drag-layout-fix">
+/* Keep each exercise as one clean horizontal row on mobile. */
+.splitDropZone{width:100%!important;box-sizing:border-box!important;overflow:hidden!important;padding:8px 10px!important}
+.splitDragExercise{
+ display:grid!important;
+ grid-template-columns:34px minmax(0,1fr) 54px!important;
+ align-items:center!important;
+ gap:10px!important;
+ width:100%!important;
+ min-height:58px!important;
+ margin:0!important;
+ padding:7px 0!important;
+ box-sizing:border-box!important;
+ background:transparent!important;
+ border:0!important;
+ border-bottom:1px solid rgba(111,121,151,.28)!important;
+}
+.splitDragExercise:last-of-type{border-bottom:0!important}
+.splitDragHandle{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:34px!important;height:42px!important;flex:none!important;
+ font-size:22px!important;line-height:1!important;color:#e34dff!important;
+ letter-spacing:-5px!important;touch-action:none!important;user-select:none!important;
+}
+.splitDragName{
+ display:block!important;width:auto!important;min-width:0!important;max-width:none!important;
+ margin:0!important;padding:0!important;
+ font-size:15px!important;line-height:1.25!important;text-align:left!important;
+ white-space:normal!important;overflow-wrap:break-word!important;
+}
+.splitDragExercise .danger{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:54px!important;min-width:54px!important;max-width:54px!important;height:42px!important;
+ margin:0!important;padding:0!important;justify-self:end!important;
+}
+.splitTouchGhost{
+ position:fixed!important;z-index:999999!important;pointer-events:none!important;
+ padding:10px 14px!important;border:1px solid #ef4cff!important;border-radius:12px!important;
+ background:#090914!important;color:#fff!important;box-shadow:0 0 18px rgba(239,76,255,.5)!important;
+ max-width:65vw!important;font-size:14px!important
+}
+</style>
+<script id="zag-split-mobile-drag-fix">
+(function(){
+  function targetIndex(zone,y,dragging){
+    const rows=[...zone.querySelectorAll(".splitDragExercise")].filter(r=>r!==dragging);
+    for(let i=0;i<rows.length;i++){
+      const b=rows[i].getBoundingClientRect();
+      if(y<b.top+b.height/2)return i;
+    }
+    return rows.length;
+  }
+  function move(di,fromType,fromIndex,toType,target){
+    const from=st.days[di][fromType?2:1],to=st.days[di][toType?2:1];
+    if(!from||!to||fromIndex<0||fromIndex>=from.length)return;
+    const item=from[fromIndex];
+    from.splice(fromIndex,1);
+    if(from===to&&target>fromIndex)target--;
+    target=Math.max(0,Math.min(target,to.length));
+    to.splice(target,0,item);
+    syncPlannedDays();save();dayExerciseEditor(di);
+  }
+
+  /* Replace the earlier initializer so desktop and iPhone dragging both work. */
+  window.initSplitExerciseDrag=function(){
+    document.querySelectorAll(".splitDragExercise").forEach(row=>{
+      row.ondragstart=e=>{
+        splitExerciseDrag={day:+row.dataset.day,type:+row.dataset.type,index:+row.dataset.index};
+        row.classList.add("dragging");
+        if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain","move")}catch(_){}}
+      };
+      row.ondragend=()=>{row.classList.remove("dragging");document.querySelectorAll(".splitDropZone").forEach(z=>z.classList.remove("dragOver"))};
+
+      const handle=row.querySelector(".splitDragHandle");
+      if(!handle)return;
+      handle.onpointerdown=e=>{
+        if(e.pointerType==="mouse")return;
+        e.preventDefault();e.stopPropagation();
+        const di=+row.dataset.day,fromType=+row.dataset.type,fromIndex=+row.dataset.index;
+        row.classList.add("dragging");
+        try{handle.setPointerCapture(e.pointerId)}catch(_){}
+        const ghost=document.createElement("div");
+        ghost.className="splitTouchGhost";
+        ghost.textContent=row.querySelector(".splitDragName")?.textContent||"Exercise";
+        document.body.appendChild(ghost);
+        const place=(x,y)=>{ghost.style.left=(x+12)+"px";ghost.style.top=(y-24)+"px"};
+        place(e.clientX,e.clientY);
+        const clear=()=>document.querySelectorAll(".splitDropZone").forEach(z=>z.classList.remove("dragOver"));
+        handle.onpointermove=ev=>{
+          place(ev.clientX,ev.clientY);clear();
+          document.elementFromPoint(ev.clientX,ev.clientY)?.closest?.(".splitDropZone")?.classList.add("dragOver");
+        };
+        const finish=ev=>{
+          clear();row.classList.remove("dragging");ghost.remove();
+          const zone=document.elementFromPoint(ev.clientX,ev.clientY)?.closest?.(".splitDropZone");
+          handle.onpointermove=handle.onpointerup=handle.onpointercancel=null;
+          if(zone&&+zone.dataset.day===di)move(di,fromType,fromIndex,+zone.dataset.type,targetIndex(zone,ev.clientY,row));
+        };
+        handle.onpointerup=finish;
+        handle.onpointercancel=()=>{clear();row.classList.remove("dragging");ghost.remove();handle.onpointermove=handle.onpointerup=handle.onpointercancel=null};
+      };
+    });
+
+    document.querySelectorAll(".splitDropZone").forEach(zone=>{
+      zone.ondragover=e=>{e.preventDefault();zone.classList.add("dragOver");if(e.dataTransfer)e.dataTransfer.dropEffect="move"};
+      zone.ondragleave=e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove("dragOver")};
+      zone.ondrop=e=>{
+        e.preventDefault();e.stopPropagation();zone.classList.remove("dragOver");
+        if(!splitExerciseDrag)return;
+        const d=splitExerciseDrag;splitExerciseDrag=null;
+        if(+zone.dataset.day!==d.day)return;
+        const dragging=document.querySelector(".splitDragExercise.dragging");
+        move(d.day,d.type,d.index,+zone.dataset.type,targetIndex(zone,e.clientY,dragging));
+      };
+    });
+  };
+})();
+</script>
+
+
+<style id="zag-split-scroll-drop-indicator-style">
+/* Normal page/modal scrolling everywhere except the actual purple drag grips. */
+.splitDragExercise{touch-action:pan-y!important}
+.splitDragName,.splitDragExercise .danger,.splitDropZone{touch-action:pan-y!important}
+.splitDragHandle{touch-action:none!important}
+
+/* Visible insertion marker between exercises while dragging. */
+.splitDropMarker{
+ height:4px!important;
+ margin:-2px 6px!important;
+ border-radius:999px!important;
+ background:#ef4cff!important;
+ box-shadow:0 0 7px #ef4cff,0 0 15px rgba(239,76,255,.9)!important;
+ pointer-events:none!important;
+ position:relative!important;
+ z-index:20!important;
+}
+.splitDropMarker:before,.splitDropMarker:after{
+ content:""!important;position:absolute!important;top:50%!important;
+ width:8px!important;height:8px!important;border-radius:50%!important;
+ background:#ef4cff!important;transform:translateY(-50%)!important;
+ box-shadow:0 0 8px #ef4cff!important
+}
+.splitDropMarker:before{left:-2px!important}
+.splitDropMarker:after{right:-2px!important}
+</style>
+<script id="zag-split-scroll-drop-indicator-script">
+(function(){
+  let marker=null;
+
+  function removeMarker(){
+    if(marker){marker.remove();marker=null}
+  }
+  function rowsFor(zone,dragging){
+    return [...zone.querySelectorAll(".splitDragExercise")].filter(r=>r!==dragging);
+  }
+  function showMarker(zone,y,dragging){
+    removeMarker();
+    marker=document.createElement("div");
+    marker.className="splitDropMarker";
+    const rows=rowsFor(zone,dragging);
+    let before=null;
+    for(const r of rows){
+      const b=r.getBoundingClientRect();
+      if(y < b.top+b.height/2){before=r;break}
+    }
+    zone.insertBefore(marker,before);
+  }
+  function markerIndex(zone){
+    if(!marker||marker.parentElement!==zone)return rowsFor(zone,document.querySelector(".splitDragExercise.dragging")).length;
+    let n=0;
+    for(const child of zone.children){
+      if(child===marker)return n;
+      if(child.classList&&child.classList.contains("splitDragExercise")&&!child.classList.contains("dragging"))n++;
+    }
+    return n;
+  }
+  function moveItem(di,fromType,fromIndex,toType,target){
+    const from=st.days[di][fromType?2:1],to=st.days[di][toType?2:1];
+    if(!from||!to||fromIndex<0||fromIndex>=from.length)return;
+    const item=from.splice(fromIndex,1)[0];
+    if(from===to&&target>fromIndex)target--;
+    target=Math.max(0,Math.min(target,to.length));
+    to.splice(target,0,item);
+    syncPlannedDays();save();dayExerciseEditor(di);
+  }
+
+  window.initSplitExerciseDrag=function(){
+    document.querySelectorAll(".splitDragExercise").forEach(row=>{
+      row.draggable=true;
+
+      row.ondragstart=e=>{
+        splitExerciseDrag={day:+row.dataset.day,type:+row.dataset.type,index:+row.dataset.index};
+        row.classList.add("dragging");
+        if(e.dataTransfer){
+          e.dataTransfer.effectAllowed="move";
+          try{e.dataTransfer.setData("text/plain","move")}catch(_){}
+        }
+      };
+      row.ondragend=()=>{
+        row.classList.remove("dragging");
+        document.querySelectorAll(".splitDropZone").forEach(z=>z.classList.remove("dragOver"));
+        removeMarker();
+      };
+
+      const handle=row.querySelector(".splitDragHandle");
+      if(!handle)return;
+
+      /* On touch screens ONLY the handle starts a drag. The rest of every row scrolls normally. */
+      handle.onpointerdown=e=>{
+        if(e.pointerType==="mouse")return;
+        e.preventDefault();e.stopPropagation();
+
+        const di=+row.dataset.day,fromType=+row.dataset.type,fromIndex=+row.dataset.index;
+        row.classList.add("dragging");
+        try{handle.setPointerCapture(e.pointerId)}catch(_){}
+
+        const ghost=document.createElement("div");
+        ghost.className="splitTouchGhost";
+        ghost.textContent=row.querySelector(".splitDragName")?.textContent||"Exercise";
+        document.body.appendChild(ghost);
+        const place=(x,y)=>{ghost.style.left=(x+12)+"px";ghost.style.top=(y-24)+"px"};
+        place(e.clientX,e.clientY);
+
+        const clearZones=()=>document.querySelectorAll(".splitDropZone").forEach(z=>z.classList.remove("dragOver"));
+
+        handle.onpointermove=ev=>{
+          ev.preventDefault();
+          place(ev.clientX,ev.clientY);
+          clearZones();
+
+          /* Hide the floating label briefly so elementFromPoint sees what's underneath it. */
+          ghost.style.display="none";
+          const under=document.elementFromPoint(ev.clientX,ev.clientY);
+          ghost.style.display="";
+          const zone=under?.closest?.(".splitDropZone");
+
+          if(zone&&+zone.dataset.day===di){
+            zone.classList.add("dragOver");
+            showMarker(zone,ev.clientY,row);
+
+            /* Auto-scroll the modal/page when dragging near the viewport edges. */
+            const edge=90;
+            if(ev.clientY<edge) window.scrollBy(0,-12);
+            else if(ev.clientY>window.innerHeight-edge) window.scrollBy(0,12);
+          }else removeMarker();
+        };
+
+        const finish=ev=>{
+          clearZones();
+          row.classList.remove("dragging");
+          ghost.style.display="none";
+          const under=document.elementFromPoint(ev.clientX,ev.clientY);
+          const zone=under?.closest?.(".splitDropZone") || marker?.parentElement;
+          ghost.remove();
+
+          const target=zone&&+zone.dataset.day===di ? markerIndex(zone) : -1;
+          removeMarker();
+          handle.onpointermove=handle.onpointerup=handle.onpointercancel=null;
+
+          if(zone&&+zone.dataset.day===di&&target>=0)
+            moveItem(di,fromType,fromIndex,+zone.dataset.type,target);
+        };
+        handle.onpointerup=finish;
+        handle.onpointercancel=()=>{
+          clearZones();row.classList.remove("dragging");ghost.remove();removeMarker();
+          handle.onpointermove=handle.onpointerup=handle.onpointercancel=null;
+        };
+      };
+    });
+
+    document.querySelectorAll(".splitDropZone").forEach(zone=>{
+      zone.ondragover=e=>{
+        e.preventDefault();
+        zone.classList.add("dragOver");
+        if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+        showMarker(zone,e.clientY,document.querySelector(".splitDragExercise.dragging"));
+      };
+      zone.ondragleave=e=>{
+        if(!zone.contains(e.relatedTarget)){zone.classList.remove("dragOver");removeMarker()}
+      };
+      zone.ondrop=e=>{
+        e.preventDefault();e.stopPropagation();
+        zone.classList.remove("dragOver");
+        if(!splitExerciseDrag){removeMarker();return}
+        const d=splitExerciseDrag;splitExerciseDrag=null;
+        if(+zone.dataset.day!==d.day){removeMarker();return}
+        const target=markerIndex(zone);
+        removeMarker();
+        moveItem(d.day,d.type,d.index,+zone.dataset.type,target);
+      };
+    });
+  };
+})();
+</script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script src="assets/app.js"></script>
 </body></html>
 
 
