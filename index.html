@@ -228,7 +228,8 @@ if(!raw){
   ordered.forEach((ex,i)=>st.weeks[ex]=(i%8)+1);
 }
 
-st.max={...seed,...(st.max||{})}; st.days=st.days||JSON.parse(JSON.stringify(base)); st.splitName=st.splitName||"The Goat Split"; st.customSplits=st.customSplits||{}; st.prHistory=st.prHistory||{}; st.repsAtMax=st.repsAtMax||{}; st.history=st.history||[]; st.draft=st.draft||{}; st.weeks=st.weeks||{}; st.units=st.units||"kg"; st.groups=st.groups||[]; st.groupView=st.groupView||"total"; st.groupExercise=st.groupExercise||"Bench Press";
+// PBs are user data: never preload the old demo/seed maxes on a fresh install.
+st.max={...(st.max||{})}; st.days=st.days||JSON.parse(JSON.stringify(base)); st.splitName=st.splitName||"The Goat Split"; st.customSplits=st.customSplits||{}; st.prHistory=st.prHistory||{}; st.repsAtMax=st.repsAtMax||{}; st.history=st.history||[]; st.draft=st.draft||{}; st.weeks=st.weeks||{}; st.units=st.units||"kg"; st.groups=st.groups||[]; st.groupView=st.groupView||"total"; st.groupExercise=st.groupExercise||"Bench Press";
 if(st.groupsOnboardingBuild!==1){st.demoGroup=null;st.groupsOnboardingBuild=1;save&&save();}
 st.notifications=st.notifications||{};
 if(st.notifications.workoutReminder===undefined)st.notifications.workoutReminder=true;
