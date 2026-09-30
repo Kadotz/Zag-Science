@@ -1,4 +1,4 @@
-const CACHE = 'zag-science-pwa-v14-pb-cloud';
+const CACHE = 'zag-science-pwa-v15-bodyweight';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
@@ -32,14 +32,15 @@ self.addEventListener('push', event => {
   try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data ? event.data.text() : '' }; }
   const kind = data.kind || 'workout';
   const isStreak = kind === 'streak';
-  event.waitUntil(self.registration.showNotification(data.title || (isStreak ? 'Zag Science — Keep your streak alive' : 'Zag Science — Workout reminder'), {
-    body: data.body || (isStreak ? 'Your streak is waiting. Train today or use a rest day.' : 'Your workout is ready when you are.'),
+  const isBodyweight = kind === 'bodyweight';
+  event.waitUntil(self.registration.showNotification(data.title || (isBodyweight ? 'Update your bodyweight' : (isStreak ? 'Keep your streak alive' : 'Workout reminder')), {
+    body: data.body || (isBodyweight ? 'It has been 2 weeks since your last bodyweight update.' : (isStreak ? 'Your streak is waiting. Train today or use a rest day.' : 'Your workout is ready when you are.')),
     icon: './assets/icons/icon-192.png',
     badge: './assets/icons/icon-192.png',
-    tag: isStreak ? 'zag-streak-reminder' : 'zag-workout-reminder',
+    tag: isBodyweight ? 'zag-bodyweight-reminder' : (isStreak ? 'zag-streak-reminder' : 'zag-workout-reminder'),
     renotify: true,
     data: { kind },
-    actions: [{ action: 'open-workout', title: 'Open Workout' }, { action: 'rest-day', title: 'Rest Day' }]
+    actions: isBodyweight ? [] : [{ action: 'open-workout', title: 'Open Workout' }, { action: 'rest-day', title: 'Rest Day' }]
   }));
 });
 
