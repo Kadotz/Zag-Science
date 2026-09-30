@@ -23,6 +23,3 @@ v17: rebuilt cloud-state migration; exact streak/history/group state is included
 
 
 v18: real Supabase Groups: create, invite code, join, shared members and PB totals.
-
-
-v19: Groups now uses the same live Supabase auth session as Account & Cloud and refreshes the session before showing the signed-out state.

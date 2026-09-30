@@ -2676,7 +2676,7 @@ if ('serviceWorker' in navigator) {
 (function(){
  let cache=[];
  const E=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- function signed(){return !!(window.zagSb&&window.zagSession&&zagSession.user)}
+ function signed(){return !!(zagSb&&zagSession?.user)}
  function code(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
  async function memberships(){
    const {data,error}=await zagSb.from("group_members").select("group_id,role").eq("user_id",zagSession.user.id);
@@ -2693,6 +2693,13 @@ if ('serviceWorker' in navigator) {
  window.zagOnlineGroupsHome=async function(){
    setActiveNav("groups");
    const h=document.getElementById("screen");
+   if(zagSb && !zagSession?.user){
+     try{
+       const {data}=await zagSb.auth.getSession();
+       zagSession=data?.session||null;
+       zagRefreshAccountStatus();
+     }catch(e){console.warn("Groups session refresh failed",e)}
+   }
    if(!signed()){
      h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><h2>Sign in to use Groups</h2><div class=small style="margin-bottom:18px">Online groups are linked to your Zag Science account.</div><button class=pick onclick=settings()>Go to Settings</button></div>`;
      return;
