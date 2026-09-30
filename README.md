@@ -17,3 +17,6 @@ Adds authenticated Supabase PB cloud backup/sync while preserving local storage 
 ## v15.4
 - Places the Olympia trophy artwork directly on the empty Groups landing page, above “No groups yet”.
 - Keeps the trophy in the Create Group modal too.
+
+
+v17: rebuilt cloud-state migration; exact streak/history/group state is included. Faulty v16 snapshots are ignored.
