@@ -2717,13 +2717,28 @@ if ('serviceWorker' in navigator) {
  window.zagCreateOnlineGroup=async function(){
    const name=(document.getElementById("onlineGroupName")?.value||"").trim();
    if(!name)return alert("Give your group a name first.");
-   if(!signed())return alert("Sign in first.");
-   const invite=code();
-   let r=await zagSb.from("groups").insert({name,owner_id:zagSession.user.id,invite_code:invite}).select().single();
-   if(r.error)return alert("Could not create group: "+r.error.message);
-   let m=await zagSb.from("group_members").insert({group_id:r.data.id,user_id:zagSession.user.id,role:"owner"});
-   if(m.error)return alert("Group created, but membership failed: "+m.error.message);
-   closeModal();await zagOnlineGroupsHome();
+   try{
+     if(zagSb && !zagSession?.user){
+       const {data,error}=await zagSb.auth.getSession();
+       if(error)throw error;
+       zagSession=data?.session||null;
+     }
+     if(!zagSession?.user)return alert("Your sign-in session has expired. Please sign in again.");
+     const invite=code();
+     const r=await zagSb.from("groups").insert({name,owner_id:zagSession.user.id,invite_code:invite}).select("*").single();
+     if(r.error)throw new Error("Could not create group: "+r.error.message);
+     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:zagSession.user.id,role:"owner"},{onConflict:"group_id,user_id"}).select();
+     if(m.error){
+       try{await zagSb.from("groups").delete().eq("id",r.data.id).eq("owner_id",zagSession.user.id)}catch(_){}
+       throw new Error("Could not add you to the group: "+m.error.message);
+     }
+     closeModal();
+     cache=[];
+     await zagOnlineGroupsHome();
+   }catch(e){
+     console.error("Create group failed",e);
+     alert(e?.message||"Could not create group.");
+   }
  }
  window.zagJoinOnlineGroupModal=function(){
    modal("Join Group",`<p class=small>Enter the 6-character invite code from the group owner.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 style="width:100%;padding:10px;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`);
