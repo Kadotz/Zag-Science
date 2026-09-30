@@ -20,3 +20,6 @@ Adds authenticated Supabase PB cloud backup/sync while preserving local storage 
 
 
 v17: rebuilt cloud-state migration; exact streak/history/group state is included. Faulty v16 snapshots are ignored.
+
+
+v18: real Supabase Groups: create, invite code, join, shared members and PB totals.
