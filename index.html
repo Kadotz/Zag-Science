@@ -2563,49 +2563,17 @@ function zagApplyCloudPBMap(cloud){zagPBSyncSuppress=true;st.repsAtMax=st.repsAt
 async function zagInitPBSync(){if(!zagSb||!zagSession?.user||zagPBSyncBusy)return;zagPBSyncBusy=true;zagSetCloudPBStatus('Syncing PBs…');try{const key=zagPBMarkerKey(),marker=localStorage.getItem(key),cloud=await zagFetchCloudPBMap(),cloudHas=Object.keys(cloud).length>0,currentSig=zagPBSignature();if(!marker){if(cloudHas){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}else{const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));}}else if(currentSig!==marker){const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));}else if(cloudHas){const cloudSig=zagPBSignature(cloud);if(cloudSig!==marker){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}}zagSetCloudPBStatus('PB cloud sync is up to date.');}catch(e){console.warn('PB cloud sync failed',e);zagSetCloudPBStatus('PB sync will retry when you are online.');}finally{zagPBSyncBusy=false}}
 function zagQueuePBSync(){if(zagPBSyncSuppress||!zagSession?.user)return;clearTimeout(zagPBSyncTimer);zagPBSyncTimer=setTimeout(zagInitPBSync,900)}
 
-// v16: full training-state cloud backup. PBs remain in personal_bests; shared Groups will use their own tables later.
+// v16.1: full training-state cloud backup. Existing-device data wins on first v16.1 sync.
 let zagStateSyncTimer=null,zagStateSyncBusy=false,zagStateSyncSuppress=false;
-function zagCloudStatePayload(){
- const copy=JSON.parse(JSON.stringify(st));
- delete copy.max; delete copy.repsAtMax; delete copy.groups; delete copy.demoGroup;
- return copy;
-}
-function zagStateMarkerKey(){return zagSession?.user?.id?'zagStateCloudV16:'+zagSession.user.id:''}
-async function zagFetchCloudState(){
- if(!zagSb||!zagSession?.user)return null;
- const {data,error}=await zagSb.from('workouts').select('workout_data,completed_at').eq('user_id',zagSession.user.id).eq('workout_name','__ZAG_STATE_V16__').order('completed_at',{ascending:false}).limit(1);
- if(error)throw error; return data&&data[0]?data[0]:null;
-}
-async function zagUploadCloudState(){
- if(!zagSb||!zagSession?.user)return;
- const uid=zagSession.user.id, now=new Date().toISOString();
- const {error:delErr}=await zagSb.from('workouts').delete().eq('user_id',uid).eq('workout_name','__ZAG_STATE_V16__');
- if(delErr)throw delErr;
- const {error}=await zagSb.from('workouts').insert({user_id:uid,workout_name:'__ZAG_STATE_V16__',completed_at:now,workout_data:zagCloudStatePayload()});
- if(error)throw error; localStorage.setItem(zagStateMarkerKey(),now);
-}
-function zagApplyCloudState(row){
- if(!row||!row.workout_data)return;
- zagStateSyncSuppress=true;
- const keepMax=st.max,keepReps=st.repsAtMax,keepGroups=st.groups,keepDemo=st.demoGroup;
- st={...st,...row.workout_data};
- st.max=keepMax||{}; st.repsAtMax=keepReps||{}; st.groups=keepGroups||[]; st.demoGroup=keepDemo||null;
- localStorage.setItem('zagScienceV2',JSON.stringify(st));
- zagStateSyncSuppress=false;
-}
-async function zagInitStateSync(){
- if(!zagSb||!zagSession?.user||zagStateSyncBusy)return;
- zagStateSyncBusy=true;
- try{
-   const cloud=await zagFetchCloudState(), marker=localStorage.getItem(zagStateMarkerKey());
-   if(!cloud){await zagUploadCloudState();}
-   else if(!marker || new Date(cloud.completed_at).getTime()>new Date(marker).getTime()+1000){
-     zagApplyCloudState(cloud); localStorage.setItem(zagStateMarkerKey(),cloud.completed_at);
-     if(typeof home==='function')home();
-   }
- }catch(e){console.warn('Training cloud sync failed',e)}finally{zagStateSyncBusy=false}
-}
-function zagQueueStateSync(){if(zagStateSyncSuppress||!zagSession?.user)return;clearTimeout(zagStateSyncTimer);zagStateSyncTimer=setTimeout(()=>zagUploadCloudState().catch(e=>console.warn('Training cloud backup failed',e)),1400)}
+function zagCloudStatePayload(){const copy=JSON.parse(JSON.stringify(st));delete copy.max;delete copy.repsAtMax;delete copy.groups;delete copy.demoGroup;return copy}
+function zagStateMarkerKey(){return zagSession?.user?.id?'zagStateCloudV161:'+zagSession.user.id:''}
+function zagLocalTrainingHasData(){return (Array.isArray(st.history)&&st.history.length>0)||Number(st.streak?.count||0)>0||!!st.streak?.lastWorkout||Object.keys(st.draft||{}).length>0}
+async function zagSyncProfileTrainingSummary(){if(!zagSb||!zagSession?.user)return;const patch={updated_at:new Date().toISOString(),streak:Number(st.streak?.count||0)};if(Number.isFinite(Number(st.bodyweightKg))&&Number(st.bodyweightKg)>0)patch.bodyweight_kg=Number(st.bodyweightKg);const {error}=await zagSb.from('profiles').update(patch).eq('id',zagSession.user.id);if(error)throw error}
+async function zagFetchCloudState(){if(!zagSb||!zagSession?.user)return null;const {data,error}=await zagSb.from('workouts').select('workout_data,completed_at').eq('user_id',zagSession.user.id).eq('workout_name','__ZAG_STATE_V161__').order('completed_at',{ascending:false}).limit(1);if(error)throw error;return data&&data[0]?data[0]:null}
+async function zagUploadCloudState(){if(!zagSb||!zagSession?.user)return;const uid=zagSession.user.id,now=new Date().toISOString();const {error:delErr}=await zagSb.from('workouts').delete().eq('user_id',uid).in('workout_name',['__ZAG_STATE_V16__','__ZAG_STATE_V161__']);if(delErr)throw delErr;const {error}=await zagSb.from('workouts').insert({user_id:uid,workout_name:'__ZAG_STATE_V161__',completed_at:now,workout_data:zagCloudStatePayload()});if(error)throw error;await zagSyncProfileTrainingSummary();localStorage.setItem(zagStateMarkerKey(),now)}
+function zagApplyCloudState(row){if(!row||!row.workout_data)return;zagStateSyncSuppress=true;const keepMax=st.max,keepReps=st.repsAtMax,keepGroups=st.groups,keepDemo=st.demoGroup;st={...st,...row.workout_data};st.max=keepMax||{};st.repsAtMax=keepReps||{};st.groups=keepGroups||[];st.demoGroup=keepDemo||null;st.history=Array.isArray(st.history)?st.history:[];st.streak=st.streak||{count:0,lastWorkout:'',weekKey:'',restUsed:0,lastPopup:''};localStorage.setItem('zagScienceV2',JSON.stringify(st));zagStateSyncSuppress=false}
+async function zagInitStateSync(){if(!zagSb||!zagSession?.user||zagStateSyncBusy)return;zagStateSyncBusy=true;try{const marker=localStorage.getItem(zagStateMarkerKey()),localHas=zagLocalTrainingHasData();let cloud=await zagFetchCloudState();if(!marker&&localHas){await zagUploadCloudState();cloud=await zagFetchCloudState()}else if(!cloud){await zagUploadCloudState();cloud=await zagFetchCloudState()}else if(!localHas){zagApplyCloudState(cloud);localStorage.setItem(zagStateMarkerKey(),cloud.completed_at)}else if(marker&&new Date(cloud.completed_at).getTime()>new Date(marker).getTime()+1000){zagApplyCloudState(cloud);localStorage.setItem(zagStateMarkerKey(),cloud.completed_at)}await zagSyncProfileTrainingSummary();if(typeof home==='function')home()}catch(e){console.warn('Training cloud sync failed',e)}finally{zagStateSyncBusy=false}}
+function zagQueueStateSync(){if(zagStateSyncSuppress||!zagSession?.user)return;clearTimeout(zagStateSyncTimer);zagStateSyncTimer=setTimeout(()=>zagUploadCloudState().catch(e=>console.warn('Training cloud backup failed',e)),900)}
 
 (async()=>{if(!zagSb)return;const {data}=await zagSb.auth.getSession();zagSession=data.session||null;zagRefreshAccountStatus();if(zagSession){zagInitStateSync().then(()=>zagInitPBSync());}zagSb.auth.onAuthStateChange((event,session)=>{zagSession=session||null;setTimeout(zagRefreshAccountStatus,0);if(session){setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),150);setTimeout(zagSyncBodyweightProfile,300);}if(event==='PASSWORD_RECOVERY')setTimeout(()=>{const pw=prompt('Enter your new Zag Science password:');if(pw&&pw.length>=6)zagSb.auth.updateUser({password:pw}).then(({error})=>alert(error?error.message:'Password updated.'))},200)})})();
 </script>
