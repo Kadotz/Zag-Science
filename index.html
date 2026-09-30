@@ -597,7 +597,7 @@ function combinedValue(m){let ex=(st.demoGroup?.exercises||[]);if(!ex.length)ex=
 function groupTotalLayout(){let ms=groupMembers().sort((a,b)=>combinedValue(b)-combinedValue(a));return groupPodium(ms,m=>weightText(combinedValue(m)))+groupTable('Combined Weight Leaderboard',ms,m=>weightText(combinedValue(m)),'Combined')}
 function groupBodyweightLayout(){let ms=groupMembers().sort((a,b)=>(combinedValue(b)/b.bw)-(combinedValue(a)/a.bw));return groupPodium(ms,m=>(combinedValue(m)/m.bw).toFixed(2)+'×')+groupTable('Bodyweight Ratio Leaderboard',ms,m=>(combinedValue(m)/m.bw).toFixed(2)+'×','Ratio')}
 function groupExercises(){let opts=(st.demoGroup?.exercises||[]).filter(Boolean);if(!opts.length)opts=['Squats','Bench Press','Deadlifts','Weighted Lat Pull Up','Barbell Row'];if(!opts.includes(st.groupExercise))st.groupExercise=opts[0];let ex=st.groupExercise;let ms=groupMembers().sort((a,b)=>(b.vals[ex]||0)-(a.vals[ex]||0));return `<div class=exerciseTabStrip>${opts.map(x=>`<button class="exerciseTab ${x===ex?'sel':''}" onclick="st.groupExercise='${q(x)}';save();groupsPage('exercises')">${esc(x)}</button>`).join('')}</div>${groupPodium(ms,m=>weightText(m.vals[ex]||0))}${groupTable(ex+' Leaderboard',ms,m=>weightText(m.vals[ex]||0),'Best Lift')}`}
-function groupActivity(){let a=[['Kieron','Bench Press','170 kg','New group #1'],['Anna','Deadlifts','160 kg','+5 kg PR'],['Bill','Barbell Row','120 kg','+2.5 kg PR'],['James','Squats','180 kg','Matched PR'],['Betsy','Bench Press','90 kg','+5 kg PR']];return `<div class=pagecard><h2 style="margin:0">🏅 Recent PRs</h2><div class=small>Mock activity for testing the future live group feed</div></div>${a.map((x,i)=>`<div class=pagecard style="padding:13px;margin:8px 0"><div class=row><div style="font-size:24px">${i===0?'⚡':'🏋️'}</div><div class=grow><b>${x[0]}</b><div class=small>${x[1]} • ${x[3]}</div></div><b>${x[2]}</b></div></div>`).join('')}`}
+function groupActivity(){let a=[];return `<div class=pagecard><h2 style="margin:0">🏅 Recent PRs</h2><div class=small>Mock activity for testing the future live group feed</div></div>${a.map((x,i)=>`<div class=pagecard style="padding:13px;margin:8px 0"><div class=row><div style="font-size:24px">${i===0?'⚡':'🏋️'}</div><div class=grow><b>${x[0]}</b><div class=small>${x[1]} • ${x[3]}</div></div><b>${x[2]}</b></div></div>`).join('')}`}
 function groupTotal(){return groupOverall()}
 function groupBody(){let ms=groupMembers().sort((a,b)=>groupScore(b)-groupScore(a));return `<div class=pagecard><h2>⚖️ Bodyweight Ranking</h2></div>${ms.map((m,i)=>memberCard(m,i,x=>(groupScore(x)/100).toFixed(2)+'×')).join('')}`}
 let groupCreateState={combined:false,bodyweight:false,individual:false,ratioCombined:false,ratioIndividual:false,selectedExercises:new Set()};
@@ -1041,16 +1041,7 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
   window.zagInviteOpen=false;
   window.zagBodyMode="combined";
 
-  window.zagAllGroupPeople=function(){
-    return [
-      {name:"Kieron",vals:{"Squats":200,"Bench Press":170,"Deadlifts":220,"Weighted Lat Pull Up":50,"Barbell Row":115},bw:90,streak:12,prs:4,trend:1,username:"kieron"},
-      {name:"James",vals:{"Squats":180,"Bench Press":165,"Deadlifts":210,"Weighted Lat Pull Up":45,"Barbell Row":110},bw:84,streak:8,prs:2,trend:-1,username:"jamesfit"},
-      {name:"Bill",vals:{"Squats":160,"Bench Press":150,"Deadlifts":200,"Weighted Lat Pull Up":40,"Barbell Row":120},bw:82,streak:16,prs:3,trend:2,username:"billlifts"},
-      {name:"Keelan",vals:{"Squats":150,"Bench Press":140,"Deadlifts":190,"Weighted Lat Pull Up":60,"Barbell Row":110},bw:78,streak:6,prs:1,trend:0,username:"keelanstrong"},
-      {name:"Anna",vals:{"Squats":120,"Bench Press":125,"Deadlifts":160,"Weighted Lat Pull Up":25,"Barbell Row":80},bw:65,streak:10,prs:3,trend:1,username:"annatrains"},
-      {name:"Betsy",vals:{"Squats":100,"Bench Press":90,"Deadlifts":140,"Weighted Lat Pull Up":20,"Barbell Row":70},bw:60,streak:5,prs:2,trend:-1,username:"betsyfit"}
-    ];
-  };
+  window.zagAllGroupPeople=function(){ return window.zagRealGroupPeople||[]; };
 
   window.groupMembers=function(){
     let all=zagAllGroupPeople();
@@ -2672,108 +2663,108 @@ if ('serviceWorker' in navigator) {
 .zagOnlineAvatar{width:36px;height:36px;border:1.5px solid #d43cf1;border-radius:50%;display:grid;place-items:center;font-weight:900}
 .zagGroupActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 </style>
-<script id="zagOnlineGroupsV18">
+<script id="zagOnlineGroupsV22">
 (function(){
  let cache=[];
  const E=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  function signed(){return !!(zagSb&&zagSession?.user)}
  function code(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+ async function ensureSession(){
+   if(zagSb&&!zagSession?.user){const {data}=await zagSb.auth.getSession();zagSession=data?.session||null}
+   return zagSession?.user||null;
+ }
  async function memberships(){
-   const {data,error}=await zagSb.from("group_members").select("group_id,role").eq("user_id",zagSession.user.id);
+   const u=await ensureSession(); if(!u)return [];
+   const {data,error}=await zagSb.from("group_members").select("group_id,role").eq("user_id",u.id);
    if(error)throw error; return data||[];
  }
  async function load(){
-   const ms=await memberships(), ids=ms.map(x=>x.group_id);
+   const ms=await memberships(),ids=ms.map(x=>x.group_id);
    if(!ids.length){cache=[];return cache}
    const {data,error}=await zagSb.from("groups").select("*").in("id",ids);
    if(error)throw error;
    cache=(data||[]).map(g=>({...g,myRole:ms.find(m=>m.group_id===g.id)?.role||"member"}));
    return cache;
  }
+ async function realMembers(id){
+   const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);
+   if(mr.error)throw mr.error;
+   const ms=mr.data||[],ids=ms.map(x=>x.user_id);
+   if(!ids.length)return [];
+   const [a,b]=await Promise.all([
+     zagSb.from("profiles").select("id,username,display_name,bodyweight_kg").in("id",ids),
+     zagSb.from("personal_bests").select("user_id,exercise_name,weight_kg,reps").in("user_id",ids)
+   ]);
+   if(a.error)throw a.error;if(b.error)throw b.error;
+   return ms.map(m=>{
+     const pr=(a.data||[]).find(x=>x.id===m.user_id)||{};
+     const mine=(b.data||[]).filter(x=>x.user_id===m.user_id);
+     const vals={};mine.forEach(x=>{const w=Number(x.weight_kg)||0;if(w>(vals[x.exercise_name]||0))vals[x.exercise_name]=w});
+     return {id:m.user_id,name:pr.display_name||pr.username||"Member",username:pr.username||"",bw:Number(pr.bodyweight_kg)||0,vals,role:m.role,streak:0,prs:mine.length,trend:0};
+   });
+ }
+ function totalOf(m){return Object.values(m.vals||{}).reduce((n,v)=>n+(Number(v)||0),0)}
+ function memberTable(title,people,score,fmt){
+   let a=[...people].sort((x,y)=>score(y)-score(x));
+   return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div><div><b>${i+1}. ${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>`;
+ }
+ function podium(people,score,fmt){
+   let a=[...people].sort((x,y)=>score(y)-score(x)).slice(0,3);
+   if(!a.length)return "";
+   let order=a.length>=2?[a[1],a[0],a[2]].filter(Boolean):a;
+   return `<div class=groupPodium>${order.map(m=>`<div class=podiumCard><b>${E(m.name)}</b><div class=small>${E(fmt(score(m)))}</div></div>`).join("")}</div>`;
+ }
  window.zagOnlineGroupsHome=async function(){
-   setActiveNav("groups");
-   const h=document.getElementById("screen");
-   if(zagSb && !zagSession?.user){
-     try{
-       const {data}=await zagSb.auth.getSession();
-       zagSession=data?.session||null;
-       zagRefreshAccountStatus();
-     }catch(e){console.warn("Groups session refresh failed",e)}
-   }
-   if(!signed()){
-     h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><h2>Sign in to use Groups</h2><div class=small style="margin-bottom:18px">Online groups are linked to your Zag Science account.</div><button class=pick onclick=settings()>Go to Settings</button></div>`;
-     return;
-   }
+   setActiveNav("groups");const h=document.getElementById("screen");
+   if(!await ensureSession()){h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><h2>Sign in to use Groups</h2><div class=small style="margin-bottom:18px">Online groups are linked to your Zag Science account.</div><button class=pick onclick=settings()>Go to Settings</button></div>`;return}
    h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard><h2>Loading groups…</h2></div>`;
    try{await load()}catch(e){h.innerHTML=`<div class=title><h1>Groups</h1></div><div class=pagecard><h2>Groups couldn't load</h2><div class=small>${E(e.message||e)}</div></div>`;return}
    h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
-   ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row><div class=groupBadgeNoEmoji></div><div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><div class="groupEmptyFigurine"><img src="assets/images/asset-022-0703892d0bc1.png" alt="Zag Science trophy figurine"></div><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
+   ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row><div class=groupBadgeNoEmoji></div><div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
    <div class=zagGroupActions><button class=pick onclick=zagCreateOnlineGroupModal()>Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
-   window.scrollTo(0,0);
  }
- window.zagCreateOnlineGroupModal=function(){
-   modal("Create Group",`<p class=small>Create a shared group for real Zag Science accounts.</p><input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px" placeholder="Group name"><button class=pick onclick=zagCreateOnlineGroup()>Create Group</button>`);
- }
+ window.zagCreateOnlineGroupModal=function(){modal("Create Group",`<p class=small>Create a shared group for real Zag Science accounts.</p><input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px" placeholder="Group name"><button id=zagCreateBtn class=pick onclick=zagCreateOnlineGroup()>Create Group</button>`)}
  window.zagCreateOnlineGroup=async function(){
-   const name=(document.getElementById("onlineGroupName")?.value||"").trim();
-   if(!name)return alert("Give your group a name first.");
+   const name=(document.getElementById("onlineGroupName")?.value||"").trim(),btn=document.getElementById("zagCreateBtn");
+   if(!name)return alert("Give your group a name first.");if(btn){btn.disabled=true;btn.textContent="Creating…"}
    try{
-     if(zagSb && !zagSession?.user){
-       const {data,error}=await zagSb.auth.getSession();
-       if(error)throw error;
-       zagSession=data?.session||null;
-     }
-     if(!zagSession?.user)return alert("Your sign-in session has expired. Please sign in again.");
-     const invite=code();
-     const r=await zagSb.from("groups").insert({name,owner_id:zagSession.user.id,invite_code:invite}).select("*").single();
-     if(r.error)throw new Error("Could not create group: "+r.error.message);
-     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:zagSession.user.id,role:"owner"},{onConflict:"group_id,user_id"}).select();
-     if(m.error){
-       try{await zagSb.from("groups").delete().eq("id",r.data.id).eq("owner_id",zagSession.user.id)}catch(_){}
-       throw new Error("Could not add you to the group: "+m.error.message);
-     }
-     closeModal();
-     cache=[];
-     await zagOnlineGroupsHome();
-   }catch(e){
-     console.error("Create group failed",e);
-     alert(e?.message||"Could not create group.");
-   }
+     const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
+     const r=await zagSb.from("groups").insert({name,owner_id:u.id,invite_code:code()}).select("*").single();if(r.error)throw r.error;
+     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"owner"},{onConflict:"group_id,user_id"});if(m.error)throw m.error;
+     cache.push({...r.data,myRole:"owner"});closeModal();
+     await zagOpenOnlineGroup(r.data.id);
+   }catch(e){if(btn){btn.disabled=false;btn.textContent="Create Group"}alert("Could not create group: "+(e.message||e))}
  }
- window.zagJoinOnlineGroupModal=function(){
-   modal("Join Group",`<p class=small>Enter the 6-character invite code from the group owner.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 style="width:100%;padding:10px;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`);
- }
+ window.zagJoinOnlineGroupModal=function(){modal("Join Group",`<p class=small>Enter the 6-character invite code from the group owner.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 style="width:100%;padding:10px;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`)}
  window.zagJoinOnlineGroup=async function(){
-   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase();
-   if(!c)return alert("Enter an invite code.");
-   const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();
-   if(r.error||!r.data)return alert("That group code was not found.");
-   const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:zagSession.user.id,role:"member"},{onConflict:"group_id,user_id"});
-   if(m.error)return alert("Could not join group: "+m.error.message);
-   closeModal();await zagOnlineGroupsHome();
+   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase();if(!c)return alert("Enter an invite code.");
+   const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();if(r.error||!r.data)return alert("That group code was not found.");
+   const u=await ensureSession(),m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});if(m.error)return alert(m.error.message);
+   closeModal();cache.push({...r.data,myRole:"member"});await zagOpenOnlineGroup(r.data.id);
  }
  window.zagOpenOnlineGroup=async function(id){
-   const g=cache.find(x=>x.id===id); if(!g)return;
-   const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);
-   if(mr.error)return alert(mr.error.message);
-   const ms=mr.data||[], ids=ms.map(x=>x.user_id);
-   let ps=[],pbs=[];
-   if(ids.length){
-     const a=await zagSb.from("profiles").select("id,username,display_name,bodyweight_kg").in("id",ids); if(!a.error)ps=a.data||[];
-     const b=await zagSb.from("personal_bests").select("user_id,exercise_name,weight_kg,reps").in("user_id",ids); if(!b.error)pbs=b.data||[];
-   }
-   let rows=ms.map(m=>{
-     const pr=ps.find(x=>x.id===m.user_id)||{}, mine=pbs.filter(x=>x.user_id===m.user_id);
-     const total=mine.reduce((n,x)=>n+(Number(x.weight_kg)||0),0);
-     return {name:pr.display_name||pr.username||"Member",role:m.role,total,bw:Number(pr.bodyweight_kg)||0};
-   }).sort((a,b)=>b.total-a.total);
-   document.getElementById("screen").innerHTML=`<div class=title><h1>${E(g.name)}</h1><p>Shared online group</p></div>
-   <div class=pagecard style="text-align:center"><div class=small>INVITE CODE</div><div class=zagOnlineCode>${E(g.invite_code||"")}</div><div class=small>Give this code to another Zag Science user.</div></div>
-   <div class=pagecard><h2 style="margin-top:0">Members</h2>${rows.map((r,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E(r.name.charAt(0).toUpperCase())}</div><div><b>${i+1}. ${E(r.name)}</b><div class=small>${r.role==="owner"?"Owner":"Member"}${r.bw?" · "+weightText(r.bw):""}</div></div><b>${weightText(r.total)}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>
-   <button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`;
-   window.scrollTo(0,0);
+   let g=cache.find(x=>x.id===id);if(!g){await load();g=cache.find(x=>x.id===id)}if(!g)return;
+   const h=document.getElementById("screen");
+   h.innerHTML=`<div class=title><h1>${E(g.name)}</h1><p>Loading group…</p></div>`;
+   try{
+     const people=await realMembers(id);window.zagRealGroupPeople=people;window.zagRealCurrentGroup=g;
+     const exercises=[...new Set(people.flatMap(m=>Object.keys(m.vals||{})))].sort();
+     window.zagRenderRealGroup=function(view="total",ex=""){
+       const tabs=`<div class=groupMainTabs><button class="groupMainTab ${view==="total"?"sel":""}" onclick="zagRenderRealGroup('total')">Total</button><button class="groupMainTab ${view==="bodyweight"?"sel":""}" onclick="zagRenderRealGroup('bodyweight')">Bodyweight</button><button class="groupMainTab ${view==="exercises"?"sel":""}" onclick="zagRenderRealGroup('exercises','${E(ex||exercises[0]||"")}')">Individual Exercises</button></div>`;
+       let body="";
+       if(view==="bodyweight"){let score=m=>m.bw?totalOf(m)/m.bw:0;body=podium(people,score,x=>x.toFixed(2)+"×")+memberTable("Bodyweight Leaderboard",people,score,x=>x.toFixed(2)+"×")}
+       else if(view==="exercises"){let chosen=ex||exercises[0]||"";let strip=`<div class=exerciseTabStrip>${exercises.map(x=>`<button class="exerciseTab ${x===chosen?"sel":""}" onclick="zagRenderRealGroup('exercises',${JSON.stringify(x).replace(/"/g,"&quot;")})">${E(x)}</button>`).join("")}</div>`;let score=m=>Number(m.vals?.[chosen])||0;body=strip+podium(people,score,weightText)+memberTable(chosen||"Exercise",people,score,weightText)}
+       else {body=podium(people,totalOf,weightText)+memberTable("Total Leaderboard",people,totalOf,weightText)}
+       h.innerHTML=`<div class=title><h1>${E(g.name)}</h1><p>${people.length} Member${people.length===1?"":"s"} · Train harder together</p></div>
+       <div class="pagecard zagPersistentGroup" data-group-id="${E(g.id)}"><div class=row><div class=groupBadgeNoEmoji></div><div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div><button class=pick onclick="zagInviteRealGroup()">Invite</button></div></div>
+       <div class=pagecard><h2 style="margin-top:0">Members</h2>${people.map(m=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E(m.name.charAt(0).toUpperCase())}</div><div><b>${E(m.name)}</b><div class=small>${m.role==="owner"?"Owner":"Member"}${m.username?" · @"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div></div>`).join("")}</div>
+       <div class="pagecard zagPersistentGroup">${tabs}<div class=zagLeaderboardHost>${body}</div></div>
+       <button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`;
+     };
+     window.zagInviteRealGroup=function(){modal("Invite",`<div class=small>Invite code</div><div class=zagOnlineCode>${E(g.invite_code||"")}</div><p class=small>Give this code to another Zag Science user.</p>`)}
+     zagRenderRealGroup("total");
+   }catch(e){h.innerHTML=`<div class=title><h1>${E(g.name)}</h1></div><div class=pagecard><h2>Group couldn't load</h2><div class=small>${E(e.message||e)}</div></div><button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`}
  }
- // Override the existing Groups nav after all legacy group scripts have loaded.
  window.groupsPage=function(){return zagOnlineGroupsHome()}
 })();
 </script>
