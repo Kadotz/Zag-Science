@@ -12,3 +12,8 @@ Adds authenticated Supabase PB cloud backup/sync while preserving local storage 
 - Added a two-week bodyweight reminder (delivered when the PWA is active/open; fully closed timed delivery will use the later push backend).
 - Removed duplicated “Zag Science” wording from notification titles.
 - Restored the trophy figurine artwork to Create Group.
+
+
+## v15.4
+- Places the Olympia trophy artwork directly on the empty Groups landing page, above “No groups yet”.
+- Keeps the trophy in the Create Group modal too.
