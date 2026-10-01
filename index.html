@@ -120,7 +120,12 @@ img.logo[alt="Zag Science"]{
 
 .groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
 </style>
-
+<style id="zag-v23-sticky-header">
+img.logo[alt="Zag Science"]{
+  position:sticky!important;top:0!important;z-index:900!important;
+  transform:translateZ(0);-webkit-transform:translateZ(0);
+}
+</style>
 
 <style>
 .zagNeedle{width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:3px;filter:drop-shadow(0 0 4px #e73cff)}
@@ -305,6 +310,7 @@ let zagScrollRestoreToken=0;
 let zagSkipNextScrollSave=false;
 let zagForceWorkoutTop=false;
 function setActiveNav(name){
+ try{sessionStorage.setItem("zagActivePage",name)}catch(_){}
  st.pageScrolls=st.pageScrolls||{};
  // Migrate the older Maxes-only scroll value once, if present.
  if(st.pageScrolls.maxes==null&&st.maxesScrollY!=null)st.pageScrolls.maxes=Number(st.maxesScrollY)||0;
@@ -461,12 +467,12 @@ function showStreakPopup(force=false){
 }
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
 d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section class=exercise><div class=head><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><select class=week style="position:absolute;left:4px;right:4px;top:4px;width:${st.stickWeek?'64':'68'}px;padding:3px 1px;font-size:8px" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><button class="btn editMain" onclick="chooseExtraForMain(${e})">Edit</button></div><div class=maxbox><span>↗</span> Max: ${weightText(st.max[ex]||0)}</div><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i})">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></section>`});
-s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section class=extras><h2>Extras / Replacements</h2>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="st.max['${q(x)}']=+displayToKg(this.value);save()"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></section>`;document.getElementById("screen").innerHTML=s}
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></section>`});
+s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section class=extras><h2>Extras / Replacements</h2>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></section>`;document.getElementById("screen").innerHTML=s}
 function setExerciseWeek(ex,w){if(st.stickWeek)return;st.weeks[ex]=+w||1;save();workout()}
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
-function one(ex,i){let key=k(ex,i),t=sets(ex)[i];if(st.draft[key]?.done)delete st.draft[key];else st.draft[key]={kg:t.kg,r:t.r,done:true};clickSound();save();workout()}
+function one(ex,i,btn){let key=k(ex,i),t=sets(ex)[i],row=btn?.closest("tr");if(st.draft[key]?.done){delete st.draft[key];btn?.classList.remove("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value="";if(ins[1])ins[1].value=""}}else{st.draft[key]={kg:t.kg,r:t.r,done:true};btn?.classList.add("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value=kgToDisplay(t.kg);if(ins[1])ins[1].value=t.r}}clickSound();save()}
 function allExercise(ex){sets(ex).forEach((t,i)=>st.draft[k(ex,i)]={kg:t.kg,r:t.r,done:true});clickSound();save();workout()}
 function move(n){st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
 function closeModal(){document.getElementById("modalRoot").innerHTML=""}
@@ -475,7 +481,7 @@ function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`
 function doSwap(extra,i){let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
 function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
 function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
-function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(+v.r>=t.r&&+v.kg>(st.max[ex]||0)){let old=st.max[ex]||0;st.prHistory[ex]=st.prHistory[ex]||[];st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:+v.kg,reps:+v.r});st.max[ex]=+v.kg;st.repsAtMax[ex]=+v.r;prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
+function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(+v.r>=t.r&&+v.kg>(st.max[ex]||0)){let old=st.max[ex]||0;st.prHistory[ex]=st.prHistory[ex]||[];st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:+v.kg,reps:+v.r});st.max[ex]=+v.kg;st.repsAtMax[ex]=+v.r;zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
 d[1].forEach(ex=>{
  let w=Number(st.weeks[ex]||1);
  st.weeks[ex]=w>=8?1:w+1;
@@ -578,7 +584,8 @@ function renameSavedSplit(n){textEntryModal("Rename Split","Split name",n,v=>{if
 function deleteSavedSplit(n){delete st.customSplits[n];if(st.splitName===n)st.splitName="The Goat Split";save();editSplit()}
 function loadOriginal(){st.days=JSON.parse(JSON.stringify(ORIGINAL));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName="The Goat Split";st.day=0;save();editSplit()}
 function uniqueSections(){let seen=new Set(),out=[];st.days.forEach((d,i)=>{let key=d[0]+"|"+JSON.stringify(d[1])+"|"+JSON.stringify(d[2]);if(!seen.has(key)){seen.add(key);out.push({name:d[0],mains:d[1],extras:d[2],day:i})}});return out}
-function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number value="${kgToDisplay(st.max[x]||0)}" onchange="st.max['${q(x)}']=+displayToKg(this.value);save()"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
+function zagSetMax(ex,v){st.max[ex]=+displayToKg(v);zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save()}
+function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number value="${kgToDisplay(st.max[x]||0)}" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
 function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach(sec=>{s+=`<section class=maxsection><h2>${esc(sec.name)}</h2>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
 function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
@@ -706,13 +713,15 @@ function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.res
 processStreakCalendar();save();
 // A fresh app load always starts on Home. Per-page scroll memory is still used during navigation.
 document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
-home();
+let zagResumePage="";try{zagResumePage=sessionStorage.getItem("zagActivePage")||""}catch(_){}
+const zagRoutes={home:home,workout:workout,maxes:maxes,groups:()=>groupsPage(),history:historyPage,settings:settings};
+if(zagResumePage&&zagResumePage!=="home"&&zagRoutes[zagResumePage])zagRoutes[zagResumePage]();else home();
 zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);setTimeout(zagCheckBodyweightReminder,1800);
-// iOS PWAs often resume instead of reloading. Treat returning to the app as opening it: show Home.
+// v23: backgrounding/resuming keeps the user on the current page.
 let zagHiddenAt=0;
 document.addEventListener("visibilitychange",()=>{
  if(document.visibilityState==="hidden")zagHiddenAt=Date.now();
- else if(zagHiddenAt && Date.now()-zagHiddenAt>800){zagHiddenAt=0;home();}
+ else zagHiddenAt=0;
 });
 </script>
 
@@ -2543,15 +2552,15 @@ function zagSwitchAuth(mode){zagRenderAccount(mode)}
 async function zagSubmitAuth(){if(!zagSb)return;const email=(document.getElementById('zagAuthEmail')?.value||'').trim();const password=document.getElementById('zagAuthPassword')?.value||'';if(!email||!password){zagAuthMessage('Enter your email and password.',true);return}zagAuthMessage('Please wait…');try{if(zagAuthMode==='signup'){const username=(document.getElementById('zagAuthUsername')?.value||'').trim();if(username.length<2){zagAuthMessage('Choose a username with at least 2 characters.',true);return}const {data,error}=await zagSb.auth.signUp({email,password,options:{data:{username,display_name:username},emailRedirectTo:'https://kadotz.github.io/Zag-Science/'}});if(error)throw error;if(data.session){zagSession=data.session;zagCloseAccount();zagRefreshAccountStatus();setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),100);setTimeout(()=>modal('Account created','<div class=note>Your Zag Science account is signed in.</div>'),100)}else zagAuthMessage('Account created. Check your email and tap the confirmation link, then return here and sign in.')}else{const {data,error}=await zagSb.auth.signInWithPassword({email,password});if(error)throw error;zagSession=data.session;zagCloseAccount();zagRefreshAccountStatus();setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),100);setTimeout(()=>modal('Signed in',`<div class=note>Signed in as ${esc(data.user?.user_metadata?.username||data.user?.email||'Zag Science user')}.</div>`),100)}}catch(e){zagAuthMessage(e.message||'Something went wrong. Please try again.',true)}}
 async function zagSignOut(){if(!zagSb)return;await zagSb.auth.signOut();zagSession=null;zagCloseAccount();zagRefreshAccountStatus();setTimeout(()=>modal('Signed out','<div class=note>You have been signed out. Your existing workout data is still stored on this device.</div>'),100)}
 async function zagForgotPassword(){if(!zagSb)return;const email=(document.getElementById('zagAuthEmail')?.value||'').trim();if(!email){zagAuthMessage('Enter your email first.',true);return}zagAuthMessage('Sending reset email…');const {error}=await zagSb.auth.resetPasswordForEmail(email,{redirectTo:'https://kadotz.github.io/Zag-Science/'});zagAuthMessage(error?(error.message||'Could not send reset email.'):'Password reset email sent.',!!error)}
-let zagPBSyncTimer=null,zagPBSyncBusy=false,zagPBSyncSuppress=false;
+let zagPBSyncTimer=null,zagPBSyncBusy=false,zagPBSyncSuppress=false,zagPBDirty=new Set();
 function zagPBMap(){const out={};Object.keys(st.max||{}).sort().forEach(ex=>{const kg=Number(st.max[ex]||0);if(Number.isFinite(kg)&&kg>=0)out[ex]={kg:Math.round(kg*1000)/1000,reps:Number(st.repsAtMax?.[ex]||0)||null};});return out}
 function zagPBSignature(map=zagPBMap()){return JSON.stringify(map)}
 function zagPBMarkerKey(){return zagSession?.user?.id?'zagPbCloudV14:'+zagSession.user.id:''}
 function zagSetCloudPBStatus(t){const el=document.getElementById('zagCloudPBStatus');if(el)el.textContent=t||''}
 async function zagFetchCloudPBMap(){if(!zagSb||!zagSession?.user)return{};const {data,error}=await zagSb.from('personal_bests').select('exercise_name,weight_kg,reps,achieved_at,created_at').eq('user_id',zagSession.user.id).order('achieved_at',{ascending:true});if(error)throw error;const out={};(data||[]).forEach(r=>{out[r.exercise_name]={kg:Number(r.weight_kg||0),reps:r.reps==null?null:Number(r.reps)}});return out}
 async function zagUploadPBDifferences(cloud){const local=zagPBMap(),rows=[];for(const [ex,v] of Object.entries(local)){const c=cloud[ex];if(!c||Number(c.kg)!==Number(v.kg)||Number(c.reps||0)!==Number(v.reps||0))rows.push({user_id:zagSession.user.id,exercise_name:ex,weight_kg:v.kg,reps:v.reps,achieved_at:new Date().toISOString()})}if(rows.length){const {error}=await zagSb.from('personal_bests').insert(rows);if(error)throw error}return local}
-function zagApplyCloudPBMap(cloud){zagPBSyncSuppress=true;st.repsAtMax=st.repsAtMax||{};Object.entries(cloud).forEach(([ex,v])=>{st.max[ex]=Number(v.kg||0);if(v.reps!=null)st.repsAtMax[ex]=Number(v.reps)});localStorage.setItem('zagScienceV2',JSON.stringify(st));zagPBSyncSuppress=false}
-async function zagInitPBSync(){if(!zagSb||!zagSession?.user||zagPBSyncBusy)return;zagPBSyncBusy=true;zagSetCloudPBStatus('Syncing PBs…');try{const key=zagPBMarkerKey(),marker=localStorage.getItem(key),cloud=await zagFetchCloudPBMap(),cloudHas=Object.keys(cloud).length>0,currentSig=zagPBSignature();if(!marker){if(cloudHas){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}else{const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));}}else if(currentSig!==marker){const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));}else if(cloudHas){const cloudSig=zagPBSignature(cloud);if(cloudSig!==marker){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}}zagSetCloudPBStatus('PB cloud sync is up to date.');}catch(e){console.warn('PB cloud sync failed',e);zagSetCloudPBStatus('PB sync will retry when you are online.');}finally{zagPBSyncBusy=false}}
+function zagApplyCloudPBMap(cloud){zagPBSyncSuppress=true;st.repsAtMax=st.repsAtMax||{};Object.entries(cloud).forEach(([ex,v])=>{if(zagPBDirty.has(ex))return;st.max[ex]=Number(v.kg||0);if(v.reps!=null)st.repsAtMax[ex]=Number(v.reps)});localStorage.setItem('zagScienceV2',JSON.stringify(st));zagPBSyncSuppress=false}
+async function zagInitPBSync(){if(!zagSb||!zagSession?.user)return;if(zagPBSyncBusy){clearTimeout(zagPBSyncTimer);zagPBSyncTimer=setTimeout(zagInitPBSync,1000);return;}zagPBSyncBusy=true;zagSetCloudPBStatus('Syncing PBs…');try{const key=zagPBMarkerKey(),marker=localStorage.getItem(key),cloud=await zagFetchCloudPBMap(),cloudHas=Object.keys(cloud).length>0,currentSig=zagPBSignature();if(!marker){if(cloudHas){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}else{const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));zagPBDirty.clear();}}else if(currentSig!==marker){const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));zagPBDirty.clear();}else if(cloudHas){const cloudSig=zagPBSignature(cloud);if(cloudSig!==marker){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}}zagSetCloudPBStatus('PB cloud sync is up to date.');}catch(e){console.warn('PB cloud sync failed',e);zagSetCloudPBStatus('PB sync will retry when you are online.');}finally{zagPBSyncBusy=false}}
 function zagQueuePBSync(){if(zagPBSyncSuppress||!zagSession?.user)return;clearTimeout(zagPBSyncTimer);zagPBSyncTimer=setTimeout(zagInitPBSync,900)}
 
 // v17: exact local-state cloud backup.
@@ -2635,7 +2644,6 @@ async function zagInitStateSync(){
      localStorage.setItem(zagStateMarkerKey(),cloud.completed_at);
    }
    await zagSyncProfileTrainingSummary();
-   if(typeof home==='function')home();
  }catch(e){console.warn('Training cloud sync failed',e)}
  finally{zagStateSyncBusy=false}
 }
@@ -2723,7 +2731,15 @@ if ('serviceWorker' in navigator) {
    ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row><div class=groupBadgeNoEmoji></div><div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
    <div class=zagGroupActions><button class=pick onclick=zagCreateOnlineGroupModal()>Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
  }
- window.zagCreateOnlineGroupModal=function(){modal("Create Group",`<p class=small>Create a shared group for real Zag Science accounts.</p><input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px" placeholder="Group name"><button id=zagCreateBtn class=pick onclick=zagCreateOnlineGroup()>Create Group</button>`)}
+ window.zagCreateOnlineGroupModal=function(){
+   groupCreateState={combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,selectedExercises:new Set(allGroupExerciseNames())};
+   modal("Create Group",`<input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name">
+   <div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
+   <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
+   <div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
+   <button id=zagCreateBtn class="pick createGroupAction" onclick=zagCreateOnlineGroup()>Create Group</button>`);
+   renderGroupExercisePicker();syncGroupCreateUI();
+ }
  window.zagCreateOnlineGroup=async function(){
    const name=(document.getElementById("onlineGroupName")?.value||"").trim(),btn=document.getElementById("zagCreateBtn");
    if(!name)return alert("Give your group a name first.");if(btn){btn.disabled=true;btn.textContent="Creating…"}
@@ -2731,8 +2747,8 @@ if ('serviceWorker' in navigator) {
      const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
      const r=await zagSb.from("groups").insert({name,owner_id:u.id,invite_code:code()}).select("*").single();if(r.error)throw r.error;
      const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"owner"},{onConflict:"group_id,user_id"});if(m.error)throw m.error;
-     cache.push({...r.data,myRole:"owner"});closeModal();
-     await zagOpenOnlineGroup(r.data.id);
+     st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[r.data.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,exercises:[...(groupCreateState.selectedExercises||new Set())]};save();
+     cache.push({...r.data,myRole:"owner"});closeModal();await zagOpenOnlineGroup(r.data.id);
    }catch(e){if(btn){btn.disabled=false;btn.textContent="Create Group"}alert("Could not create group: "+(e.message||e))}
  }
  window.zagJoinOnlineGroupModal=function(){modal("Join Group",`<p class=small>Enter the 6-character invite code from the group owner.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 style="width:100%;padding:10px;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`)}
@@ -2742,6 +2758,22 @@ if ('serviceWorker' in navigator) {
    const u=await ensureSession(),m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});if(m.error)return alert(m.error.message);
    closeModal();cache.push({...r.data,myRole:"member"});await zagOpenOnlineGroup(r.data.id);
  }
+ window.zagEditOnlineGroup=function(){
+   const g=window.zagRealCurrentGroup;if(!g)return;
+   const c=(st.onlineGroupConfigs||{})[g.id]||{combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,exercises:allGroupExerciseNames()};
+   groupCreateState={combined:!!c.combined,bodyweight:!!c.bodyweight,individual:!!c.individual,ratioCombined:!!c.ratioCombined,ratioIndividual:!!c.ratioIndividual,selectedExercises:new Set(c.exercises||[])};
+   modal("Edit Group",`<input id=onlineEditGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" value="${E(g.name)}" placeholder="Group name">
+   <div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
+   <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
+   <div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
+   <button class="pick createGroupAction" onclick=zagSaveOnlineGroupEdit()>Save Group</button>`);
+   renderGroupExercisePicker();syncGroupCreateUI();
+ }
+ window.zagSaveOnlineGroupEdit=async function(){
+   const g=window.zagRealCurrentGroup;if(!g)return;const name=(document.getElementById("onlineEditGroupName")?.value||"").trim();if(!name)return alert("Give your group a name first.");
+   const r=await zagSb.from("groups").update({name}).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();if(r.error)return alert("Could not save group: "+r.error.message);
+   g.name=name;st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,exercises:[...(groupCreateState.selectedExercises||new Set())]};save();closeModal();await zagOpenOnlineGroup(g.id);
+ }
  window.zagOpenOnlineGroup=async function(id){
    let g=cache.find(x=>x.id===id);if(!g){await load();g=cache.find(x=>x.id===id)}if(!g)return;
    const h=document.getElementById("screen");
@@ -2749,15 +2781,23 @@ if ('serviceWorker' in navigator) {
    try{
      const people=await realMembers(id);window.zagRealGroupPeople=people;window.zagRealCurrentGroup=g;
      const exercises=[...new Set(people.flatMap(m=>Object.keys(m.vals||{})))].sort();
-     window.zagRenderRealGroup=function(view="total",ex=""){
-       const tabs=`<div class=groupMainTabs><button class="groupMainTab ${view==="total"?"sel":""}" onclick="zagRenderRealGroup('total')">Total</button><button class="groupMainTab ${view==="bodyweight"?"sel":""}" onclick="zagRenderRealGroup('bodyweight')">Bodyweight</button><button class="groupMainTab ${view==="exercises"?"sel":""}" onclick="zagRenderRealGroup('exercises','${E(ex||exercises[0]||"")}')">Individual Exercises</button></div>`;
+     window.zagRenderRealGroup=function(view="total",ex="",bodyMode="combined"){
+       const cfg=(st.onlineGroupConfigs||{})[g.id]||{combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,exercises:exercises};
+       const allowed=(cfg.exercises&&cfg.exercises.length)?cfg.exercises:exercises;
+       let mainTabs=[];if(cfg.combined)mainTabs.push(["total","Total"]);if(cfg.bodyweight)mainTabs.push(["bodyweight","Bodyweight"]);if(cfg.individual)mainTabs.push(["exercises","Individual Exercises"]);
+       if(!mainTabs.some(x=>x[0]===view))view=mainTabs[0]?.[0]||"total";
+       const tabs=`<div class=groupMainTabs>${mainTabs.map(x=>`<button class="groupMainTab ${view===x[0]?"sel":""}" onclick="zagRenderRealGroup('${x[0]}')">${x[1]}</button>`).join("")}</div>`;
        let body="";
-       if(view==="bodyweight"){let score=m=>m.bw?totalOf(m)/m.bw:0;body=podium(people,score,x=>x.toFixed(2)+"×")+memberTable("Bodyweight Leaderboard",people,score,x=>x.toFixed(2)+"×")}
-       else if(view==="exercises"){let chosen=ex||exercises[0]||"";let strip=`<div class=exerciseTabStrip>${exercises.map(x=>`<button class="exerciseTab ${x===chosen?"sel":""}" onclick="zagRenderRealGroup('exercises',${JSON.stringify(x).replace(/"/g,"&quot;")})">${E(x)}</button>`).join("")}</div>`;let score=m=>Number(m.vals?.[chosen])||0;body=strip+podium(people,score,weightText)+memberTable(chosen||"Exercise",people,score,weightText)}
-       else {body=podium(people,totalOf,weightText)+memberTable("Total Leaderboard",people,totalOf,weightText)}
-       h.innerHTML=`<div class=title><h1>${E(g.name)}</h1><p>${people.length} Member${people.length===1?"":"s"} · Train harder together</p></div>
-       <div class="pagecard zagPersistentGroup" data-group-id="${E(g.id)}"><div class=row><div class=groupBadgeNoEmoji></div><div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div><button class=pick onclick="zagInviteRealGroup()">Invite</button></div></div>
-       <div class=pagecard><h2 style="margin-top:0">Members</h2>${people.map(m=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E(m.name.charAt(0).toUpperCase())}</div><div><b>${E(m.name)}</b><div class=small>${m.role==="owner"?"Owner":"Member"}${m.username?" · @"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div></div>`).join("")}</div>
+       if(view==="bodyweight"){
+         let modes=[];if(cfg.ratioCombined)modes.push(["combined","Combined Weight"]);if(cfg.ratioIndividual)modes.push(["individual","Individual Exercise"]);if(!modes.length)modes=[["combined","Combined Weight"],["individual","Individual Exercise"]];
+         if(!modes.some(x=>x[0]===bodyMode))bodyMode=modes[0][0];
+         const subtabs=`<div class=exerciseTabStrip>${modes.map(x=>`<button class="exerciseTab ${bodyMode===x[0]?"sel":""}" onclick="zagRenderRealGroup('bodyweight','${E(ex||allowed[0]||"")}','${x[0]}')">${x[1]}</button>`).join("")}</div>`;
+         if(bodyMode==="individual"){let chosen=ex||allowed[0]||"";let strip=`<div class=exerciseTabStrip>${allowed.map(x=>`<button class="exerciseTab ${x===chosen?"sel":""}" onclick="zagRenderRealGroup('bodyweight','${E(x)}','individual')">${E(x)}</button>`).join("")}</div>`;let score=m=>m.bw?(Number(m.vals?.[chosen])||0)/m.bw:0;body=subtabs+strip+podium(people,score,x=>x.toFixed(2)+"×")+memberTable(chosen+" Bodyweight Ratio",people,score,x=>x.toFixed(2)+"×")}
+         else{let score=m=>m.bw?allowed.reduce((n,x)=>n+(Number(m.vals?.[x])||0),0)/m.bw:0;body=subtabs+podium(people,score,x=>x.toFixed(2)+"×")+memberTable("Combined Bodyweight Ratio",people,score,x=>x.toFixed(2)+"×")}
+       }else if(view==="exercises"){let chosen=ex||allowed[0]||"";let strip=`<div class=exerciseTabStrip>${allowed.map(x=>`<button class="exerciseTab ${x===chosen?"sel":""}" onclick="zagRenderRealGroup('exercises','${E(x)}')">${E(x)}</button>`).join("")}</div>`;let score=m=>Number(m.vals?.[chosen])||0;body=strip+podium(people,score,weightText)+memberTable(chosen||"Exercise",people,score,weightText)}
+       else {let score=m=>allowed.reduce((n,x)=>n+(Number(m.vals?.[x])||0),0);body=podium(people,score,weightText)+memberTable("Combined Weight Leaderboard",people,score,weightText)}
+       h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
+       <div class="pagecard groupHero"><div class=groupBadgeNoEmoji></div><div class=grow><div class=groupTitle>${E(g.name)}</div><div class=small>${people.length} Member${people.length===1?"":"s"} · Train harder together</div></div><button class=btn onclick="zagInviteRealGroup()">Invite</button><button class=btn onclick="zagEditOnlineGroup()">Edit Group</button></div>
        <div class="pagecard zagPersistentGroup">${tabs}<div class=zagLeaderboardHost>${body}</div></div>
        <button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`;
      };
