@@ -584,7 +584,17 @@ function renameSavedSplit(n){textEntryModal("Rename Split","Split name",n,v=>{if
 function deleteSavedSplit(n){delete st.customSplits[n];if(st.splitName===n)st.splitName="The Goat Split";save();editSplit()}
 function loadOriginal(){st.days=JSON.parse(JSON.stringify(ORIGINAL));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName="The Goat Split";st.day=0;save();editSplit()}
 function uniqueSections(){let seen=new Set(),out=[];st.days.forEach((d,i)=>{let key=d[0]+"|"+JSON.stringify(d[1])+"|"+JSON.stringify(d[2]);if(!seen.has(key)){seen.add(key);out.push({name:d[0],mains:d[1],extras:d[2],day:i})}});return out}
-function zagSetMax(ex,v){st.max[ex]=+displayToKg(v);zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save()}
+async function zagPushOnePB(ex){
+ if(!zagSb||!zagSession?.user||!ex)return;
+ const kg=Number(st.max?.[ex]||0),reps=Number(st.repsAtMax?.[ex]||1)||1;
+ try{
+   const {error}=await zagSb.from('personal_bests').upsert({user_id:zagSession.user.id,exercise_name:ex,weight_kg:kg,reps:reps},{onConflict:'user_id,exercise_name'});
+   if(error)throw error;
+   zagPBDirty.delete(ex);
+   const k=zagPBMarkerKey();if(k)localStorage.setItem(k,zagPBSignature());
+ }catch(e){console.warn('PB direct sync failed',e);zagQueuePBSync()}
+}
+function zagSetMax(ex,v){st.max[ex]=+displayToKg(v);zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save();zagPushOnePB(ex)}
 function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number value="${kgToDisplay(st.max[x]||0)}" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
 function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach(sec=>{s+=`<section class=maxsection><h2>${esc(sec.name)}</h2>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
@@ -2728,12 +2738,12 @@ if ('serviceWorker' in navigator) {
    h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard><h2>Loading groups…</h2></div>`;
    try{await load()}catch(e){h.innerHTML=`<div class=title><h1>Groups</h1></div><div class=pagecard><h2>Groups couldn't load</h2><div class=small>${E(e.message||e)}</div></div>`;return}
    h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
-   ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row><div class=groupBadgeNoEmoji></div><div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
+   ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row>${((st.onlineGroupConfigs||{})[g.id]?.emblem)?`<div class=groupBadgeNoEmoji><img src="${zagEmblemSrc((st.onlineGroupConfigs||{})[g.id].emblem)}" style="width:100%;height:100%;object-fit:contain" alt=""></div>`:`<div class=groupBadgeNoEmoji></div>`}<div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
    <div class=zagGroupActions><button class=pick onclick=zagCreateOnlineGroupModal()>Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
  }
  window.zagCreateOnlineGroupModal=function(){
-   groupCreateState={combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,selectedExercises:new Set(allGroupExerciseNames())};
-   modal("Create Group",`<input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name">
+   groupCreateState={combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,emblem:"",selectedExercises:new Set(allGroupExerciseNames())};
+   modal("Create Group",`<div class="zagEditGroupTopRow"><button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Choose group emblem"><span class="zagGroupImagePlaceholder"></span></button><input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name"></div>
    <div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
    <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
    <div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
@@ -2747,7 +2757,7 @@ if ('serviceWorker' in navigator) {
      const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
      const r=await zagSb.from("groups").insert({name,owner_id:u.id,invite_code:code()}).select("*").single();if(r.error)throw r.error;
      const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"owner"},{onConflict:"group_id,user_id"});if(m.error)throw m.error;
-     st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[r.data.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,exercises:[...(groupCreateState.selectedExercises||new Set())]};save();
+     st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[r.data.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();
      cache.push({...r.data,myRole:"owner"});closeModal();await zagOpenOnlineGroup(r.data.id);
    }catch(e){if(btn){btn.disabled=false;btn.textContent="Create Group"}alert("Could not create group: "+(e.message||e))}
  }
@@ -2761,8 +2771,8 @@ if ('serviceWorker' in navigator) {
  window.zagEditOnlineGroup=function(){
    const g=window.zagRealCurrentGroup;if(!g)return;
    const c=(st.onlineGroupConfigs||{})[g.id]||{combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,exercises:allGroupExerciseNames()};
-   groupCreateState={combined:!!c.combined,bodyweight:!!c.bodyweight,individual:!!c.individual,ratioCombined:!!c.ratioCombined,ratioIndividual:!!c.ratioIndividual,selectedExercises:new Set(c.exercises||[])};
-   modal("Edit Group",`<input id=onlineEditGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" value="${E(g.name)}" placeholder="Group name">
+   groupCreateState={combined:!!c.combined,bodyweight:!!c.bodyweight,individual:!!c.individual,ratioCombined:!!c.ratioCombined,ratioIndividual:!!c.ratioIndividual,emblem:c.emblem||"",selectedExercises:new Set(c.exercises||[])};
+   modal("Edit Group",`<div class="zagEditGroupTopRow"><button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Change group emblem">${c.emblem?`<img class="zagGroupImagePreview" src="${zagEmblemSrc(c.emblem)}" alt="">`:`<span class="zagGroupImagePlaceholder"></span>`}</button><input id=onlineEditGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" value="${E(g.name)}" placeholder="Group name"></div>
    <div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
    <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
    <div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
@@ -2772,7 +2782,7 @@ if ('serviceWorker' in navigator) {
  window.zagSaveOnlineGroupEdit=async function(){
    const g=window.zagRealCurrentGroup;if(!g)return;const name=(document.getElementById("onlineEditGroupName")?.value||"").trim();if(!name)return alert("Give your group a name first.");
    const r=await zagSb.from("groups").update({name}).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();if(r.error)return alert("Could not save group: "+r.error.message);
-   g.name=name;st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,exercises:[...(groupCreateState.selectedExercises||new Set())]};save();closeModal();await zagOpenOnlineGroup(g.id);
+   g.name=name;st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();closeModal();await zagOpenOnlineGroup(g.id);
  }
  window.zagOpenOnlineGroup=async function(id){
    let g=cache.find(x=>x.id===id);if(!g){await load();g=cache.find(x=>x.id===id)}if(!g)return;
@@ -2797,7 +2807,7 @@ if ('serviceWorker' in navigator) {
        }else if(view==="exercises"){let chosen=ex||allowed[0]||"";let strip=`<div class=exerciseTabStrip>${allowed.map(x=>`<button class="exerciseTab ${x===chosen?"sel":""}" onclick="zagRenderRealGroup('exercises','${E(x)}')">${E(x)}</button>`).join("")}</div>`;let score=m=>Number(m.vals?.[chosen])||0;body=strip+podium(people,score,weightText)+memberTable(chosen||"Exercise",people,score,weightText)}
        else {let score=m=>allowed.reduce((n,x)=>n+(Number(m.vals?.[x])||0),0);body=podium(people,score,weightText)+memberTable("Combined Weight Leaderboard",people,score,weightText)}
        h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
-       <div class="pagecard groupHero"><div class=groupBadgeNoEmoji></div><div class=grow><div class=groupTitle>${E(g.name)}</div><div class=small>${people.length} Member${people.length===1?"":"s"} · Train harder together</div></div><button class=btn onclick="zagInviteRealGroup()">Invite</button><button class=btn onclick="zagEditOnlineGroup()">Edit Group</button></div>
+       <div class="pagecard groupHero">${cfg.emblem?`<div class=groupBadgeNoEmoji><img src="${zagEmblemSrc(cfg.emblem)}" style="width:100%;height:100%;object-fit:contain" alt=""></div>`:`<div class=groupBadgeNoEmoji></div>`}<div class=grow><div class=groupTitle>${E(g.name)}</div><div class=small>${people.length} Member${people.length===1?"":"s"} · Train harder together</div></div><button class=btn onclick="zagInviteRealGroup()">Invite</button><button class=btn onclick="zagEditOnlineGroup()">Edit Group</button></div>
        <div class="pagecard zagPersistentGroup">${tabs}<div class=zagLeaderboardHost>${body}</div></div>
        <button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`;
      };

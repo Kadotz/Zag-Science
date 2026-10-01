@@ -1,4 +1,4 @@
-const CACHE = 'zag-science-pwa-v23-fixes';
+const CACHE = 'zag-science-pwa-v24-pb-emblems';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
