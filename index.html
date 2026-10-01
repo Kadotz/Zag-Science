@@ -195,6 +195,48 @@ img.logo[alt="Zag Science"]{
 
 .groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
 </style>
+
+<style id="zag-v25-online-emblem-fix">
+/* Online Groups: remove the old inner placeholder shape and centre the chosen emblem. */
+.zagOnlineGroupCard .groupBadgeNoEmoji,
+.groupHero .groupBadgeNoEmoji{
+  position:relative!important;
+  width:86px!important;
+  height:86px!important;
+  min-width:86px!important;
+  padding:0!important;
+  margin:0 12px 0 0!important;
+  border:1.5px solid #8d29a5!important;
+  border-radius:14px!important;
+  background:#060711!important;
+  box-shadow:0 0 10px rgba(210,45,255,.25)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.zagOnlineGroupCard .groupBadgeNoEmoji::before,
+.zagOnlineGroupCard .groupBadgeNoEmoji::after,
+.groupHero .groupBadgeNoEmoji::before,
+.groupHero .groupBadgeNoEmoji::after{
+  content:none!important;
+  display:none!important;
+}
+.zagOnlineGroupCard .groupBadgeNoEmoji img,
+.groupHero .groupBadgeNoEmoji img{
+  position:static!important;
+  display:block!important;
+  width:82%!important;
+  height:82%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+}
+</style>
 </head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.jpg">
