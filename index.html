@@ -237,7 +237,124 @@ img.logo[alt="Zag Science"]{
   transform:none!important;
 }
 </style>
-</head>
+
+<style id="zag-v26-group-emblem-editor">
+.modalbox.zagPickingEmblem{
+  padding-top:22px!important;
+}
+.modalbox.zagPickingEmblem .zagHideWhilePicking{
+  display:none!important;
+}
+.modalbox.zagPickingEmblem #zagEmblemPickerOnly{
+  margin-top:12px!important;
+  margin-bottom:4px!important;
+}
+.modalbox.zagPickingEmblem .zagEmblemPickerOnlyGrid{
+  max-height:285px!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch;
+}
+.exileGroupBtn{
+  width:100%!important;
+  margin-top:10px!important;
+  border-color:#a82b65!important;
+}
+.exileInlineConfirm{
+  margin-top:10px;
+  padding:12px;
+  border:1px solid #a82b65;
+  border-radius:10px;
+  background:#10070d;
+}
+.exileConfirmActions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.exileConfirmActions button{flex:1}
+.exileConfirm{
+  border:1px solid #d33c79;
+  border-radius:9px;
+  background:#2a0918;
+  color:#fff;
+  padding:10px;
+}
+</style>
+
+<style id="zag-v27-real-group-emblems">
+.zagOnlineGroupCard .row{align-items:center!important}
+.zagRealEmblemBox{
+  position:relative!important;
+  width:128px!important;height:128px!important;min-width:128px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  overflow:visible!important;padding:0!important;margin:0 14px 0 0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;
+}
+.zagRealEmblemBox::before,.zagRealEmblemBox::after{
+  content:none!important;display:none!important;background:none!important;border:0!important;box-shadow:none!important;
+}
+.zagRealEmblemImage{
+  position:absolute!important;left:50%!important;top:50%!important;
+  width:124px!important;height:124px!important;max-width:none!important;max-height:none!important;
+  object-fit:contain!important;object-position:center!important;
+  transform:translate(-50%,-50%)!important;
+  margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;
+}
+@media(max-width:430px){
+ .zagRealEmblemBox{width:112px!important;height:112px!important;min-width:112px!important;margin-right:12px!important}
+ .zagRealEmblemImage{width:110px!important;height:110px!important}
+}
+</style>
+
+<style id="zag-v27-2-emblem-picker">
+.modalbox.zagPickingEmblem .groupModeGrid,
+.modalbox.zagPickingEmblem .bodyRatioBox,
+.modalbox.zagPickingEmblem .exerciseChooser,
+.modalbox.zagPickingEmblem .createGroupAction,
+.modalbox.zagPickingEmblem .exileGroupBtn,
+.modalbox.zagPickingEmblem #zagOnlineExileConfirm{
+ display:none!important;
+}
+.modalbox.zagPickingEmblem #zagEmblemPickerOnly{
+ display:block!important;margin:12px 0 0!important;
+}
+.modalbox.zagPickingEmblem .zagEmblemPickerOnlyGrid{
+ max-height:52vh!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;
+}
+</style>
+
+<style id="zag-v27-3-cloud-groups">
+.zagCloudSyncNote{font-size:12px;color:#c98bd8;margin:6px 0 10px;text-align:center}
+</style>
+
+<style id="zag-v27-4-groups-no-flash">
+body.zagGroupsBooting #screen{visibility:hidden!important}
+</style>
+<style id="zag-v27-5-group-emblem-size">
+.zagOnlineGroupCard .row{position:relative!important;min-height:164px!important;padding-left:168px!important}
+.zagRealEmblemBox{position:absolute!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;width:160px!important;height:160px!important;min-width:160px!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.zagRealEmblemBox::before,.zagRealEmblemBox::after{content:none!important;display:none!important}
+.zagRealEmblemImage{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:158px!important;height:158px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+@media(max-width:430px){.zagOnlineGroupCard .row{min-height:154px!important;padding-left:154px!important}.zagRealEmblemBox{width:148px!important;height:148px!important;min-width:148px!important}.zagRealEmblemImage{width:146px!important;height:146px!important}}
+</style><style id="zag-v27-6-emblem-final">
+.zagOnlineGroupCard .zagRealEmblemBox,.groupHero .zagRealEmblemBox{
+ width:150px!important;height:150px!important;min-width:150px!important;max-width:150px!important;
+ border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+}
+.zagOnlineGroupCard .zagRealEmblemImage,.groupHero .zagRealEmblemImage{
+ width:150px!important;height:150px!important;min-width:150px!important;max-width:150px!important;max-height:none!important;
+ object-fit:contain!important;transform:scale(1.55)!important;transform-origin:center!important;
+ border:0!important;background:transparent!important;box-shadow:none!important;margin:0!important;padding:0!important;
+}
+.zagOnlineGroupCard .row{min-height:160px!important}
+.groupHero{min-height:170px!important}
+@media(max-width:430px){
+ .zagOnlineGroupCard .zagRealEmblemBox,.groupHero .zagRealEmblemBox{width:138px!important;height:138px!important;min-width:138px!important;max-width:138px!important}
+ .zagOnlineGroupCard .zagRealEmblemImage,.groupHero .zagRealEmblemImage{width:138px!important;height:138px!important;min-width:138px!important;max-width:138px!important;transform:scale(1.55)!important}
+}
+</style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.jpg">
 <main id="screen"></main></div>
@@ -641,7 +758,13 @@ function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=
 function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach(sec=>{s+=`<section class=maxsection><h2>${esc(sec.name)}</h2>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
 function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
-function groupMembers(){let all=[{name:"Kieron",vals:{"Squats":200,"Bench Press":170,"Deadlifts":220,"Weighted Lat Pull Up":50,"Barbell Row":115},bw:90,streak:12,prs:4,trend:1},{name:"James",vals:{"Squats":180,"Bench Press":165,"Deadlifts":210,"Weighted Lat Pull Up":45,"Barbell Row":110},bw:84,streak:8,prs:2,trend:-1},{name:"Bill",vals:{"Squats":160,"Bench Press":150,"Deadlifts":200,"Weighted Lat Pull Up":40,"Barbell Row":120},bw:82,streak:16,prs:3,trend:2},{name:"Keelan",vals:{"Squats":150,"Bench Press":140,"Deadlifts":190,"Weighted Lat Pull Up":60,"Barbell Row":110},bw:78,streak:6,prs:1,trend:0},{name:"Anna",vals:{"Squats":120,"Bench Press":125,"Deadlifts":160,"Weighted Lat Pull Up":25,"Barbell Row":80},bw:65,streak:10,prs:3,trend:1},{name:"Betsy",vals:{"Squats":100,"Bench Press":90,"Deadlifts":140,"Weighted Lat Pull Up":20,"Barbell Row":70},bw:60,streak:5,prs:2,trend:-1}];if(!st.demoGroup)return all;let allowed=new Set(["Kieron",...(st.demoGroup.members||[])]);return all.filter(x=>allowed.has(x.name))}
+function groupMembers(){
+  if(Array.isArray(window.zagRealGroupPeople) && window.zagRealGroupPeople.length) return window.zagRealGroupPeople;
+  const meName=(st.profile?.username||st.username||"You");
+  const vals={};
+  try{Object.entries(st.pb||st.pbs||st.maxes||{}).forEach(([k,v])=>{vals[k]=Number(v?.weight_kg??v?.weight??v)||0})}catch(_){}
+  return [{name:meName,username:meName,vals,bw:Number(st.bodyweightKg||st.bodyweight_kg||st.bodyweight)||0,streak:Number(st.streak)||0,prs:0,trend:0}];
+}
 const groupMedalGold="assets/images/asset-019-c71d4429545b.png",groupMedalSilver="assets/images/asset-020-03270e433097.png",groupMedalBronze="assets/images/asset-021-d979d8b3369c.png";
 function medalImg(i,cls='rankMedalImg'){let a=[groupMedalGold,groupMedalSilver,groupMedalBronze];return i<3?`<img class="${cls}" src="${a[i]}" alt="${i+1} place medal">`:String(i+1)}
 function rankBadge(i){return medalImg(i)}
@@ -650,7 +773,12 @@ function memberCard(m,i,metric){let tr=m.trend>0?`<span style="color:#e969ff">�
 function showcaseSecondGroup(){let ms=groupMembers().slice().sort((a,b)=>(b.vals['Deadlifts']||0)-(a.vals['Deadlifts']||0));return `<div class="groupSectionBox"><div class=groupSectionLabel>Group 2</div><div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>Strength Crew</div><div class=small>${ms.length} Members • Push each other</div><div class=showcaseNote>Demo group for layout testing</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs><button class="groupMainTab">Total</button><button class="groupMainTab">Bodyweight</button><button class="groupMainTab sel">Individual Exercises</button></div><div class=exerciseTabStrip><button class="exerciseTab sel">Deadlifts</button><button class=exerciseTab>Bench Press</button><button class=exerciseTab>Squats</button></div>${groupPodium(ms,m=>weightText(m.vals['Deadlifts']||0))}${groupTable('Deadlifts Leaderboard',ms,m=>weightText(m.vals['Deadlifts']||0),'Best Lift')}</div>`}function groupsPage(view){setActiveNav("groups");st.groupView=view||st.groupView||"overall";save();if(!st.demoGroup){document.getElementById("screen").innerHTML=`<div class=title><h1>Groups</h1><p>Compete • improve • celebrate PRs</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><div class="groupEmptyFigurine"><img src="assets/images/asset-022-0703892d0bc1.png" alt="Zag Science trophy figurine"></div><h2 style="margin:0 0 6px">No groups yet</h2><div class=small style="margin-bottom:18px">Create a group to start a leaderboard with friends.</div><button class=pick style="width:100%" onclick=createGroup()>＋ Create Group</button></div>`;window.scrollTo(0,0);return}let tabs=[['total','Total'],['bodyweight','Bodyweight'],['exercises','Individual Exercises']];if(!view&&(!st.groupView||!['total','bodyweight','exercises'].includes(st.groupView)))st.groupView='total';let inner=`<div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>${esc(st.demoGroup.name||'The Lads')}</div><div class=small>${groupMembers().length} Members • Train harder together</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs>${tabs.map(t=>`<button class="groupMainTab ${st.groupView===t[0]?'sel':''}" onclick="groupsPage('${t[0]}')">${t[1]}</button>`).join('')}</div>`;if(st.groupView==='exercises')inner+=groupExercises();else if(st.groupView==='bodyweight')inner+=groupBodyweightLayout();else inner+=groupTotalLayout();let s=`<div class=title><h1>Groups</h1><p>Friendly competition • train harder together</p></div><div class="groupSectionBox"><div class=groupSectionLabel>Group 1</div>${inner}</div>${showcaseSecondGroup()}<button class="pick createAnotherGroup" onclick="createGroup()">＋ Create Group</button>`;document.getElementById("screen").innerHTML=s;window.scrollTo(0,0)}
 function groupOverall(){let ms=groupMembers().sort((a,b)=>groupScore(b)-groupScore(a));return `<div class=pagecard><h2 style="margin:0 0 4px">⚡ Zag Score</h2><div class=small>Preview score based on the group's selected lifts relative to bodyweight. We can refine the formula before cloud launch.</div></div>${ms.map((m,i)=>memberCard(m,i,x=>groupScore(x)+' pts')).join('')}`}
 function groupStreaks(){let ms=groupMembers().sort((a,b)=>b.streak-a.streak);return `<div class=pagecard><h2 style="margin:0">🔥 Streak Leaderboard</h2><div class=small>Current workout streaks</div></div>${ms.map((m,i)=>memberCard(m,i,x=>x.streak+' days')).join('')}`}
-function groupPodium(ms,metric){let top=ms.slice(0,3), order=[1,0,2].filter(i=>top[i]);return `<div class=groupPodium>${order.map(i=>{let m=top[i];return `<div class=podiumCard ${i===0?'winner':''}><div class=podiumMedal>${medalImg(i,'podiumMedalImg')}</div><b>${esc(m.name)}</b><div class=small>${metric(m)}</div></div>`}).join('')}</div>`}
+function groupPodium(ms,metric){
+ let top=ms.slice(0,3);
+ if(!top.length)return "";
+ const card=(m,rank)=>m?`<div class="zagLegacyPodCard rank${rank}"><div class="zagLegacyMedal"><img src="${[groupMedalGold,groupMedalSilver,groupMedalBronze][rank-1]}" alt="${rank} place"></div><b>${esc(m.name)}</b><div class=small>${metric(m)}</div></div>`:`<div class="zagLegacyPodCard empty"></div>`;
+ return `<div class="zagLegacyPodium">${card(top[1],2)}${card(top[0],1)}${card(top[2],3)}</div>`;
+}
 function groupTable(title,ms,metric,label){return `<div class=pagecard groupBoard><h2> ${esc(title)}</h2><div class=boardHead><span>#</span><span>Member</span><span>${esc(label)}</span></div>${ms.map((m,i)=>`<div class=boardRow><span>${rankBadge(i)}</span><b>${esc(m.name)}</b><b>${metric(m)}</b></div>`).join('')}</div>`}
 function combinedValue(m){let ex=(st.demoGroup?.exercises||[]);if(!ex.length)ex=['Squats','Bench Press','Deadlifts'];return ex.reduce((n,x)=>n+(m.vals[x]||0),0)}
 function groupTotalLayout(){let ms=groupMembers().sort((a,b)=>combinedValue(b)-combinedValue(a));return groupPodium(ms,m=>weightText(combinedValue(m)))+groupTable('Combined Weight Leaderboard',ms,m=>weightText(combinedValue(m)),'Combined')}
@@ -668,7 +796,7 @@ function toggleExerciseChooser(){document.getElementById('gExerciseList')?.class
 function toggleGroupExercise(name){let set=groupCreateState.selectedExercises||(groupCreateState.selectedExercises=new Set());set.has(name)?set.delete(name):set.add(name);renderGroupExercisePicker();syncGroupCreateUI()}
 function groupExerciseButton(x,selected=false){return `<button type="button" class="groupExercisePill ${selected?'selected':''}" onclick="toggleGroupExercise('${q(x)}')">${esc(x)}</button>`}
 function renderGroupExercisePicker(){let host=document.getElementById('gExerciseList');if(!host)return;let selected=groupCreateState.selectedExercises||new Set();let selectedHTML=[...selected].map(x=>groupExerciseButton(x,true)).join('');let seen=new Set();let sections=groupExerciseSections().map(sec=>{let mains=(sec.mains||[]).filter(x=>!selected.has(x)&&!seen.has(x));mains.forEach(x=>seen.add(x));let extras=(sec.extras||[]).filter(x=>!selected.has(x)&&!seen.has(x));extras.forEach(x=>seen.add(x));if(!mains.length&&!extras.length)return '';return `<div class=groupExerciseSection><div class=groupExerciseSectionTitle>${esc(sec.name)}</div>${mains.map(x=>groupExerciseButton(x)).join('')}${extras.length?`<div class="groupExerciseSectionTitle extras">${esc(sec.name)} EXTRAS</div>${extras.map(x=>groupExerciseButton(x)).join('')}`:''}</div>`}).join('');host.innerHTML=`<div class=groupSelectedBlock><div class=groupSelectedTitle>Selected</div>${selectedHTML||'<div class=groupEmptySelected>No exercises selected yet.</div>'}</div>${sections}`}
-function createGroup(){groupCreateState={combined:false,bodyweight:false,individual:false,ratioCombined:false,ratioIndividual:false,selectedExercises:new Set()};modal("Create Group",`<p class=small>Set up your group, then you can add the test accounts.</p><input id=gname class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name"><div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div><div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div><div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount>None selected</span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div><button class="pick createGroupAction" onclick="finishCreateGroup()">Create Group</button>`);renderGroupExercisePicker();syncGroupCreateUI();requestAnimationFrame(()=>{const b=document.querySelector("#modalRoot .modalbox");if(b)b.scrollTop=0})}
+function createGroup(){groupCreateState={combined:false,bodyweight:false,individual:false,ratioCombined:false,ratioIndividual:false,selectedExercises:new Set()};modal("Create Group",`<p class=small>Set up your group, then you can add the test accounts.</p><input id=gname class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name"><div class="groupModeGrid zagHideWhilePicking"><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div><div id=gRatioOuter class="bodyRatioBox zagHideWhilePicking" onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div><div class="exerciseChooser zagHideWhilePicking"><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount>None selected</span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div><button class="pick createGroupAction" onclick="finishCreateGroup()">Create Group</button>`);renderGroupExercisePicker();syncGroupCreateUI();requestAnimationFrame(()=>{const b=document.querySelector("#modalRoot .modalbox");if(b)b.scrollTop=0})}
 function finishCreateGroup(){let n=(document.getElementById('gname')?.value||'').trim();if(!n){alert('Give your group a name first.');return}let exercises=[...(groupCreateState.selectedExercises||new Set())];st.demoGroup={name:n,members:[],exercises:exercises,leaderboards:{combined:groupCreateState.combined,bodyweight:groupCreateState.bodyweight,individual:groupCreateState.individual,bodyweightCombined:groupCreateState.ratioCombined,bodyweightIndividual:groupCreateState.ratioIndividual}};st.groupView='total';save();closeModal();groupsPage();setTimeout(inviteMembers,180)}
 function inviteMembers(){let chosen=new Set((st.demoGroup&&st.demoGroup.members)||[]);let people=groupMembers().filter(x=>x.name!=='Kieron');modal("Add Members",`<p class=small>Test accounts are available so you can try the group setup before real accounts are connected.</p><div class=createChoices>${people.map(p=>`<label><input class=demoMember type=checkbox value="${esc(p.name)}" ${chosen.has(p.name)?'checked':''}><b>${esc(p.name)}</b><span class=small> • ⚡ ${p.streak} day streak</span></label>`).join('')}</div><button class=pick onclick="saveDemoMembers()">Add to Group</button>`)}
 function saveDemoMembers(){if(!st.demoGroup)return;st.demoGroup.members=[...document.querySelectorAll('.demoMember:checked')].map(x=>x.value);save();closeModal();groupsPage()}
@@ -1106,9 +1234,16 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
 
   window.groupMembers=function(){
     let all=zagAllGroupPeople();
-    if(!st.demoGroup)return all;
-    let allowed=new Set(["Kieron",...(st.demoGroup.members||[])]);
-    return all.filter(x=>allowed.has(x.name));
+    if(all.length) return all;
+    const u=(st.profile?.username||st.username||zagSession?.user?.user_metadata?.username||"You");
+    const vals={};
+    try{
+      const src=st.max||st.pb||st.pbs||st.maxes||{};
+      Object.entries(src).forEach(([k,v])=>{vals[k]=Number(v?.weight_kg??v?.weight??v)||0});
+    }catch(_){}
+    return [{id:zagSession?.user?.id||"me",name:u,username:u,vals,
+      bw:Number(st.bodyweightKg||st.bodyweight_kg||st.bodyweight)||0,
+      streak:Number(st.streak)||0,prs:0,trend:0,role:"owner"}];
   };
 
   function config(){
@@ -1197,7 +1332,7 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
         <div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div>
         <div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div>
       </div>
-      <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')">
+      <div id=gRatioOuter class="bodyRatioBox zagHideWhilePicking" onclick="toggleGroupMode('bodyweight')">
         <div class=bodyRatioTitle>Bodyweight Ratio</div>
         <div class=ratioMiniGrid>
           <div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div>
@@ -1282,7 +1417,7 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
     else content=`<div class=groupNoLeaderboard>No leaderboard selections are enabled. Use Edit Group to choose which leaderboards this group shows.</div>`;
 
     let hero=`<div class="pagecard groupHero">
-      <div class=groupBadgeNoEmoji>${st.demoGroup.emblem?`<img class="zagSavedGroupEmblem" src="${zagEmblemSrc(st.demoGroup.emblem)}" alt="">`:""}</div>
+      <div class="zagLegacyHeroEmblem" style="width:92px;height:92px;min-width:92px;flex:0 0 92px;border:0;background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;overflow:visible">${st.demoGroup.emblem?`<img src="${zagEmblemSrc(st.demoGroup.emblem)}" alt="" style="width:132px;height:132px;max-width:none;object-fit:contain;transform:scale(1.18);border:0;background:transparent">`:""}</div>
       <div class=grow><div class=groupTitle>${esc(st.demoGroup.name||"Group")}</div><div class=small>${groupMembers().length} Members · Train harder together</div></div>
       <div class=groupHeroActions><button class=btn onclick="zagToggleInvite()">Invite</button><button class=btn onclick="editGroup()">Edit Group</button></div>
       ${zagInviteOpen?inviteHTML():""}
@@ -2072,7 +2207,12 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
 <script id="zag-edit-group-image-box-script">
 window.zagChooseGroupImage=function(){
   const existing=document.getElementById("zagEmblemPickerOnly");
-  if(existing){existing.remove();return}
+  const box=document.querySelector(".modalbox");
+  if(existing){
+    existing.remove();
+    if(box)box.classList.remove("zagPickingEmblem");
+    return;
+  }
   const row=document.querySelector(".zagEditGroupTopRow");
   if(!row)return;
   const current=(window.groupCreateState&&groupCreateState.emblem)||st.demoGroup?.emblem||"";
@@ -2084,15 +2224,17 @@ window.zagChooseGroupImage=function(){
       return '<button type="button" class="zagEmblemPickerOnlyChoice '+(id===current?'selected':'')+'" data-emblem="'+id+'" onclick="zagSelectGroupEmblem(\''+id+'\')"><img src="'+zagEmblemSrc(id)+'" alt=""></button>';
     }).join("")+'</div>';
   row.insertAdjacentElement("afterend",picker);
+  if(box){
+    box.classList.add("zagPickingEmblem");
+    box.scrollTop=0;
+  }
 };
 window.zagSelectGroupEmblem=function(id){
-  if(typeof groupCreateState==="undefined" || !groupCreateState)return;
-  groupCreateState.emblem=id;
-  const btn=document.querySelector(".zagGroupImageBox");
-  if(btn)btn.innerHTML='<img class="zagGroupImagePreview" src="'+zagEmblemSrc(id)+'" alt="">';
-  document.querySelectorAll(".zagEmblemPickerOnlyChoice").forEach(function(b){
-    b.classList.toggle("selected",b.dataset.emblem===id);
-  });
+ if(!window.groupCreateState)window.groupCreateState={};
+ groupCreateState.emblem=id;
+ document.querySelectorAll(".zagGroupImageBox").forEach(function(box){box.innerHTML='<img class="zagGroupImagePreview" src="'+zagEmblemSrc(id)+'" alt="">';});
+ const picker=document.getElementById("zagEmblemPickerOnly");if(picker)picker.remove();
+ const box=document.querySelector(".modalbox");if(box)box.classList.remove("zagPickingEmblem");
 };
 </script>
 
@@ -2730,8 +2872,12 @@ if ('serviceWorker' in navigator) {
  function signed(){return !!(zagSb&&zagSession?.user)}
  function code(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
  async function ensureSession(){
-   if(zagSb&&!zagSession?.user){const {data}=await zagSb.auth.getSession();zagSession=data?.session||null}
-   return zagSession?.user||null;
+   if(zagSession?.user)return zagSession.user;
+   try{
+     const r=await zagSb.auth.getSession();zagSession=r.data?.session||null;
+     if(!zagSession){try{const rr=await zagSb.auth.refreshSession();zagSession=rr.data?.session||null}catch(_){}}
+     return zagSession?.user||null;
+   }catch(_){return null}
  }
  async function memberships(){
    const u=await ensureSession(); if(!u)return [];
@@ -2739,57 +2885,122 @@ if ('serviceWorker' in navigator) {
    if(error)throw error; return data||[];
  }
  async function load(){
-   const ms=await memberships(),ids=ms.map(x=>x.group_id);
-   if(!ids.length){cache=[];return cache}
-   const {data,error}=await zagSb.from("groups").select("*").in("id",ids);
-   if(error)throw error;
-   cache=(data||[]).map(g=>({...g,myRole:ms.find(m=>m.group_id===g.id)?.role||"member"}));
+   const u=await ensureSession();if(!u){cache=[];return cache}
+
+   // Always fetch owned groups directly. A blocked group_members SELECT must not
+   // stop the owner's groups appearing on another device.
+   const ownedResult=await zagSb.from("groups").select("*").eq("owner_id",u.id);
+   if(ownedResult.error)throw ownedResult.error;
+   const owned=ownedResult.data||[];
+
+   let ms=[];
+   try{
+     const membershipResult=await zagSb.from("group_members").select("group_id,role").eq("user_id",u.id);
+     if(!membershipResult.error)ms=membershipResult.data||[];
+   }catch(_){}
+
+   const ownedIds=new Set(owned.map(g=>g.id));
+   const memberIds=[...new Set(ms.map(m=>m.group_id).filter(id=>id&&!ownedIds.has(id)))];
+   let joined=[];
+   if(memberIds.length){
+     const joinedResult=await zagSb.from("groups").select("*").in("id",memberIds);
+     if(!joinedResult.error)joined=joinedResult.data||[];
+   }
+
+   const byId=new Map();
+   [...owned,...joined].forEach(g=>{
+     const membership=ms.find(m=>m.group_id===g.id);
+     byId.set(g.id,{...g,myRole:g.owner_id===u.id?"owner":(membership?.role||"member")});
+   });
+   cache=[...byId.values()];
+   const exiledIds=new Set(Array.isArray(st.exiledOnlineGroupIds)?st.exiledOnlineGroupIds:[]);
+   cache=cache.filter(g=>!exiledIds.has(g.id));
+
+   st.onlineGroupConfigs=st.onlineGroupConfigs||{};
+   const liveIds=new Set(cache.map(g=>g.id));
+   Object.keys(st.onlineGroupConfigs).forEach(id=>{if(!liveIds.has(id))delete st.onlineGroupConfigs[id]});
+   cache.forEach(g=>{
+     if(g.emblem){
+       st.onlineGroupConfigs[g.id]=st.onlineGroupConfigs[g.id]||{};
+       st.onlineGroupConfigs[g.id].emblem=g.emblem;
+     }
+   });
+   save();
    return cache;
- }
- async function realMembers(id){
-   const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);
-   if(mr.error)throw mr.error;
-   const ms=mr.data||[],ids=ms.map(x=>x.user_id);
-   if(!ids.length)return [];
-   const [a,b]=await Promise.all([
-     zagSb.from("profiles").select("id,username,display_name,bodyweight_kg").in("id",ids),
-     zagSb.from("personal_bests").select("user_id,exercise_name,weight_kg,reps").in("user_id",ids)
-   ]);
-   if(a.error)throw a.error;if(b.error)throw b.error;
+ } async function realMembers(id){
+   const g=cache.find(x=>x.id===id)||window.zagRealCurrentGroup;
+   let ms=[];
+   try{const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);if(!mr.error)ms=mr.data||[]}catch(_){}
+   if(g?.owner_id&&!ms.some(m=>m.user_id===g.owner_id))ms.unshift({user_id:g.owner_id,role:"owner"});
+   const ids=[...new Set(ms.map(x=>x.user_id).filter(Boolean))];if(!ids.length)return [];
+   let profiles=[],pbs=[];
+   try{const a=await zagSb.from("profiles").select("id,username,display_name,bodyweight_kg,streak").in("id",ids);if(!a.error)profiles=a.data||[]}catch(_){}
+   try{const b=await zagSb.from("personal_bests").select("user_id,exercise_name,weight_kg,reps").in("user_id",ids);if(!b.error)pbs=b.data||[]}catch(_){}
    return ms.map(m=>{
-     const pr=(a.data||[]).find(x=>x.id===m.user_id)||{};
-     const mine=(b.data||[]).filter(x=>x.user_id===m.user_id);
-     const vals={};mine.forEach(x=>{const w=Number(x.weight_kg)||0;if(w>(vals[x.exercise_name]||0))vals[x.exercise_name]=w});
-     return {id:m.user_id,name:pr.display_name||pr.username||"Member",username:pr.username||"",bw:Number(pr.bodyweight_kg)||0,vals,role:m.role,streak:0,prs:mine.length,trend:0};
+     const pr=profiles.find(x=>x.id===m.user_id)||{},mine=pbs.filter(x=>x.user_id===m.user_id),vals={};
+     mine.forEach(x=>{const w=Number(x.weight_kg)||0;if(w>(vals[x.exercise_name]||0))vals[x.exercise_name]=w});
+     const isMe=zagSession?.user?.id===m.user_id;
+     return {id:m.user_id,name:pr.display_name||pr.username||(isMe?"Kadotz":"Member"),username:pr.username||(isMe?"Kadotz":""),
+       bw:Number(pr.bodyweight_kg)||0,vals,role:m.role||((g?.owner_id===m.user_id)?"owner":"member"),
+       streak:Number(pr.streak)||0,prs:mine.length,trend:0};
    });
  }
  function totalOf(m){return Object.values(m.vals||{}).reduce((n,v)=>n+(Number(v)||0),0)}
+ function zagOnlineEmblemHTML(g){
+   const cfg=(st.onlineGroupConfigs||{})[g.id]||{};
+   const emblem=g.emblem||cfg.emblem||"";
+   return `<div class="zagRealEmblemBox" style="width:92px;height:92px;min-width:92px;flex:0 0 92px;border:0;background:transparent;box-shadow:none;overflow:visible;display:flex;align-items:center;justify-content:center">${emblem?`<img class="zagRealEmblemImage" src="${zagEmblemSrc(emblem)}" alt="" style="display:block;width:132px;height:132px;max-width:none;max-height:none;object-fit:contain;transform:scale(1.18);transform-origin:center;border:0;background:transparent;box-shadow:none">`:""}</div>`;
+ }
+
  function memberTable(title,people,score,fmt){
    let a=[...people].sort((x,y)=>score(y)-score(x));
    return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div><div><b>${i+1}. ${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>`;
  }
+ const MEDAL_GOLD='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">1</text></svg>'; const MEDAL_SILVER='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">2</text></svg>'; const MEDAL_BRONZE='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">3</text></svg>';
  function podium(people,score,fmt){
-   let a=[...people].sort((x,y)=>score(y)-score(x)).slice(0,3);
-   if(!a.length)return "";
-   let order=a.length>=2?[a[1],a[0],a[2]].filter(Boolean):a;
-   return `<div class=groupPodium>${order.map(m=>`<div class=podiumCard><b>${E(m.name)}</b><div class=small>${E(fmt(score(m)))}</div></div>`).join("")}</div>`;
+   const ranked=[...people].sort((x,y)=>score(y)-score(x)).slice(0,3);
+   if(!ranked.length)return "";
+   const medal=[groupMedalGold,groupMedalSilver,groupMedalBronze];
+   const card=(m,rank)=>{
+     if(!m)return `<div class="zagApprovedPodCard empty"></div>`;
+     return `<div class="zagApprovedPodCard rank${rank}">
+       <div class="zagApprovedMedal"><img src="${medal[rank-1]}" alt="${rank} place"></div>
+       <b>${E(m.name)}</b><div class=zagApprovedScore>${E(fmt(score(m)))}</div>
+     </div>`;
+   };
+   return `<div class="zagApprovedPodium">${card(ranked[1],2)}${card(ranked[0],1)}${card(ranked[2],3)}</div>`;
+ }
+ async function zagHydrateProfile(){
+   const u=await ensureSession();if(!u)return null;
+   try{
+     const r=await zagSb.from("profiles").select("username,display_name,bodyweight_kg,streak").eq("id",u.id).maybeSingle();
+     if(r.error||!r.data)return null;
+     const pr=r.data,bw=Number(pr.bodyweight_kg);
+     if(Number.isFinite(bw)&&bw>0){st.bodyweightKg=bw;st.bodyweight_kg=bw;st.bodyweight=bw;try{localStorage.setItem("zagBodyweightKg",String(bw))}catch(_){}}
+     if(Number.isFinite(Number(pr.streak)))st.streak=Number(pr.streak);
+     save();return pr;
+   }catch(_){return null}
  }
  window.zagOnlineGroupsHome=async function(){
+   document.body.classList.add("zagGroupsBooting");
+   await zagHydrateProfile();
    setActiveNav("groups");const h=document.getElementById("screen");
+   h.innerHTML="";
+   requestAnimationFrame(()=>document.body.classList.remove("zagGroupsBooting"));
    if(!await ensureSession()){h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><h2>Sign in to use Groups</h2><div class=small style="margin-bottom:18px">Online groups are linked to your Zag Science account.</div><button class=pick onclick=settings()>Go to Settings</button></div>`;return}
    h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div><div class=pagecard><h2>Loading groups…</h2></div>`;
    try{await load()}catch(e){h.innerHTML=`<div class=title><h1>Groups</h1></div><div class=pagecard><h2>Groups couldn't load</h2><div class=small>${E(e.message||e)}</div></div>`;return}
    h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
-   ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row>${((st.onlineGroupConfigs||{})[g.id]?.emblem)?`<div class=groupBadgeNoEmoji><img src="${zagEmblemSrc((st.onlineGroupConfigs||{})[g.id].emblem)}" style="width:100%;height:100%;object-fit:contain" alt=""></div>`:`<div class=groupBadgeNoEmoji></div>`}<div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
+   ${cache.length?cache.map(g=>`<div class="pagecard zagOnlineGroupCard" onclick="zagOpenOnlineGroup('${g.id}')"><div class=row>${zagOnlineEmblemHTML(g)}<div class=grow><h2 style="margin:0">${E(g.name)}</h2><div class=small>Invite code · ${E(g.invite_code||"")}</div></div></div></div>`).join(""):`<div class=pagecard style="text-align:center;padding:28px 18px"><h2 style="margin:0 0 6px">No groups yet</h2><div class=small>Create one or join a friend's group.</div></div>`}
    <div class=zagGroupActions><button class=pick onclick=zagCreateOnlineGroupModal()>Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
  }
  window.zagCreateOnlineGroupModal=function(){
    groupCreateState={combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,emblem:"",selectedExercises:new Set(allGroupExerciseNames())};
    modal("Create Group",`<div class="zagEditGroupTopRow"><button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Choose group emblem"><span class="zagGroupImagePlaceholder"></span></button><input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name"></div>
-   <div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
+   <div class="groupModeGrid zagHideWhilePicking"><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
    <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
-   <div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
-   <button id=zagCreateBtn class="pick createGroupAction" onclick=zagCreateOnlineGroup()>Create Group</button>`);
+   <div class="exerciseChooser zagHideWhilePicking"><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
+   <button id=zagCreateBtn class="pick createGroupAction zagHideWhilePicking" onclick=zagCreateOnlineGroup()>Create Group</button>`);
    renderGroupExercisePicker();syncGroupCreateUI();
  }
  window.zagCreateOnlineGroup=async function(){
@@ -2797,34 +3008,98 @@ if ('serviceWorker' in navigator) {
    if(!name)return alert("Give your group a name first.");if(btn){btn.disabled=true;btn.textContent="Creating…"}
    try{
      const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
-     const r=await zagSb.from("groups").insert({name,owner_id:u.id,invite_code:code()}).select("*").single();if(r.error)throw r.error;
+     let payload={name,owner_id:u.id,invite_code:code(),emblem:groupCreateState.emblem||null};
+     let r=await zagSb.from("groups").insert(payload).select("*").single();
+     if(r.error&&/emblem/i.test(r.error.message||"")){delete payload.emblem;r=await zagSb.from("groups").insert(payload).select("*").single();}
+     if(r.error)throw r.error;
      const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"owner"},{onConflict:"group_id,user_id"});if(m.error)throw m.error;
      st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[r.data.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();
      cache.push({...r.data,myRole:"owner"});closeModal();await zagOpenOnlineGroup(r.data.id);
    }catch(e){if(btn){btn.disabled=false;btn.textContent="Create Group"}alert("Could not create group: "+(e.message||e))}
  }
- window.zagJoinOnlineGroupModal=function(){modal("Join Group",`<p class=small>Enter the 6-character invite code from the group owner.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 style="width:100%;padding:10px;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`)}
+ window.zagJoinOnlineGroupModal=function(){modal("Join Group",`<p class=small>Enter the 6-character group code.</p><div class="zagJoinCodeRow"><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 autocomplete="off" autocapitalize="characters" style="width:100%;padding:12px;text-transform:uppercase;letter-spacing:4px;text-align:center" placeholder="ABC123"></div><button id=zagJoinCodeBtn class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`);setTimeout(()=>document.getElementById("onlineJoinCode")?.focus(),80)}
  window.zagJoinOnlineGroup=async function(){
-   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase();if(!c)return alert("Enter an invite code.");
-   const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();if(r.error||!r.data)return alert("That group code was not found.");
-   const u=await ensureSession(),m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});if(m.error)return alert(m.error.message);
-   closeModal();cache.push({...r.data,myRole:"member"});await zagOpenOnlineGroup(r.data.id);
+   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase(),btn=document.getElementById("zagJoinCodeBtn");
+   if(!c||c.length!==6)return alert("Enter the 6-character group code.");
+   if(btn){btn.disabled=true;btn.textContent="Searching…"}
+   try{
+     const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
+     const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();
+     if(r.error)throw r.error;if(!r.data)throw new Error("That group code was not found.");
+     if(btn)btn.textContent="Joining…";
+     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});
+     if(m.error)throw m.error;
+     closeModal();try{await load()}catch(_){}
+     if(!cache.some(x=>x.id===r.data.id))cache.push({...r.data,myRole:"member"});
+     await zagOpenOnlineGroup(r.data.id);
+   }catch(e){if(btn){btn.disabled=false;btn.textContent="Join Group"}alert("Could not join group: "+(e.message||e))}
  }
  window.zagEditOnlineGroup=function(){
    const g=window.zagRealCurrentGroup;if(!g)return;
    const c=(st.onlineGroupConfigs||{})[g.id]||{combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,exercises:allGroupExerciseNames()};
-   groupCreateState={combined:!!c.combined,bodyweight:!!c.bodyweight,individual:!!c.individual,ratioCombined:!!c.ratioCombined,ratioIndividual:!!c.ratioIndividual,emblem:c.emblem||"",selectedExercises:new Set(c.exercises||[])};
-   modal("Edit Group",`<div class="zagEditGroupTopRow"><button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Change group emblem">${c.emblem?`<img class="zagGroupImagePreview" src="${zagEmblemSrc(c.emblem)}" alt="">`:`<span class="zagGroupImagePlaceholder"></span>`}</button><input id=onlineEditGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" value="${E(g.name)}" placeholder="Group name"></div>
+   const currentEmblem=g.emblem||c.emblem||"";
+   groupCreateState={combined:!!c.combined,bodyweight:!!c.bodyweight,individual:!!c.individual,ratioCombined:!!c.ratioCombined,ratioIndividual:!!c.ratioIndividual,emblem:currentEmblem,selectedExercises:new Set(c.exercises||[])};
+   modal("Edit Group",`<div class="zagEditGroupTopRow"><button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Change group emblem">${currentEmblem?`<img class="zagGroupImagePreview" src="${zagEmblemSrc(currentEmblem)}" alt="">`:`<span class="zagGroupImagePlaceholder"></span>`}</button><input id=onlineEditGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" value="${E(g.name)}" placeholder="Group name"></div>
    <div class=groupModeGrid><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
    <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
    <div class=exerciseChooser><div class=exerciseChooserHead onclick="toggleExerciseChooser()"><span>Exercises <span id=gExerciseCount class=exerciseCount></span></span><span id=gExerciseArrow>⌄</span></div><div id=gExerciseList class="exerciseChooserList"></div></div>
-   <button class="pick createGroupAction" onclick=zagSaveOnlineGroupEdit()>Save Group</button>`);
+   <button class="pick createGroupAction zagHideWhilePicking" onclick=zagSaveOnlineGroupEdit()>Save Group</button><button class="pick exileGroupBtn zagHideWhilePicking" onclick=zagConfirmOnlineExile()>Exile Group</button><div id="zagOnlineExileConfirm"></div>`);
    renderGroupExercisePicker();syncGroupCreateUI();
  }
- window.zagSaveOnlineGroupEdit=async function(){
+ window.zagConfirmOnlineExile=function(){
+   const host=document.getElementById("zagOnlineExileConfirm");if(!host)return;
+   if(host.innerHTML){host.innerHTML="";return}
+   host.innerHTML=`<div class="exileInlineConfirm"><b>Exile this group?</b><div class="small">This permanently deletes the group for all members.</div><div class="exileConfirmActions"><button type="button" class="btn" onclick="zagConfirmOnlineExile()">Cancel</button><button type="button" class="exileConfirm" onclick="zagExileOnlineGroup()">Exile Group</button></div></div>`;
+ }
+ window.zagExileOnlineGroup=async function(){
+   const g=window.zagRealCurrentGroup;if(!g)return;
+   const u=await ensureSession();if(!u)return alert("Your sign-in session has expired.");
+   const btn=document.querySelector(".exileConfirm");if(btn){btn.disabled=true;btn.textContent="Exiling…"}
+   try{
+     let deleted=false;
+     const del=await zagSb.from("groups").delete().eq("id",g.id).eq("owner_id",u.id).select("id");
+     if(!del.error&&del.data?.length)deleted=true;
+
+     if(!deleted){
+       // Some projects have a database function for cascading group deletion.
+       try{
+         const rpc=await zagSb.rpc("exile_group",{target_group_id:g.id});
+         if(!rpc.error)deleted=true;
+       }catch(_){}
+     }
+
+     // Remove any membership row too. This is safe even after a successful
+     // cascade and prevents a stale membership from making the card reappear.
+     try{await zagSb.from("group_members").delete().eq("group_id",g.id).eq("user_id",u.id)}catch(_){}
+
+     st.onlineGroupConfigs=st.onlineGroupConfigs||{};
+     delete st.onlineGroupConfigs[g.id];
+     st.exiledOnlineGroupIds=Array.isArray(st.exiledOnlineGroupIds)?st.exiledOnlineGroupIds:[];
+     if(!st.exiledOnlineGroupIds.includes(g.id))st.exiledOnlineGroupIds.push(g.id);
+     save();
+
+     cache=cache.filter(x=>x.id!==g.id);
+     window.zagRealCurrentGroup=null;
+     closeModal();
+     await zagOnlineGroupsHome();
+
+     if(!deleted){
+       setTimeout(()=>alert("Group exiled from this account. Supabase is still blocking permanent deletion of the database row; the app will keep it hidden."),50);
+     }
+   }catch(e){
+     if(btn){btn.disabled=false;btn.textContent="Exile Group"}
+     alert("Could not exile group: "+(e.message||e));
+   }
+ } window.zagSaveOnlineGroupEdit=async function(){
    const g=window.zagRealCurrentGroup;if(!g)return;const name=(document.getElementById("onlineEditGroupName")?.value||"").trim();if(!name)return alert("Give your group a name first.");
-   const r=await zagSb.from("groups").update({name}).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();if(r.error)return alert("Could not save group: "+r.error.message);
-   g.name=name;st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();closeModal();await zagOpenOnlineGroup(g.id);
+   let changes={name,emblem:groupCreateState.emblem||null};
+   let r=await zagSb.from("groups").update(changes).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();
+   if(r.error&&/emblem/i.test(r.error.message||"")){delete changes.emblem;r=await zagSb.from("groups").update(changes).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();}
+   if(r.error)return alert("Could not save group: "+r.error.message);
+   if(r.data)Object.assign(g,r.data);
+   g.name=name;
+   if(groupCreateState.emblem)g.emblem=groupCreateState.emblem;
+   st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();closeModal();await load();await zagOpenOnlineGroup(g.id);
  }
  window.zagOpenOnlineGroup=async function(id){
    let g=cache.find(x=>x.id===id);if(!g){await load();g=cache.find(x=>x.id===id)}if(!g)return;
@@ -2849,11 +3124,21 @@ if ('serviceWorker' in navigator) {
        }else if(view==="exercises"){let chosen=ex||allowed[0]||"";let strip=`<div class=exerciseTabStrip>${allowed.map(x=>`<button class="exerciseTab ${x===chosen?"sel":""}" onclick="zagRenderRealGroup('exercises','${E(x)}')">${E(x)}</button>`).join("")}</div>`;let score=m=>Number(m.vals?.[chosen])||0;body=strip+podium(people,score,weightText)+memberTable(chosen||"Exercise",people,score,weightText)}
        else {let score=m=>allowed.reduce((n,x)=>n+(Number(m.vals?.[x])||0),0);body=podium(people,score,weightText)+memberTable("Combined Weight Leaderboard",people,score,weightText)}
        h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
-       <div class="pagecard groupHero">${cfg.emblem?`<div class=groupBadgeNoEmoji><img src="${zagEmblemSrc(cfg.emblem)}" style="width:100%;height:100%;object-fit:contain" alt=""></div>`:`<div class=groupBadgeNoEmoji></div>`}<div class=grow><div class=groupTitle>${E(g.name)}</div><div class=small>${people.length} Member${people.length===1?"":"s"} · Train harder together</div></div><button class=btn onclick="zagInviteRealGroup()">Invite</button><button class=btn onclick="zagEditOnlineGroup()">Edit Group</button></div>
+       <div class="pagecard groupHero">${zagOnlineEmblemHTML(g)}<div class=grow><div class=groupTitle>${E(g.name)}</div><div class=small>${people.length} Member${people.length===1?"":"s"} · Train harder together</div></div><button class=btn onclick="zagInviteRealGroup()">Invite</button><button class=btn onclick="zagEditOnlineGroup()">Edit Group</button></div>
        <div class="pagecard zagPersistentGroup">${tabs}<div class=zagLeaderboardHost>${body}</div></div>
-       <button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`;
+       <div class="zagBottomGroupActions"><button class=pick onclick=zagCreateOnlineGroupModal()>+ Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
      };
-     window.zagInviteRealGroup=function(){modal("Invite",`<div class=small>Invite code</div><div class=zagOnlineCode>${E(g.invite_code||"")}</div><p class=small>Give this code to another Zag Science user.</p>`)}
+     window.zagCopyGroupCode=async function(c){try{await navigator.clipboard.writeText(c);const b=document.getElementById("zagCopyCodeBtn");if(b){b.textContent="Copied";setTimeout(()=>b.textContent="Copy Code",1200)}}catch(_){prompt("Copy this group code:",c)}};
+     window.zagInviteRealGroup=async function(){
+       let c=(g.invite_code||"").trim().toUpperCase();
+       if(!c){
+         const u=await ensureSession();if(!u)return alert("Your sign-in session has expired.");
+         c=code();const up=await zagSb.from("groups").update({invite_code:c}).eq("id",g.id).eq("owner_id",u.id).select("invite_code").maybeSingle();
+         if(up.error||!up.data)return alert("Could not create a group code.");
+         g.invite_code=c;
+       }
+       modal("Invite to "+E(g.name),`<div class=small>Group code</div><div class=zagOnlineCode>${E(c)}</div><p class=small>Give this code to the other person. They can press <b>Join Group</b> and enter it.</p><button id=zagCopyCodeBtn class=pick onclick="zagCopyGroupCode('${E(c)}')">Copy Code</button>`);
+     }
      zagRenderRealGroup("total");
    }catch(e){h.innerHTML=`<div class=title><h1>${E(g.name)}</h1></div><div class=pagecard><h2>Group couldn't load</h2><div class=small>${E(e.message||e)}</div></div><button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`}
  }
@@ -2861,7 +3146,87 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 
-</body></html>
+<style id="zag-v27-7-visible-fix">
+.zagPodiumV277{display:grid!important;grid-template-columns:1fr 1.08fr 1fr!important;gap:10px!important;align-items:end!important;margin:18px 0 24px!important;min-height:175px!important}
+.zagPodiumSlot{text-align:center!important;min-height:150px!important;padding:8px 4px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-end!important}
+.zagPodiumSlot.empty{visibility:hidden!important}
+.zagNumberMedal{position:relative!important;width:104px!important;height:116px!important;margin:0 auto 7px!important}
+.zagMedalRibbon{position:absolute!important;left:24px!important;top:0!important;width:56px!important;height:60px!important;background:linear-gradient(90deg,#641177,#df48fa,#641177)!important;clip-path:polygon(0 0,45% 0,50% 25%,55% 0,100% 0,76% 72%,50% 100%,24% 72%)!important}
+.zagMedalDisc{position:absolute!important;left:13px!important;bottom:0!important;width:78px!important;height:78px!important;border-radius:50%!important;display:grid!important;place-items:center!important;font-size:45px!important;font-weight:1000!important;color:#fff!important;background:radial-gradient(circle at 35% 30%,#ffb5ff,#a727ca 42%,#431051 72%)!important;border:4px solid #ed64ff!important;box-shadow:0 0 18px #dc3cff!important;text-shadow:0 2px 4px #29002f!important}
+.zagPodiumSlot.rank1 .zagNumberMedal{width:118px!important;height:132px!important}
+.zagPodiumSlot.rank1 .zagMedalDisc{width:90px!important;height:90px!important;font-size:54px!important;border-color:#ffd86a!important;box-shadow:0 0 22px #e7a8ff!important}
+.zagPodiumSlot.rank1 .zagMedalRibbon{left:28px!important;width:62px!important;height:67px!important}
+.zagPodiumSlot b{font-size:15px!important;color:white!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.groupHero>.zagRealEmblemBox{margin-right:10px!important}
+@media(max-width:430px){
+ .zagPodiumV277{gap:3px!important}
+ .zagNumberMedal{transform:scale(.86)!important;margin-bottom:0!important}
+ .zagPodiumSlot.rank1 .zagNumberMedal{transform:scale(.9)!important}
+ .zagPodiumSlot{padding:4px 1px!important}
+}
+</style><style id="zag-v27-8-both-group-renderers">
+.zagLegacyHeroEmblem,.zagRealEmblemBox{width:138px!important;height:138px!important;min-width:138px!important;flex:0 0 138px!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.zagLegacyHeroEmblem img,.zagRealEmblemImage{width:138px!important;height:138px!important;min-width:138px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;transform:scale(1.55)!important;transform-origin:center!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.zagLegacyPodium{display:grid!important;grid-template-columns:1fr 1.1fr 1fr!important;gap:8px!important;align-items:end!important;margin:16px 0 22px!important;min-height:145px!important}
+.zagLegacyPodCard{text-align:center!important;min-width:0!important;padding:8px 2px!important}.zagLegacyPodCard.empty{visibility:hidden!important}.zagLegacyPodCard.rank1{transform:translateY(-10px)!important}
+.zagLegacyMedal img{display:block!important;width:78px!important;height:78px!important;object-fit:contain!important;margin:0 auto 6px!important}.zagLegacyPodCard.rank1 .zagLegacyMedal img{width:92px!important;height:92px!important;filter:drop-shadow(0 0 10px rgba(235,100,255,.55))!important}
+.zagLegacyPodCard b{display:block!important;font-size:14px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+@media(max-width:430px){.zagLegacyHeroEmblem,.zagRealEmblemBox{width:126px!important;height:126px!important;min-width:126px!important;flex-basis:126px!important}.zagLegacyHeroEmblem img,.zagRealEmblemImage{width:126px!important;height:126px!important;min-width:126px!important}.zagLegacyMedal img{width:68px!important;height:68px!important}.zagLegacyPodCard.rank1 .zagLegacyMedal img{width:80px!important;height:80px!important}}
+</style><style id="zag-v27-9-group-final">
+.zagLegacyHeroEmblem,.zagRealEmblemBox{
+ width:92px!important;height:92px!important;min-width:92px!important;flex:0 0 92px!important;
+ border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;
+ display:flex!important;align-items:center!important;justify-content:center!important
+}
+.zagLegacyHeroEmblem img,.zagRealEmblemImage{
+ width:132px!important;height:132px!important;min-width:132px!important;max-width:none!important;max-height:none!important;
+ object-fit:contain!important;transform:scale(1.18)!important;transform-origin:center!important;
+ border:0!important;background:transparent!important;box-shadow:none!important
+}
+.groupHero{min-height:0!important}
+@media(max-width:430px){
+ .zagLegacyHeroEmblem,.zagRealEmblemBox{width:88px!important;height:88px!important;min-width:88px!important;flex-basis:88px!important}
+ .zagLegacyHeroEmblem img,.zagRealEmblemImage{width:128px!important;height:128px!important;min-width:128px!important}
+}
+</style>
+<script>window.ZAG_BUILD="27.10";</script><style id="zag-v27-11-approved-podium">
+.zagApprovedPodium{
+ display:grid;grid-template-columns:1fr 1.08fr 1fr;gap:10px;align-items:stretch;
+ margin:18px 0 22px;min-height:210px
+}
+.zagApprovedPodCard{
+ position:relative;overflow:hidden;min-width:0;height:210px;border-radius:18px;
+ border:2px solid #a82bc5;background:#05060d;text-align:center
+}
+.zagApprovedPodCard.rank1{
+ height:224px;margin-top:-14px;border-color:#ed54ff;
+ box-shadow:0 0 14px rgba(232,70,255,.75),0 0 28px rgba(166,38,211,.42)
+}
+.zagApprovedPodCard.empty{visibility:hidden}
+.zagApprovedMedal{position:absolute;inset:0;overflow:hidden}
+.zagApprovedMedal img{
+ position:absolute;left:50%;top:50%;width:126%;height:126%;max-width:none;max-height:none;
+ object-fit:cover;transform:translate(-50%,-50%);filter:none
+}
+.zagApprovedPodCard b,.zagApprovedScore{
+ position:absolute;z-index:2;left:5px;right:5px;text-align:center;text-shadow:0 2px 7px #000,0 0 7px #000
+}
+.zagApprovedPodCard b{bottom:31px;font-size:17px;color:#fff}
+.zagApprovedScore{bottom:10px;font-size:13px;color:#e8d7ee}
+@media(max-width:430px){
+ .zagApprovedPodium{gap:5px;min-height:188px}
+ .zagApprovedPodCard{height:188px;border-radius:14px}
+ .zagApprovedPodCard.rank1{height:200px;margin-top:-12px}
+ .zagApprovedMedal img{width:132%;height:132%}
+ .zagApprovedPodCard b{font-size:15px;bottom:29px}
+ .zagApprovedScore{font-size:12px;bottom:9px}
+}
+</style><script>window.ZAG_BUILD="27.11";</script><style id="zag-v27-12-code-join-ui">
+.zagGroupActions,.zagBottomGroupActions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:14px!important}
+.zagGroupActions .pick,.zagBottomGroupActions .pick{width:100%!important;margin:0!important;min-width:0!important}
+.zagOnlineCode{font-size:30px!important;font-weight:900!important;letter-spacing:7px!important;text-align:center!important;color:#f06cff!important;padding:18px 8px!important;margin:10px 0!important;border:1px solid #8f25a7!important;border-radius:14px!important;background:#080811!important}
+.zagJoinCodeRow{margin:12px 0 14px!important}
+</style><script>window.ZAG_BUILD="27.12-code-join";</script></body></html>
 
 
 
