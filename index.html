@@ -3017,22 +3017,15 @@ if ('serviceWorker' in navigator) {
      cache.push({...r.data,myRole:"owner"});closeModal();await zagOpenOnlineGroup(r.data.id);
    }catch(e){if(btn){btn.disabled=false;btn.textContent="Create Group"}alert("Could not create group: "+(e.message||e))}
  }
- window.zagJoinOnlineGroupModal=function(){modal("Join Group",`<p class=small>Enter the 6-character group code.</p><div class="zagJoinCodeRow"><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 autocomplete="off" autocapitalize="characters" style="width:100%;padding:12px;text-transform:uppercase;letter-spacing:4px;text-align:center" placeholder="ABC123"></div><button id=zagJoinCodeBtn class=pick onclick=zagJoinOnlineGroup()>Join Group</button>`);setTimeout(()=>document.getElementById("onlineJoinCode")?.focus(),80)}
+ window.zagJoinOnlineGroupModal=function(){
+   modal("Join Group",`<p class=small>Search for a group using its 6-character code.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 autocomplete="off" style="width:100%;padding:12px;text-align:center;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick style="width:100%;margin-top:12px" onclick=zagJoinOnlineGroup()>Join Group</button>`);
+   setTimeout(()=>document.getElementById("onlineJoinCode")?.focus(),80)
+ }
  window.zagJoinOnlineGroup=async function(){
-   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase(),btn=document.getElementById("zagJoinCodeBtn");
-   if(!c||c.length!==6)return alert("Enter the 6-character group code.");
-   if(btn){btn.disabled=true;btn.textContent="Searching…"}
-   try{
-     const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
-     const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();
-     if(r.error)throw r.error;if(!r.data)throw new Error("That group code was not found.");
-     if(btn)btn.textContent="Joining…";
-     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});
-     if(m.error)throw m.error;
-     closeModal();try{await load()}catch(_){}
-     if(!cache.some(x=>x.id===r.data.id))cache.push({...r.data,myRole:"member"});
-     await zagOpenOnlineGroup(r.data.id);
-   }catch(e){if(btn){btn.disabled=false;btn.textContent="Join Group"}alert("Could not join group: "+(e.message||e))}
+   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase();if(!c)return alert("Enter an invite code.");
+   const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();if(r.error||!r.data)return alert("That group code was not found.");
+   const u=await ensureSession(),m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});if(m.error)return alert(m.error.message);
+   closeModal();cache.push({...r.data,myRole:"member"});await zagOpenOnlineGroup(r.data.id);
  }
  window.zagEditOnlineGroup=function(){
    const g=window.zagRealCurrentGroup;if(!g)return;
@@ -3126,18 +3119,14 @@ if ('serviceWorker' in navigator) {
        h.innerHTML=`<div class=title><h1>Groups</h1><p>Friendly competition · train harder together</p></div>
        <div class="pagecard groupHero">${zagOnlineEmblemHTML(g)}<div class=grow><div class=groupTitle>${E(g.name)}</div><div class=small>${people.length} Member${people.length===1?"":"s"} · Train harder together</div></div><button class=btn onclick="zagInviteRealGroup()">Invite</button><button class=btn onclick="zagEditOnlineGroup()">Edit Group</button></div>
        <div class="pagecard zagPersistentGroup">${tabs}<div class=zagLeaderboardHost>${body}</div></div>
-       <div class="zagBottomGroupActions"><button class=pick onclick=zagCreateOnlineGroupModal()>+ Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
+       <div class="zagCreateJoinRow"><button class=pick onclick=zagCreateOnlineGroupModal()>+ Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
      };
-     window.zagCopyGroupCode=async function(c){try{await navigator.clipboard.writeText(c);const b=document.getElementById("zagCopyCodeBtn");if(b){b.textContent="Copied";setTimeout(()=>b.textContent="Copy Code",1200)}}catch(_){prompt("Copy this group code:",c)}};
-     window.zagInviteRealGroup=async function(){
-       let c=(g.invite_code||"").trim().toUpperCase();
-       if(!c){
-         const u=await ensureSession();if(!u)return alert("Your sign-in session has expired.");
-         c=code();const up=await zagSb.from("groups").update({invite_code:c}).eq("id",g.id).eq("owner_id",u.id).select("invite_code").maybeSingle();
-         if(up.error||!up.data)return alert("Could not create a group code.");
-         g.invite_code=c;
-       }
-       modal("Invite to "+E(g.name),`<div class=small>Group code</div><div class=zagOnlineCode>${E(c)}</div><p class=small>Give this code to the other person. They can press <b>Join Group</b> and enter it.</p><button id=zagCopyCodeBtn class=pick onclick="zagCopyGroupCode('${E(c)}')">Copy Code</button>`);
+     window.zagCopyInviteCode=async function(c){
+       try{await navigator.clipboard.writeText(c);const b=document.getElementById("zagCopyInviteCode");if(b){b.textContent="Copied";setTimeout(()=>b.textContent="Copy Code",1200)}}catch(_){prompt("Copy group code:",c)}
+     };
+     window.zagInviteRealGroup=function(){
+       const c=(g.invite_code||"").trim().toUpperCase();
+       modal("Invite",`<div class=small>Group code</div><div class=zagOnlineCode>${E(c)}</div><p class=small>Give this code to the person you want to invite. They can enter it under <b>Join Group</b>.</p><button id=zagCopyInviteCode class=pick onclick="zagCopyInviteCode('${E(c)}')">Copy Code</button>`)
      }
      zagRenderRealGroup("total");
    }catch(e){h.innerHTML=`<div class=title><h1>${E(g.name)}</h1></div><div class=pagecard><h2>Group couldn't load</h2><div class=small>${E(e.message||e)}</div></div><button class=pick onclick=zagOnlineGroupsHome()>Back to Groups</button>`}
@@ -3221,12 +3210,12 @@ if ('serviceWorker' in navigator) {
  .zagApprovedPodCard b{font-size:15px;bottom:29px}
  .zagApprovedScore{font-size:12px;bottom:9px}
 }
-</style><script>window.ZAG_BUILD="27.11";</script><style id="zag-v27-12-code-join-ui">
-.zagGroupActions,.zagBottomGroupActions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:14px!important}
-.zagGroupActions .pick,.zagBottomGroupActions .pick{width:100%!important;margin:0!important;min-width:0!important}
-.zagOnlineCode{font-size:30px!important;font-weight:900!important;letter-spacing:7px!important;text-align:center!important;color:#f06cff!important;padding:18px 8px!important;margin:10px 0!important;border:1px solid #8f25a7!important;border-radius:14px!important;background:#080811!important}
-.zagJoinCodeRow{margin:12px 0 14px!important}
-</style><script>window.ZAG_BUILD="27.12-code-join";</script></body></html>
+</style><script>window.ZAG_BUILD="27.11";</script><style id="zag-v27-13-verified-code-join">
+.zagGroupActions,.zagCreateJoinRow{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important;margin:14px 0!important}
+.zagGroupActions>.pick,.zagCreateJoinRow>.pick{width:100%!important;min-width:0!important;margin:0!important}
+.zagOnlineCode{font-size:30px!important;font-weight:900!important;letter-spacing:6px!important;text-align:center!important;color:#f06cff!important;padding:17px 8px!important;margin:10px 0!important;border:1px solid #9229ac!important;border-radius:14px!important;background:#070811!important}
+</style>
+<script id="zag-build-marker-v2713">window.ZAG_BUILD="27.13-VERIFIED-GROUP-CODE-JOIN";</script></body></html>
 
 
 
