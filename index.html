@@ -3215,7 +3215,94 @@ if ('serviceWorker' in navigator) {
 .zagGroupActions>.pick,.zagCreateJoinRow>.pick{width:100%!important;min-width:0!important;margin:0!important}
 .zagOnlineCode{font-size:30px!important;font-weight:900!important;letter-spacing:6px!important;text-align:center!important;color:#f06cff!important;padding:17px 8px!important;margin:10px 0!important;border:1px solid #9229ac!important;border-radius:14px!important;background:#070811!important}
 </style>
-<script id="zag-build-marker-v2713">window.ZAG_BUILD="27.15-GROUPS-RUNTIME-FIX-VERIFIED";</script></body></html>
+<script id="zag-build-marker-v2713">window.ZAG_BUILD="27.15-GROUPS-RUNTIME-FIX-VERIFIED";</script>
+<style id="zag-v27-16-groups-layout-fix">
+/* Group list: compact card, large emblem, no oversized empty box. */
+.zagOnlineGroupCard .row{
+  position:relative!important;
+  min-height:104px!important;
+  padding-left:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+.zagOnlineGroupCard .zagRealEmblemBox{
+  position:relative!important;
+  left:auto!important;top:auto!important;
+  transform:none!important;
+  width:98px!important;height:98px!important;
+  min-width:98px!important;max-width:98px!important;
+  flex:0 0 98px!important;
+  margin:0 8px 0 0!important;
+  overflow:visible!important;
+}
+.zagOnlineGroupCard .zagRealEmblemImage{
+  position:absolute!important;
+  left:50%!important;top:50%!important;
+  width:120px!important;height:120px!important;
+  min-width:120px!important;max-width:120px!important;
+  transform:translate(-50%,-50%)!important;
+  object-fit:contain!important;
+}
+
+/* Group detail header: keep emblem inside the header instead of overflowing
+   down behind the podium/leaderboard. */
+.groupHero{
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:76px minmax(0,1fr) auto auto!important;
+  align-items:center!important;
+  gap:8px!important;
+  overflow:visible!important;
+}
+.groupHero>.zagRealEmblemBox{
+  position:relative!important;
+  left:auto!important;top:auto!important;
+  transform:none!important;
+  width:76px!important;height:76px!important;
+  min-width:76px!important;max-width:76px!important;
+  flex:0 0 76px!important;
+  margin:0 4px 0 0!important;
+  overflow:visible!important;
+}
+.groupHero>.zagRealEmblemBox .zagRealEmblemImage{
+  position:absolute!important;
+  left:50%!important;top:50%!important;
+  width:94px!important;height:94px!important;
+  min-width:94px!important;max-width:94px!important;
+  transform:translate(-50%,-50%)!important;
+  object-fit:contain!important;
+}
+.groupHero>.grow{min-width:0!important}
+.groupHero>.btn{white-space:nowrap!important;margin:0!important}
+
+/* Keep the bottom create/join controls clear of the fixed navigation. */
+.zagCreateJoinRow,.zagGroupActions{margin-bottom:26px!important}
+
+@media(max-width:430px){
+  .zagOnlineGroupCard .row{min-height:96px!important;gap:9px!important}
+  .zagOnlineGroupCard .zagRealEmblemBox{
+    width:88px!important;height:88px!important;min-width:88px!important;max-width:88px!important;flex-basis:88px!important
+  }
+  .zagOnlineGroupCard .zagRealEmblemImage{
+    width:110px!important;height:110px!important;min-width:110px!important;max-width:110px!important
+  }
+  .groupHero{
+    grid-template-columns:66px minmax(0,1fr) auto auto!important;
+    gap:6px!important;
+  }
+  .groupHero>.zagRealEmblemBox{
+    width:66px!important;height:66px!important;min-width:66px!important;max-width:66px!important;flex-basis:66px!important
+  }
+  .groupHero>.zagRealEmblemBox .zagRealEmblemImage{
+    width:82px!important;height:82px!important;min-width:82px!important;max-width:82px!important
+  }
+  .groupHero>.btn{padding-left:8px!important;padding-right:8px!important}
+}
+</style>
+
+<script id="zag-build-marker-v2716">window.ZAG_BUILD="27.16-GROUPS-LAYOUT-FIX-VERIFIED";</script>
+</body></html>
 
 
 
