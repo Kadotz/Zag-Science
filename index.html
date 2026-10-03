@@ -2954,7 +2954,7 @@ if ('serviceWorker' in navigator) {
 
  function memberTable(title,people,score,fmt){
    let a=[...people].sort((x,y)=>score(y)-score(x));
-   const smallRank=(i)=>i===0?MEDAL_GOLD:i===1?MEDAL_SILVER:i===2?MEDAL_BRONZE:"";
+   const smallRank=(i)=>i===0?"assets/images/zag-rank-1-v2719.png":i===1?"assets/images/zag-rank-2-v2719.png":i===2?"assets/images/zag-rank-3-v2719.png":"";
    return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div><div class="zagOnlineMemberIdentity"><b>${i<3?`<img class="zagOnlineSmallMedal" src="${smallRank(i)}" alt="${i+1} place">`:`<span class="zagOnlineRankNumber">${i+1}.</span>`} ${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>`;
  }
  const MEDAL_GOLD='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">1</text></svg>'; const MEDAL_SILVER='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">2</text></svg>'; const MEDAL_BRONZE='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">3</text></svg>';
@@ -2996,7 +2996,7 @@ if ('serviceWorker' in navigator) {
    <div class=zagGroupActions><button class=pick onclick=zagCreateOnlineGroupModal()>Create Group</button><button class=pick onclick=zagJoinOnlineGroupModal()>Join Group</button></div>`;
  }
  window.zagCreateOnlineGroupModal=function(){
-   groupCreateState={combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,emblem:"",selectedExercises:new Set(allGroupExerciseNames())};
+   groupCreateState={combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,emblem:"",selectedExercises:new Set()};
    modal("Create Group",`<div class="zagEditGroupTopRow"><button type="button" class="zagGroupImageBox" onclick="zagChooseGroupImage()" aria-label="Choose group emblem"><span class="zagGroupImagePlaceholder"></span></button><input id=onlineGroupName class="cell groupCreateTop" style="width:100%;padding:10px;font-size:13px" placeholder="Group name"></div>
    <div class="groupModeGrid zagHideWhilePicking"><div id=gCombinedBox class=groupSelectBox onclick="toggleGroupMode('combined')">Combined Weight</div><div id=gIndividualBox class=groupSelectBox onclick="toggleGroupMode('individual')">Individual Exercise</div></div>
    <div id=gRatioOuter class=bodyRatioBox onclick="toggleGroupMode('bodyweight')"><div class=bodyRatioTitle>Bodyweight Ratio</div><div class=ratioMiniGrid><div id=gRatioCombined class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioCombined')">Combined Weight</div><div id=gRatioIndividual class=ratioMini onclick="event.stopPropagation();toggleGroupMode('ratioIndividual')">Individual Exercise</div></div></div>
@@ -3015,6 +3015,8 @@ if ('serviceWorker' in navigator) {
      if(r.error&&/emblem/i.test(r.error.message||"")){delete payload.emblem;r=await zagSb.from("groups").insert(payload).select("*").single();}
      if(r.error||!r.data)throw (r.error||new Error("The group row was not returned after creation."));
      created=r.data;
+     st.exiledOnlineGroupIds=(Array.isArray(st.exiledOnlineGroupIds)?st.exiledOnlineGroupIds:[]).filter(id=>id!==created.id);
+     save();
 
      // A newly-created UUID must never inherit an old local exile state.
      st.exiledOnlineGroupIds=(Array.isArray(st.exiledOnlineGroupIds)?st.exiledOnlineGroupIds:[]).filter(id=>id!==created.id);
@@ -3058,7 +3060,7 @@ if ('serviceWorker' in navigator) {
      }
 
      closeModal();
-     await zagOpenOnlineGroup(created.id);
+     await load(); await zagOpenOnlineGroup(created.id);
    }catch(e){
      if(btn){btn.disabled=false;btn.textContent="Create Group"}
      alert("Could not create group: "+(e.message||e));
@@ -3406,6 +3408,14 @@ if ('serviceWorker' in navigator) {
 </style>
 
 <script id="zag-build-marker-v2718">window.ZAG_BUILD="27.18-PODIUM-JOIN-RANK-MEDALS";</script>
+<style id="zag-v27-19-screenshot-fixes">
+.zagApprovedMedal img{object-position:center 68%!important;transform:translate(-50%,-42%)!important}
+.zagApprovedPodCard>b{font-weight:950!important;font-size:1.12em!important;letter-spacing:.25px!important;text-shadow:0 3px 8px #000,0 0 14px #000,0 0 4px #000!important}
+.zagApprovedScore{font-weight:950!important;font-size:1.08em!important;text-shadow:0 3px 8px #000,0 0 14px #000,0 0 4px #000!important}
+.zagOnlineSmallMedal{display:inline-block!important;visibility:visible!important;opacity:1!important;width:27px!important;height:33px!important;min-width:27px!important;object-fit:contain!important;vertical-align:middle!important;margin-right:7px!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.zagOnlineMemberIdentity>b{display:flex!important;align-items:center!important;font-weight:900!important}
+</style>
+<script id="zag-build-marker-v2719">window.ZAG_BUILD="27.19-GROUPS-SCREENSHOT-FIX";</script>
 </body></html>
 
 
