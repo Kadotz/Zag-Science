@@ -3446,6 +3446,34 @@ if ('serviceWorker' in navigator) {
 .zagOnlineMemberIdentity .zagOnlineSmallMedal{display:none!important}
 </style>
 <script id="zag-build-marker-v2720">window.ZAG_BUILD="27.20-GROUP-CARDS-PODIUM-MEDALS";</script>
+<style id="zag-v27-21-podium-framing">
+/* Fill the podium card width while preserving the important trophy/statue composition. */
+.zagApprovedPodCard.rank1 .zagApprovedMedal img{
+  width:116%!important;height:116%!important;max-width:none!important;max-height:none!important;
+  object-fit:cover!important;object-position:center top!important;
+  transform:translate(-50%,-50%)!important;
+}
+.zagApprovedPodCard.rank2 .zagApprovedMedal img,
+.zagApprovedPodCard.rank3 .zagApprovedMedal img{
+  width:118%!important;height:118%!important;max-width:none!important;max-height:none!important;
+  object-fit:cover!important;object-position:center center!important;
+  transform:translate(-50%,-50%)!important;
+}
+/* Put both labels beneath the circular rank/flask emblem on every podium card. */
+.zagApprovedPodCard{position:relative!important;padding:0!important}
+.zagApprovedPodCard>b{
+  position:absolute!important;left:5px!important;right:5px!important;bottom:28px!important;
+  z-index:8!important;margin:0!important;font-size:1.02em!important;font-weight:950!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:center!important;
+  text-shadow:0 3px 8px #000,0 0 14px #000,0 0 4px #000!important;
+}
+.zagApprovedPodCard .zagApprovedScore{
+  position:absolute!important;left:5px!important;right:5px!important;bottom:7px!important;
+  z-index:8!important;margin:0!important;font-size:1.02em!important;font-weight:950!important;text-align:center!important;
+  text-shadow:0 3px 8px #000,0 0 14px #000,0 0 4px #000!important;
+}
+</style>
+<script id="zag-build-marker-v2721">window.ZAG_BUILD="27.21-PODIUM-FRAMING";</script>
 </body></html>
 
 
