@@ -3006,16 +3006,62 @@ if ('serviceWorker' in navigator) {
  window.zagCreateOnlineGroup=async function(){
    const name=(document.getElementById("onlineGroupName")?.value||"").trim(),btn=document.getElementById("zagCreateBtn");
    if(!name)return alert("Give your group a name first.");if(btn){btn.disabled=true;btn.textContent="Creating…"}
+   let created=null;
    try{
      const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
      let payload={name,owner_id:u.id,invite_code:code(),emblem:groupCreateState.emblem||null};
      let r=await zagSb.from("groups").insert(payload).select("*").single();
      if(r.error&&/emblem/i.test(r.error.message||"")){delete payload.emblem;r=await zagSb.from("groups").insert(payload).select("*").single();}
-     if(r.error)throw r.error;
-     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"owner"},{onConflict:"group_id,user_id"});if(m.error)throw m.error;
-     st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[r.data.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();
-     cache.push({...r.data,myRole:"owner"});closeModal();await zagOpenOnlineGroup(r.data.id);
-   }catch(e){if(btn){btn.disabled=false;btn.textContent="Create Group"}alert("Could not create group: "+(e.message||e))}
+     if(r.error||!r.data)throw (r.error||new Error("The group row was not returned after creation."));
+     created=r.data;
+
+     // A newly-created UUID must never inherit an old local exile state.
+     st.exiledOnlineGroupIds=(Array.isArray(st.exiledOnlineGroupIds)?st.exiledOnlineGroupIds:[]).filter(id=>id!==created.id);
+
+     // Create and then explicitly verify the owner's membership.
+     let m=await zagSb.from("group_members").upsert(
+       {group_id:created.id,user_id:u.id,role:"owner"},
+       {onConflict:"group_id,user_id"}
+     );
+     if(m.error){
+       await new Promise(res=>setTimeout(res,250));
+       m=await zagSb.from("group_members").upsert(
+         {group_id:created.id,user_id:u.id,role:"owner"},
+         {onConflict:"group_id,user_id"}
+       );
+     }
+     if(m.error)throw new Error("Group was created, but owner membership failed: "+m.error.message);
+
+     const verifyGroup=await zagSb.from("groups").select("*").eq("id",created.id).eq("owner_id",u.id).maybeSingle();
+     if(verifyGroup.error||!verifyGroup.data)throw new Error("The new group could not be verified on the server.");
+
+     const verifyMember=await zagSb.from("group_members").select("group_id,user_id,role").eq("group_id",created.id).eq("user_id",u.id).maybeSingle();
+     if(verifyMember.error||!verifyMember.data)throw new Error("The owner membership could not be verified on the server.");
+
+     st.onlineGroupConfigs=st.onlineGroupConfigs||{};
+     st.onlineGroupConfigs[created.id]={
+       combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,
+       individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,
+       ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",
+       exercises:[...(groupCreateState.selectedExercises||new Set())]
+     };
+     save();
+
+     // Do not trust the pre-create cache: rebuild it from Supabase and confirm
+     // the group survives the exact same load used by the Groups home screen.
+     await load();
+     let live=cache.find(g=>g.id===created.id);
+     if(!live){
+       live={...verifyGroup.data,myRole:"owner"};
+       cache=[live,...cache.filter(g=>g.id!==created.id)];
+     }
+
+     closeModal();
+     await zagOpenOnlineGroup(created.id);
+   }catch(e){
+     if(btn){btn.disabled=false;btn.textContent="Create Group"}
+     alert("Could not create group: "+(e.message||e));
+   }
  }
  window.zagJoinOnlineGroupModal=function(){
    modal("Join Group",`<p class=small>Search for a group using its 6-character code.</p><input id=onlineJoinCode class="cell groupCreateTop" maxlength=6 autocomplete="off" style="width:100%;padding:12px;text-align:center;text-transform:uppercase;letter-spacing:4px" placeholder="ABC123"><button class=pick style="width:100%;margin-top:12px" onclick=zagJoinOnlineGroup()>Join Group</button>`);
@@ -3194,8 +3240,8 @@ if ('serviceWorker' in navigator) {
 .zagApprovedPodCard.empty{visibility:hidden}
 .zagApprovedMedal{position:absolute;inset:0;overflow:hidden}
 .zagApprovedMedal img{
- position:absolute;left:50%;top:50%;width:126%;height:126%;max-width:none;max-height:none;
- object-fit:cover;transform:translate(-50%,-50%);filter:none
+ position:absolute;left:50%;top:50%;width:100%;height:100%;max-width:100%;max-height:100%;
+ object-fit:contain;object-position:center;transform:translate(-50%,-50%);filter:none
 }
 .zagApprovedPodCard b,.zagApprovedScore{
  position:absolute;z-index:2;left:5px;right:5px;text-align:center;text-shadow:0 2px 7px #000,0 0 7px #000
@@ -3206,7 +3252,7 @@ if ('serviceWorker' in navigator) {
  .zagApprovedPodium{gap:5px;min-height:188px}
  .zagApprovedPodCard{height:188px;border-radius:14px}
  .zagApprovedPodCard.rank1{height:200px;margin-top:-12px}
- .zagApprovedMedal img{width:132%;height:132%}
+ .zagApprovedMedal img{width:100%;height:100%;object-fit:contain}
  .zagApprovedPodCard b{font-size:15px;bottom:29px}
  .zagApprovedScore{font-size:12px;bottom:9px}
 }
@@ -3302,6 +3348,8 @@ if ('serviceWorker' in navigator) {
 </style>
 
 <script id="zag-build-marker-v2716">window.ZAG_BUILD="27.16-GROUPS-LAYOUT-FIX-VERIFIED";</script>
+
+<script id="zag-build-marker-v2717">window.ZAG_BUILD="27.17-MEDALS-CREATE-VERIFY";</script>
 </body></html>
 
 
