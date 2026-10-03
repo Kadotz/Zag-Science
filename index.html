@@ -2968,21 +2968,18 @@ if ('serviceWorker' in navigator) {
    return cache;
  } async function realMembers(id){
    const g=cache.find(x=>x.id===id)||window.zagRealCurrentGroup;
-   let ms=[];
-   try{const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);if(!mr.error)ms=mr.data||[]}catch(_){}
+   try{
+     const r=await zagSb.rpc("zag_group_members",{group_id_input:id});
+     if(!r.error&&Array.isArray(r.data)){
+       return r.data.map(m=>({id:m.user_id,name:m.display_name||m.username||"Member",username:m.username||"",bw:Number(m.bodyweight_kg)||0,vals:(m.pb_values&&typeof m.pb_values==="object")?m.pb_values:{},role:m.role||((g?.owner_id===m.user_id)?"owner":"member"),streak:Number(m.streak)||0,prs:Number(m.pr_count)||0,trend:0}));
+     }
+   }catch(_){}
+   let ms=[];try{const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);if(!mr.error)ms=mr.data||[]}catch(_){}
    if(g?.owner_id&&!ms.some(m=>m.user_id===g.owner_id))ms.unshift({user_id:g.owner_id,role:"owner"});
    const ids=[...new Set(ms.map(x=>x.user_id).filter(Boolean))];if(!ids.length)return [];
-   let profiles=[],pbs=[];
-   try{const a=await zagSb.from("profiles").select("id,username,display_name,bodyweight_kg,streak").in("id",ids);if(!a.error)profiles=a.data||[]}catch(_){}
+   let profiles=[],pbs=[];try{const a=await zagSb.from("profiles").select("id,username,display_name,bodyweight_kg,streak").in("id",ids);if(!a.error)profiles=a.data||[]}catch(_){}
    try{const b=await zagSb.from("personal_bests").select("user_id,exercise_name,weight_kg,reps").in("user_id",ids);if(!b.error)pbs=b.data||[]}catch(_){}
-   return ms.map(m=>{
-     const pr=profiles.find(x=>x.id===m.user_id)||{},mine=pbs.filter(x=>x.user_id===m.user_id),vals={};
-     mine.forEach(x=>{const w=Number(x.weight_kg)||0;if(w>(vals[x.exercise_name]||0))vals[x.exercise_name]=w});
-     const isMe=zagSession?.user?.id===m.user_id;
-     return {id:m.user_id,name:pr.display_name||pr.username||(isMe?"Kadotz":"Member"),username:pr.username||(isMe?"Kadotz":""),
-       bw:Number(pr.bodyweight_kg)||0,vals,role:m.role||((g?.owner_id===m.user_id)?"owner":"member"),
-       streak:Number(pr.streak)||0,prs:mine.length,trend:0};
-   });
+   return ms.map(m=>{const pr=profiles.find(x=>x.id===m.user_id)||{},mine=pbs.filter(x=>x.user_id===m.user_id),vals={};mine.forEach(x=>{const w=Number(x.weight_kg)||0;if(w>(vals[x.exercise_name]||0))vals[x.exercise_name]=w});return {id:m.user_id,name:pr.display_name||pr.username||"Member",username:pr.username||"",bw:Number(pr.bodyweight_kg)||0,vals,role:m.role||"member",streak:Number(pr.streak)||0,prs:mine.length,trend:0}});
  }
  function totalOf(m){return Object.values(m.vals||{}).reduce((n,v)=>n+(Number(v)||0),0)}
  function zagOnlineEmblemHTML(g){
@@ -3053,8 +3050,9 @@ if ('serviceWorker' in navigator) {
    let created=null;
    try{
      const u=await ensureSession();if(!u)throw new Error("Your sign-in session has expired.");
-     let payload={name,owner_id:u.id,invite_code:code(),emblem:groupCreateState.emblem||null};
+     let payload={name,owner_id:u.id,invite_code:code(),emblem:groupCreateState.emblem||null,combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratio_combined:!!groupCreateState.ratioCombined,ratio_individual:!!groupCreateState.ratioIndividual,exercises:[...(groupCreateState.selectedExercises||new Set())]};
      let r=await zagSb.from("groups").insert(payload).select("*").single();
+     if(r.error&&/column|schema cache/i.test(r.error.message||"")){payload={name,owner_id:u.id,invite_code:payload.invite_code,emblem:groupCreateState.emblem||null};r=await zagSb.from("groups").insert(payload).select("*").single();}
      if(r.error&&/emblem/i.test(r.error.message||"")){delete payload.emblem;r=await zagSb.from("groups").insert(payload).select("*").single();}
      if(r.error||!r.data)throw (r.error||new Error("The group row was not returned after creation."));
      created=r.data;
@@ -3156,6 +3154,9 @@ if ('serviceWorker' in navigator) {
    }
  }
  window.zagEditOnlineGroup=function(){
+   const roleGroup=window.zagRealCurrentGroup;if(!roleGroup)return;
+   if(roleGroup.myRole!=="owner"&&roleGroup.owner_id!==zagSession?.user?.id){modal("Host only",'<div class=note><b>Only the group host can edit this group.</b><br><br>You can still view the leaderboards and compete in the group.</div>');return;}
+
    const g=window.zagRealCurrentGroup;if(!g)return;
    const c=(st.onlineGroupConfigs||{})[g.id]||{combined:true,bodyweight:true,individual:true,ratioCombined:true,ratioIndividual:true,exercises:allGroupExerciseNames()};
    const currentEmblem=g.emblem||c.emblem||"";
@@ -3213,8 +3214,9 @@ if ('serviceWorker' in navigator) {
    }
  }; window.zagSaveOnlineGroupEdit=async function(){
    const g=window.zagRealCurrentGroup;if(!g)return;const name=(document.getElementById("onlineEditGroupName")?.value||"").trim();if(!name)return alert("Give your group a name first.");
-   let changes={name,emblem:groupCreateState.emblem||null};
+   let changes={name,emblem:groupCreateState.emblem||null,combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratio_combined:!!groupCreateState.ratioCombined,ratio_individual:!!groupCreateState.ratioIndividual,exercises:[...(groupCreateState.selectedExercises||new Set())]};
    let r=await zagSb.from("groups").update(changes).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();
+   if(r.error&&/column|schema cache/i.test(r.error.message||"")){changes={name,emblem:groupCreateState.emblem||null};r=await zagSb.from("groups").update(changes).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();}
    if(r.error&&/emblem/i.test(r.error.message||"")){delete changes.emblem;r=await zagSb.from("groups").update(changes).eq("id",g.id).eq("owner_id",zagSession.user.id).select("*").single();}
    if(r.error)return alert("Could not save group: "+r.error.message);
    if(r.data)Object.assign(g,r.data);
@@ -3222,11 +3224,19 @@ if ('serviceWorker' in navigator) {
    if(groupCreateState.emblem)g.emblem=groupCreateState.emblem;
    st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]={combined:!!groupCreateState.combined,bodyweight:!!groupCreateState.bodyweight,individual:!!groupCreateState.individual,ratioCombined:!!groupCreateState.ratioCombined,ratioIndividual:!!groupCreateState.ratioIndividual,emblem:groupCreateState.emblem||"",exercises:[...(groupCreateState.selectedExercises||new Set())]};save();closeModal();await load();await zagOpenOnlineGroup(g.id);
  }
+ async function zagSharedGroupConfig(g){
+   let local=(st.onlineGroupConfigs||{})[g.id]||{}, server={};
+   try{const r=await zagSb.rpc("zag_group_config",{group_id_input:g.id});if(!r.error&&r.data)server=Array.isArray(r.data)?(r.data[0]||{}):r.data}catch(_){}
+   const exercises=local.exercises?.length?local.exercises:(Array.isArray(server.exercises)?server.exercises:[]);
+   const c={combined:local.combined??server.combined??true,bodyweight:local.bodyweight??server.bodyweight??true,individual:local.individual??server.individual??true,ratioCombined:local.ratioCombined??server.ratio_combined??true,ratioIndividual:local.ratioIndividual??server.ratio_individual??true,emblem:local.emblem||g.emblem||"",exercises};
+   st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]=c;save();return c;
+ }
  window.zagOpenOnlineGroup=async function(id){
    let g=cache.find(x=>x.id===id);if(!g){await load();g=cache.find(x=>x.id===id)}if(!g)return;
    const h=document.getElementById("screen");
    h.innerHTML=`<div class=title><h1>${E(g.name)}</h1><p>Loading group…</p></div>`;
    try{
+     await zagSharedGroupConfig(g);
      const people=await realMembers(id);window.zagRealGroupPeople=people;window.zagRealCurrentGroup=g;
      const exercises=[...new Set(people.flatMap(m=>Object.keys(m.vals||{})))].sort();
      window.zagRenderRealGroup=function(view="total",ex="",bodyMode="combined"){
@@ -3532,6 +3542,7 @@ if ('serviceWorker' in navigator) {
 }
 </style>
 <script id="zag-build-marker-v2722">window.ZAG_BUILD="27.22-ACCOUNT-GROUPS-INFO";</script>
+<script id="zag-build-marker-v2723">window.ZAG_BUILD="27.23-SHARED-GROUPS";</script>
 </body></html>
 
 
