@@ -2954,8 +2954,12 @@ if ('serviceWorker' in navigator) {
 
  function memberTable(title,people,score,fmt){
    let a=[...people].sort((x,y)=>score(y)-score(x));
-   const smallRank=(i)=>i===0?"assets/images/zag-rank-1-v2719.png":i===1?"assets/images/zag-rank-2-v2719.png":i===2?"assets/images/zag-rank-3-v2719.png":"";
-   return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div><div class="zagOnlineMemberIdentity"><b>${i<3?`<img class="zagOnlineSmallMedal" src="${smallRank(i)}" alt="${i+1} place">`:`<span class="zagOnlineRankNumber">${i+1}.</span>`} ${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>`;
+   const rankMedal=(i)=>i===0?"assets/images/zag-leaderboard-medal-1-v2720.jpg":i===1?"assets/images/zag-leaderboard-medal-2-v2720.jpg":i===2?"assets/images/zag-leaderboard-medal-3-v2720.jpg":"";
+   return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>{
+     const medal=rankMedal(i);
+     const avatar=medal?`<div class="zagOnlineAvatar zagRankAvatar"><img src="${medal}" alt="${i+1} place"></div>`:`<div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div>`;
+     return `<div class=zagOnlineMember>${avatar}<div class="zagOnlineMemberIdentity"><b>${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`;
+   }).join("")||"<div class=small>No members yet.</div>"}</div>`;
  }
  const MEDAL_GOLD='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">1</text></svg>'; const MEDAL_SILVER='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">2</text></svg>'; const MEDAL_BRONZE='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">3</text></svg>';
  function podium(people,score,fmt){
@@ -3416,6 +3420,32 @@ if ('serviceWorker' in navigator) {
 .zagOnlineMemberIdentity>b{display:flex!important;align-items:center!important;font-weight:900!important}
 </style>
 <script id="zag-build-marker-v2719">window.ZAG_BUILD="27.19-GROUPS-SCREENSHOT-FIX";</script>
+<style id="zag-v27-20-groups-final-polish">
+/* First Groups page: compact cards with no unused vertical space. */
+.zagOnlineGroupCard{padding-top:8px!important;padding-bottom:8px!important}
+.zagOnlineGroupCard .row{min-height:74px!important;height:auto!important}
+.zagOnlineGroupCard .zagRealEmblemBox{width:70px!important;height:70px!important;min-width:70px!important;max-width:70px!important;flex-basis:70px!important}
+.zagOnlineGroupCard .zagRealEmblemImage{width:90px!important;height:90px!important;min-width:90px!important;max-width:90px!important}
+
+/* Podium cards: fit the complete trophy artwork inside the card, never crop it. */
+.zagApprovedMedal{overflow:hidden!important}
+.zagApprovedMedal img{
+ width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+ object-fit:contain!important;object-position:center center!important;
+ transform:translate(-50%,-50%)!important;background:#080713!important
+}
+/* Name and score sit together at the bottom over the artwork. */
+.zagApprovedPodCard{display:flex!important;flex-direction:column!important;justify-content:flex-end!important;padding-bottom:9px!important;overflow:hidden!important}
+.zagApprovedPodCard>b,.zagApprovedScore{position:relative!important;z-index:5!important;font-weight:950!important;text-align:center!important;text-shadow:0 3px 8px #000,0 0 14px #000,0 0 4px #000!important}
+.zagApprovedPodCard>b{font-size:1.04em!important;margin-top:auto!important}
+.zagApprovedScore{font-size:1.04em!important}
+
+/* New approved medals occupy the existing avatar circle for places 1-3. */
+.zagOnlineAvatar.zagRankAvatar{padding:0!important;overflow:hidden!important;border:2px solid #d94cff!important;background:#080713!important}
+.zagOnlineAvatar.zagRankAvatar img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important}
+.zagOnlineMemberIdentity .zagOnlineSmallMedal{display:none!important}
+</style>
+<script id="zag-build-marker-v2720">window.ZAG_BUILD="27.20-GROUP-CARDS-PODIUM-MEDALS";</script>
 </body></html>
 
 
