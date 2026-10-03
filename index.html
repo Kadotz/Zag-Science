@@ -765,7 +765,7 @@ function groupMembers(){
   try{Object.entries(st.pb||st.pbs||st.maxes||{}).forEach(([k,v])=>{vals[k]=Number(v?.weight_kg??v?.weight??v)||0})}catch(_){}
   return [{name:meName,username:meName,vals,bw:Number(st.bodyweightKg||st.bodyweight_kg||st.bodyweight)||0,streak:Number(st.streak)||0,prs:0,trend:0}];
 }
-const groupMedalGold="assets/images/asset-019-c71d4429545b.png",groupMedalSilver="assets/images/asset-020-03270e433097.png",groupMedalBronze="assets/images/asset-021-d979d8b3369c.png";
+const groupMedalGold="assets/images/zag-podium-1-v2718.jpg",groupMedalSilver="assets/images/zag-podium-2-v2718.jpg",groupMedalBronze="assets/images/zag-podium-3-v2718.jpg";
 function medalImg(i,cls='rankMedalImg'){let a=[groupMedalGold,groupMedalSilver,groupMedalBronze];return i<3?`<img class="${cls}" src="${a[i]}" alt="${i+1} place medal">`:String(i+1)}
 function rankBadge(i){return medalImg(i)}
 function groupScore(m){let total=m.vals["Squats"]+m.vals["Bench Press"]+m.vals["Deadlifts"];return Math.round((total/m.bw)*100)}
@@ -2954,7 +2954,8 @@ if ('serviceWorker' in navigator) {
 
  function memberTable(title,people,score,fmt){
    let a=[...people].sort((x,y)=>score(y)-score(x));
-   return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div><div><b>${i+1}. ${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>`;
+   const smallRank=(i)=>i===0?MEDAL_GOLD:i===1?MEDAL_SILVER:i===2?MEDAL_BRONZE:"";
+   return `<div class=pagecard><h2 style="margin:0 0 12px">${E(title)}</h2>${a.map((m,i)=>`<div class=zagOnlineMember><div class=zagOnlineAvatar>${E((m.name||"M").charAt(0).toUpperCase())}</div><div class="zagOnlineMemberIdentity"><b>${i<3?`<img class="zagOnlineSmallMedal" src="${smallRank(i)}" alt="${i+1} place">`:`<span class="zagOnlineRankNumber">${i+1}.</span>`} ${E(m.name)}</b><div class=small>${m.username?"@"+E(m.username):""}${m.bw?" · "+weightText(m.bw):""}</div></div><b>${E(fmt(score(m)))}</b></div>`).join("")||"<div class=small>No members yet.</div>"}</div>`;
  }
  const MEDAL_GOLD='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">1</text></svg>'; const MEDAL_SILVER='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">2</text></svg>'; const MEDAL_BRONZE='data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><defs><filter id="g"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="%23fff"/><stop offset=".25" stop-color="%23e66cff"/><stop offset=".55" stop-color="%237b159d"/><stop offset="1" stop-color="%23f7b4ff"/></linearGradient></defs><path d="M38 5h38l14 64L62 91zM142 5h-38L90 69l28 22z" fill="%238f20a8"/><circle cx="90" cy="142" r="70" fill="%23200a2c" stroke="%23e85cff" stroke-width="8"/><circle cx="90" cy="142" r="56" fill="none" stroke="%239b2db6" stroke-width="3"/><text x="90" y="172" text-anchor="middle" font-family="Arial" font-weight="900" font-size="86" fill="url(%23p)">3</text></svg>';
  function podium(people,score,fmt){
@@ -3068,10 +3069,38 @@ if ('serviceWorker' in navigator) {
    setTimeout(()=>document.getElementById("onlineJoinCode")?.focus(),80)
  }
  window.zagJoinOnlineGroup=async function(){
-   const c=(document.getElementById("onlineJoinCode")?.value||"").trim().toUpperCase();if(!c)return alert("Enter an invite code.");
-   const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();if(r.error||!r.data)return alert("That group code was not found.");
-   const u=await ensureSession(),m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});if(m.error)return alert(m.error.message);
-   closeModal();cache.push({...r.data,myRole:"member"});await zagOpenOnlineGroup(r.data.id);
+   const input=document.getElementById("onlineJoinCode");
+   const c=(input?.value||"").trim().replace(/\s+/g,"").toUpperCase();
+   if(!c)return alert("Enter an invite code.");
+   const u=await ensureSession();if(!u)return alert("Your sign-in session has expired.");
+   const btn=document.querySelector('#modal .pick[onclick="zagJoinOnlineGroup()"]');
+   if(btn){btn.disabled=true;btn.textContent="Joining…"}
+   try{
+     // Preferred path: database function can safely resolve an invite code
+     // before the user is already a member, without exposing other groups.
+     let rpc=await zagSb.rpc("join_group_by_code",{invite_code_input:c});
+     if(!rpc.error){
+       const gid=typeof rpc.data==="string"?rpc.data:(Array.isArray(rpc.data)?(rpc.data[0]?.group_id||rpc.data[0]?.id):rpc.data?.group_id||rpc.data?.id);
+       if(!gid)throw new Error("The server accepted the code but did not return the group.");
+       closeModal();await load();await zagOpenOnlineGroup(gid);return;
+     }
+
+     // Backward-compatible fallback for projects whose groups SELECT policy
+     // already permits invite-code lookup.
+     const r=await zagSb.from("groups").select("*").eq("invite_code",c).maybeSingle();
+     if(r.error)throw r.error;
+     if(!r.data){
+       if((rpc.error?.message||"").toLowerCase().includes("join_group_by_code"))
+         throw new Error("Join-by-code needs the included Supabase database fix to be installed once.");
+       throw new Error("That group code was not found.");
+     }
+     const m=await zagSb.from("group_members").upsert({group_id:r.data.id,user_id:u.id,role:"member"},{onConflict:"group_id,user_id"});
+     if(m.error)throw m.error;
+     closeModal();await load();await zagOpenOnlineGroup(r.data.id);
+   }catch(e){
+     if(btn){btn.disabled=false;btn.textContent="Join Group"}
+     alert("Could not join group: "+(e.message||e));
+   }
  }
  window.zagEditOnlineGroup=function(){
    const g=window.zagRealCurrentGroup;if(!g)return;
@@ -3350,6 +3379,33 @@ if ('serviceWorker' in navigator) {
 <script id="zag-build-marker-v2716">window.ZAG_BUILD="27.16-GROUPS-LAYOUT-FIX-VERIFIED";</script>
 
 <script id="zag-build-marker-v2717">window.ZAG_BUILD="27.17-MEDALS-CREATE-VERIFY";</script>
+
+<style id="zag-v27-18-groups-polish">
+/* Larger artwork inside the existing group-emblem footprint; layout dimensions stay unchanged. */
+.groupHero>.zagRealEmblemBox .zagRealEmblemImage{
+  width:112px!important;height:112px!important;min-width:112px!important;max-width:112px!important;
+}
+@media(max-width:430px){
+  .groupHero>.zagRealEmblemBox .zagRealEmblemImage{
+    width:104px!important;height:104px!important;min-width:104px!important;max-width:104px!important;
+  }
+}
+/* Approved mountain/space podium art is intentionally a full-card background crop. */
+.zagApprovedMedal{inset:0!important;border-radius:inherit!important}
+.zagApprovedMedal img{
+  width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+  object-fit:cover!important;object-position:center center!important;
+}
+.zagApprovedPodCard b,.zagApprovedScore{position:relative;z-index:2;text-shadow:0 2px 5px #000,0 0 8px #000}
+.zagOnlineMemberIdentity{min-width:0;flex:1}
+.zagOnlineSmallMedal{
+  width:24px!important;height:30px!important;object-fit:contain!important;vertical-align:middle!important;
+  margin-right:5px!important;background:transparent!important;box-shadow:none!important;border:0!important;
+}
+.zagOnlineRankNumber{display:inline-block;min-width:24px;text-align:center}
+</style>
+
+<script id="zag-build-marker-v2718">window.ZAG_BUILD="27.18-PODIUM-JOIN-RANK-MEDALS";</script>
 </body></html>
 
 
