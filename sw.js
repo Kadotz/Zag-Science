@@ -1,4 +1,4 @@
-const CACHE = 'zag-science-v27-25-info-carousel-collapsible-workout';
+const CACHE = 'zag-science-v27-26-final-info-workout-expand';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));

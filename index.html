@@ -649,10 +649,10 @@ function showStreakPopup(force=false){
  let o=document.createElement("div");o.className="streakOverlay";o.innerHTML=`<div class=streakPopup><div class="streakHero ${lost?'streakLost':''}"><div class=streakArmWrap><img class=streakPopupStateArm src="${arm}" alt="Streak state arm"></div><div class=big>${st.streak.count||0}</div></div><h2>${title}</h2><div style="font-size:18px;font-weight:900;color:#ef9cff">DAY STREAK</div><p>${msg}</p><button class=pick onclick="zagStreakPopupContinue(this)">LET'S GO</button></div>`;
  document.body.appendChild(o);st.streak.lastPopup=k;save();
 }
-function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el)el.classList.toggle('collapsed')}
+function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el){el.classList.toggle('collapsed');let b=el.querySelector('.exerciseExpand');if(b)b.textContent=el.classList.contains('collapsed')?'EXPAND':'COLLAPSE'}}
 function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
-d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow" onclick="if(!event.target.closest('select,button'))toggleExerciseCard(${e})"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>W${n}</option>`).join("")}</select><div class=titleMax>MAX: ${weightText(st.max[ex]||0)}</div><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button><span class=exerciseChevron>⌄</span></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
+d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><div class=name>${esc(ex)}</div><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>W${n}</option>`).join("")}</select><div class=titleMax>MAX: ${weightText(st.max[ex]||0)}</div><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
 ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
@@ -962,6 +962,7 @@ document.addEventListener("visibilitychange",()=>{
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
+  <button id="zagInfoPage2FollowPlan" type="button" aria-label="Open Follow the Plan"></button>
   <button id="zagInfoPage2TopSets" type="button" aria-label="Open Just Log Your Top Sets"></button>
   <button id="zagInfoLastCTA" type="button" aria-label="Let’s get stronger">LET’S GET STRONGER&nbsp;&nbsp;›</button>
   <button id="zagInfoGoV6" type="button" aria-label="Close information"></button>
@@ -976,14 +977,16 @@ document.addEventListener("visibilitychange",()=>{
    zagInfoPage=Math.max(0,Math.min(slides.length-1,n));
    slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage));
    const prev=overlay.querySelector(".zagInfoPrevHit"), next=overlay.querySelector(".zagInfoNextHit");
-   const jump=overlay.querySelector("#zagInfoPage2TopSets"), cta=overlay.querySelector("#zagInfoLastCTA");
+   const follow=overlay.querySelector("#zagInfoPage2FollowPlan"), jump=overlay.querySelector("#zagInfoPage2TopSets"), cta=overlay.querySelector("#zagInfoLastCTA");
    if(prev) prev.style.display=zagInfoPage===0?"none":"block";
    if(next) next.style.display=zagInfoPage===4?"none":"block";
+   if(follow) follow.style.display=zagInfoPage===1?"block":"none";
    if(jump) jump.style.display=zagInfoPage===1?"block":"none";
    if(cta) cta.style.display=zagInfoPage===4?"flex":"none";
  }
  overlay.querySelector(".zagInfoPrevHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage-1)});
  overlay.querySelector(".zagInfoNextHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage+1)});
+ overlay.querySelector("#zagInfoPage2FollowPlan")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(2)});
  overlay.querySelector("#zagInfoPage2TopSets")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(3)});
  overlay.querySelector("#zagInfoLastCTA")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();closeInfo(e);if(typeof workout==="function")workout();});
  function closeInfo(e){
@@ -3690,6 +3693,33 @@ if ('serviceWorker' in navigator) {
 }
 </style>
 <script id="zag-build-marker-v2724">window.ZAG_BUILD="27.24-ACCOUNT-MODAL-LANDSCAPE-WORKOUT";</script>
+
+<style id="zag-v27-26-final-info-workout-fix">
+/* Info carousel: image artwork is 2:3; hit areas sit directly over the visible controls. */
+#zagInfoPanelV6{width:min(94vw,calc(94dvh * .6666667),700px)!important;aspect-ratio:2/3!important;height:auto!important;max-height:94dvh!important;overflow:hidden!important}
+#zagInfoCloseTop{right:1.2%!important;top:.8%!important;width:12%!important;height:9%!important;z-index:100!important;opacity:.001!important;pointer-events:auto!important}
+.zagInfoPrevHit{left:2%!important;bottom:1%!important;width:34%!important;height:10%!important;z-index:90!important}
+.zagInfoNextHit{right:2%!important;bottom:1%!important;width:34%!important;height:10%!important;z-index:90!important}
+#zagInfoPage2FollowPlan,#zagInfoPage2TopSets{position:absolute;border:0;background:transparent;padding:0;z-index:95;display:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#zagInfoPage2FollowPlan{right:2%;top:27%;width:18%;height:22%}
+#zagInfoPage2TopSets{right:2%;top:52%;width:18%;height:23%}
+#zagInfoLastCTA{right:2%!important;bottom:1%!important;width:47%!important;height:10%!important;z-index:96!important;border:0!important;background:transparent!important;box-shadow:none!important;color:transparent!important;text-shadow:none!important}
+/* Workout collapsed title cards: no stray chevron, no dead space. */
+.exercise{display:block!important;margin:7px 0!important;overflow:hidden!important}
+.exerciseTitleRow{display:grid!important;grid-template-columns:28px 58px minmax(0,1fr) 66px auto 48px!important;gap:5px!important;align-items:center!important;min-height:38px!important;padding:4px 6px!important;border-bottom:0!important;background:#080a14!important}
+.exerciseTitleRow .n{position:static!important;transform:none!important;width:25px!important;height:25px!important;font-size:11px!important}
+.exerciseTitleRow .name{position:static!important;transform:none!important;min-width:0!important;padding:0!important;text-align:left!important;font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.exerciseTitleRow .week{position:static!important;width:66px!important;min-width:66px!important;padding:4px 2px!important;font-size:8px!important}
+.exerciseTitleRow .titleMax{font-size:8px!important;font-weight:900!important;white-space:nowrap!important}
+.exerciseTitleRow .editMain{position:static!important;width:48px!important;min-width:48px!important;padding:4px 2px!important;font-size:8px!important}
+.exerciseExpand{height:25px;padding:0 4px;border:1px solid #c83ee6;border-radius:6px;background:linear-gradient(135deg,#190522,#31083b);color:#f7d9ff;font-size:7px;font-weight:950;letter-spacing:.2px;box-shadow:0 0 7px #b72ed844}
+.exerciseChevron{display:none!important}
+.exercise.collapsed .exerciseBody{display:none!important}
+.exerciseBody{display:grid!important;grid-template-columns:minmax(0,1fr) 86px!important}
+.extras .exerciseChevron{display:none!important}
+@media(max-width:430px){.exerciseTitleRow{grid-template-columns:26px 52px minmax(0,1fr) 58px auto 42px!important;gap:3px!important;padding:4px!important}.exerciseTitleRow .week{width:58px!important;min-width:58px!important}.exerciseTitleRow .editMain{width:42px!important;min-width:42px!important}.exerciseExpand{font-size:6.5px!important}}
+</style>
+<script id="zag-build-marker-v2726">window.ZAG_BUILD="27.26-FINAL-INFO-WORKOUT-EXPAND";</script>
 </body></html>
 
 
