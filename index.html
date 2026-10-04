@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Zag Science - Streak State Fixed</title>
+<title>Zag Science v27.25</title>
 <style>
 :root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
 *{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
@@ -41,6 +41,25 @@ table{grid-column:2;grid-row:1/3;width:100%;border-collapse:collapse;table-layou
 .groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
 
 .zagCreateGroupTrophy{width:100%;max-width:520px;margin:0 auto 18px;border:2px solid #e969ff;border-radius:16px;overflow:hidden;background:#05050d;box-shadow:0 0 14px rgba(233,105,255,.22);line-height:0}.zagCreateGroupTrophy img{display:block;width:100%;height:auto}
+
+/* v27.25 workout collapsible title rows */
+.exercise{display:block!important;position:relative}
+.exerciseTitleRow{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto auto;gap:6px;align-items:center;min-height:44px;padding:5px 7px;background:#080a14;border-bottom:1px solid #8b28ad;cursor:pointer}
+.exerciseTitleRow .n{position:static!important;transform:none!important;width:27px;height:27px;font-size:12px}
+.exerciseTitleRow .name{position:static!important;transform:none!important;text-align:left;font-size:11px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0}
+.exerciseTitleRow .week{position:static!important;width:auto!important;min-width:70px;padding:4px 3px!important;font-size:9px!important}
+.exerciseTitleRow .titleMax{font-size:9px;font-weight:800;white-space:nowrap;color:#f3c8ff}
+.exerciseTitleRow .editMain{position:static!important;width:auto!important;padding:5px 8px!important;font-size:9px!important}
+.exerciseBody{display:grid;grid-template-columns:minmax(0,1fr) 86px;align-items:stretch}
+.exerciseBody table{grid-column:1!important;grid-row:auto!important;font-size:8px}
+.exerciseBody .exComplete{grid-column:2!important;grid-row:auto!important;margin:4px;font-size:8px}
+.exercise.collapsed .exerciseBody{display:none}
+.exercise.collapsed .exerciseTitleRow{border-bottom:0}
+.exerciseChevron{font-size:14px;color:#e67aff;transition:.15s}.exercise.collapsed .exerciseChevron{transform:rotate(-90deg)}
+.extras{padding:0!important;overflow:hidden}.extrasTitleRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;cursor:pointer}.extrasTitleRow h2{margin:0!important}.extrasBody{padding:0 8px 8px}.extras.collapsed .extrasBody{display:none}.extras.collapsed .extrasTitleRow{padding-bottom:10px}
+#zagPersistentInfo b{display:flex;align-items:center;gap:7px}.zagInfoBookIcon{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 6px #d63cff)}
+#zagInfoPanelV6{background:#05050c!important;overflow:hidden}.zagInfoSlide{position:absolute;inset:0;background-position:center;background-size:contain;background-repeat:no-repeat;display:none}.zagInfoSlide.active{display:block}.zagInfoHit{position:absolute;top:0;bottom:0;width:24%;z-index:4;background:transparent;border:0}.zagInfoPrevHit{left:0}.zagInfoNextHit{right:0}
+
 </style>
 <style>
 .streakWidget{margin:10px 0 14px;padding:14px;border:1px solid #a92bc7;border-radius:16px;background:linear-gradient(135deg,#090914,#16071e);box-shadow:0 0 22px #a629c733;display:flex;align-items:center;gap:14px}
@@ -624,10 +643,13 @@ function showStreakPopup(force=false){
  let o=document.createElement("div");o.className="streakOverlay";o.innerHTML=`<div class=streakPopup><div class="streakHero ${lost?'streakLost':''}"><div class=streakArmWrap><img class=streakPopupStateArm src="${arm}" alt="Streak state arm"></div><div class=big>${st.streak.count||0}</div></div><h2>${title}</h2><div style="font-size:18px;font-weight:900;color:#ef9cff">DAY STREAK</div><p>${msg}</p><button class=pick onclick="zagStreakPopupContinue(this)">LET'S GO</button></div>`;
  document.body.appendChild(o);st.streak.lastPopup=k;save();
 }
+function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el)el.classList.toggle('collapsed')}
+function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
-d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section class=exercise><div class=head><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><select class=week style="position:absolute;left:4px;right:4px;top:4px;width:${st.stickWeek?'64':'68'}px;padding:3px 1px;font-size:8px" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><button class="btn editMain" onclick="chooseExtraForMain(${e})">Edit</button></div><div class=maxbox><span>↗</span> Max: ${weightText(st.max[ex]||0)}</div><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></section>`});
-s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section class=extras><h2>Extras / Replacements</h2>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></section>`;document.getElementById("screen").innerHTML=s}
+d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow" onclick="if(!event.target.closest('select,button'))toggleExerciseCard(${e})"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>W${n}</option>`).join("")}</select><div class=titleMax>MAX: ${weightText(st.max[ex]||0)}</div><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button><span class=exerciseChevron>⌄</span></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></div></section>`});
+s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
+
 function setExerciseWeek(ex,w){if(st.stickWeek)return;st.weeks[ex]=+w||1;save();workout()}
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
@@ -649,7 +671,7 @@ st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
 recordStreakWorkout();save();returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
 function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
-function home(){setActiveNav("home");let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b>ⓘ Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class=btn style="width:100%;margin:3px 0;text-align:left;font-size:11px" onclick="st.day=${i};save();workout()">Day ${i+1} — ${esc(d[0])} <span style="float:right">›</span></button>`).join("")}`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
+function home(){setActiveNav("home");let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class=btn style="width:100%;margin:3px 0;text-align:left;font-size:11px" onclick="st.day=${i};save();workout()">Day ${i+1} — ${esc(d[0])} <span style="float:right">›</span></button>`).join("")}`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function editSplit(){
   let saved=Object.keys(st.customSplits||{});
   let savedHtml=saved.length?`<div class=extraslabel style="margin-top:12px">CUSTOM SPLITS</div>${saved.map(n=>`<div class=extra><button type="button" class=pick style="margin:0;flex:1;text-align:left" onclick="loadSplitFromEditor('${q(n)}')">${esc(n)}</button><button type="button" class=btn onclick="renameSavedSplit('${q(n)}')">Rename</button><button type="button" class="btn danger" onclick="deleteSavedSplit('${q(n)}')">×</button></div>`).join("")}`:"";
@@ -930,12 +952,24 @@ document.addEventListener("visibilitychange",()=>{
 </style>
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
-  <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button><button id="zagInfoGoV6" type="button" aria-label="Close information"></button>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1.jpg')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2.jpg')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3.jpg')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4.jpg')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5.jpg')"></div>
+  <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
+  <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
+  <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
+  <button id="zagInfoGoV6" type="button" aria-label="Close information"></button>
  </div>
 </div>
 <script id="zag-info-replacement-v6-script">
 (function(){
  const overlay=document.getElementById("zagInfoOverlayV6");
+ let zagInfoPage=0;
+ function showInfoPage(n){const slides=[...overlay.querySelectorAll(".zagInfoSlide")];zagInfoPage=Math.max(0,Math.min(slides.length-1,n));slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage));}
+ overlay.querySelector(".zagInfoPrevHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage-1)});
+ overlay.querySelector(".zagInfoNextHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage+1)});
  function closeInfo(e){
    if(e){e.preventDefault();e.stopPropagation();}
    overlay.classList.remove("open");
@@ -943,6 +977,7 @@ document.addEventListener("visibilitychange",()=>{
  }
  window.openZagInfo=function(e){
    if(e){e.preventDefault();e.stopPropagation();}
+   showInfoPage(0);
    overlay.classList.add("open");
    overlay.setAttribute("aria-hidden","false");
  };
@@ -1028,7 +1063,7 @@ document.addEventListener("visibilitychange",()=>{
 </style>
 
 <button id="zagHomeInfoV7" type="button" aria-label="Zag Science information">
- <span class="zagInfoIconV7">i</span>
+ <img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">
  <span class="zagInfoTextV7">Info</span>
 </button>
 
