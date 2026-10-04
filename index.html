@@ -652,10 +652,12 @@ function showStreakPopup(force=false){
 function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el){el.classList.toggle('collapsed');let b=el.querySelector('.exerciseExpand');if(b)b.textContent=el.classList.contains('collapsed')?'EXPAND':'COLLAPSE'}}
 function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
-d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><div class=name>${esc(ex)}</div><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>W${n}</option>`).join("")}</select><div class=titleMax>MAX: ${weightText(st.max[ex]||0)}</div><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
+d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><div class=name>${esc(ex)}</div><select class=week onclick="event.stopPropagation();expandWeekLabels(this)" onfocus="expandWeekLabels(this)" onblur="compactWeekLabels(this)" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>W${n}</option>`).join("")}</select><div class=titleMax>MAX: ${weightText(st.max[ex]||0)}</div><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
 ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
+function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
+function compactWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='W'+o.value})}
 function setExerciseWeek(ex,w){if(st.stickWeek)return;st.weeks[ex]=+w||1;save();workout()}
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
@@ -3720,6 +3722,21 @@ if ('serviceWorker' in navigator) {
 @media(max-width:430px){.exerciseTitleRow{grid-template-columns:26px 52px minmax(0,1fr) 58px auto 42px!important;gap:3px!important;padding:4px!important}.exerciseTitleRow .week{width:58px!important;min-width:58px!important}.exerciseTitleRow .editMain{width:42px!important;min-width:42px!important}.exerciseExpand{font-size:6.5px!important}}
 </style>
 <script id="zag-build-marker-v2726">window.ZAG_BUILD="27.26-FINAL-INFO-WORKOUT-EXPAND";</script>
+
+<style id="zag-v27-27-workout-layout-fix">
+/* More room for exercise names; compact week selector while closed. */
+.exerciseTitleRow{grid-template-columns:28px 58px minmax(0,1fr) 46px auto 48px!important}
+.exerciseTitleRow .week{width:46px!important;min-width:46px!important;padding:4px 1px!important}
+/* Expanded layout: undo legacy direct-child grid rules that were squeezing the table into the right edge. */
+.exerciseBody{display:grid!important;grid-template-columns:minmax(0,1fr) 86px!important;align-items:stretch!important;width:100%!important}
+.exercise .exerciseBody table{grid-column:1!important;grid-row:1!important;width:100%!important;position:static!important}
+.exercise .exerciseBody .exComplete{grid-column:2!important;grid-row:1!important;min-height:0!important;margin:4px!important;position:static!important}
+@media(max-width:430px){
+ .exerciseTitleRow{grid-template-columns:26px 52px minmax(0,1fr) 42px auto 42px!important}
+ .exerciseTitleRow .week{width:42px!important;min-width:42px!important}
+}
+</style>
+<script id="zag-build-marker-v2727">window.ZAG_BUILD="27.27-INFO2-WEEK-EXPANDED-FIX";</script>
 </body></html>
 
 
