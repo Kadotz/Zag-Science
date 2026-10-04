@@ -872,7 +872,7 @@ function zagCheckBodyweightReminder(){try{if(!st.notifications?.bodyweightRemind
 function streakReminderTimeSetting(){
   return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="st.streakReminderTime=this.value;save();settings()" style="min-width:110px"></div>`;
 }
-function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon style="font-size:18px;font-weight:900">ZS</div><div class=grow><b>Account & Cloud</b><div class=coming id="zagAccountStatus">${zagAccountStatusText()}</div></div><button class=btn onclick="openZagAccount()">Account</button></div></div><div class=pagecard><b>Training</b>
+function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon style="font-size:18px;font-weight:900">ZS</div><div class=grow><b>Account & Cloud</b><div class=coming id="zagAccountStatus">${zagAccountStatusText()}</div></div>${zagSession?.user?`<button class=btn onclick="zagChangeUsername()">Change Username</button>`:""}<button class=btn onclick="openZagAccount()">Account</button></div></div><div class=pagecard><b>Training</b>
 <div class=settingLine><div class=grow><b style="font-size:15px">Stick Week</b><div class=note style="margin-top:4px">Locks every exercise to Stick Week: the Week 8 PB sets through 105%, followed by 4 empty back-off set slots.</div></div><button class="btn stickWeekSwitch ${st.stickWeek?'on':''}" onclick="toggleStickWeek()">${st.stickWeek?"On":"Off"}</button></div>
 <div class=settingLine><div class=grow><b style="font-size:15px">Weight Units</b><div class=note style="margin-top:4px">Changes weights throughout Zag Science.</div></div><button class=btn onclick="toggleWeightUnit()">${weightUnit()}</button></div><div class=note>Tap to switch between kilograms and pounds. All displayed and entered weights convert automatically.</div>
 <div class=settingLine><div class=grow><b style="font-size:15px">Bodyweight</b><div class=note style="margin-top:4px">Used for bodyweight-ratio leaderboards.</div></div><div style="display:flex;align-items:center;gap:6px"><input id=zagBodyweightInput class=cell type=number inputmode=decimal step=0.1 min=1 value="${zagBodyweightDisplay()}" placeholder="—" style="width:82px;padding:8px;text-align:right"><span class=small>${weightUnit()}</span><button class=btn onclick="zagSaveBodyweight(document.getElementById('zagBodyweightInput'))">Save</button></div></div></div><div class=pagecard><b>Notifications</b>
@@ -2722,6 +2722,16 @@ const ZAG_SUPABASE_URL='https://ptzmevofxzptypyiwahm.supabase.co';
 const ZAG_SUPABASE_KEY='sb_publishable_IIv1dN8XfC2kFYVEGJtfvA_z1axIl5d';
 let zagSb=null,zagSession=null,zagAuthMode='signin';
 try{zagSb=window.supabase.createClient(ZAG_SUPABASE_URL,ZAG_SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){console.warn('Zag cloud unavailable',e)}
+
+function zagFirstLaunchAccountGuide(){
+  const key="zagAccountGuideV2724";
+  if(localStorage.getItem(key))return;
+  localStorage.setItem(key,"shown");
+  setTimeout(()=>{
+    if(zagSession?.user)return;
+    modal("Save your Zag Science progress",`<div class=note style="font-size:12px;line-height:1.5">Sign in or create a free account so your PBs, workout progress and groups can sync between devices.</div><button class=pick onclick="closeModal();settings();setTimeout(()=>openZagAccount(),250)">Go to Settings & Sign In</button><button class=btn style="width:100%;margin-top:7px" onclick="closeModal()">Not now</button>`);
+  },900);
+}
 function zagAccountStatusText(){return zagSession?.user ? `Signed in as ${esc(zagSession.user.user_metadata?.username||zagSession.user.email||'Zag Science user')}` : 'Not signed in';}
 function zagRefreshAccountStatus(){const el=document.getElementById('zagAccountStatus');if(el)el.textContent=zagAccountStatusText()}
 function zagAuthMessage(msg,bad=false){const el=document.getElementById('zagAuthMsg');if(el){el.textContent=msg||'';el.style.color=bad?'#ff7b9b':'#c99cff'}}
@@ -2740,6 +2750,30 @@ function zagRenderAccount(mode='signin'){
   else body=zagAuthForm(mode);
   root.innerHTML=`<div class=zagAccountBox><button type=button class="btn zagAccountClose" onclick="zagCloseAccount()">×</button><h2>Account</h2><div id=zagAuthPanel>${body}</div></div>`;
   document.body.appendChild(root);
+}
+
+async function zagChangeUsername(){
+  if(!zagSb||!zagSession?.user){openZagAccount();return}
+  const current=zagSession.user.user_metadata?.username||"";
+  modal("Change Username",`<p class=small>Choose your new Zag Science username.</p><input id=zagNewUsername class=cell style="width:100%;font-size:16px;padding:10px" maxlength=24 autocomplete=off value="${esc(current)}"><button class=pick onclick="zagSaveUsername()">Save Username</button><div id=zagUsernameMsg class=note></div>`);
+  setTimeout(()=>document.getElementById("zagNewUsername")?.focus(),80);
+}
+async function zagSaveUsername(){
+  const input=document.getElementById("zagNewUsername");
+  const msg=document.getElementById("zagUsernameMsg");
+  const username=(input?.value||"").trim();
+  if(username.length<2){if(msg)msg.textContent="Username must be at least 2 characters.";return}
+  if(msg)msg.textContent="Saving…";
+  try{
+    const r=await zagSb.rpc("zag_change_username",{new_username:username});
+    if(r.error)throw r.error;
+    const u=await zagSb.auth.updateUser({data:{username,display_name:username}});
+    if(u.error)throw u.error;
+    zagSession=u.data.session||zagSession;
+    if(zagSession?.user){zagSession.user=u.data.user}
+    closeModal();zagRefreshAccountStatus();settings();
+    setTimeout(()=>modal("Username updated",`<div class=note>Your username is now <b>${esc(username)}</b>.</div>`),80);
+  }catch(e){if(msg)msg.textContent=e.message||"Could not change username."}
 }
 function openZagAccount(){zagRenderAccount('signin')}
 function zagSwitchAuth(mode){zagRenderAccount(mode)}
@@ -3543,6 +3577,69 @@ if ('serviceWorker' in navigator) {
 </style>
 <script id="zag-build-marker-v2722">window.ZAG_BUILD="27.22-ACCOUNT-GROUPS-INFO";</script>
 <script id="zag-build-marker-v2723">window.ZAG_BUILD="27.23-SHARED-GROUPS";</script>
+<script id="zag-account-guide-trigger">window.addEventListener("load",()=>zagFirstLaunchAccountGuide());</script>
+<style id="zag-v27-24-ui-layout">
+/* Popups sit BELOW the portrait header rather than underneath it. */
+.modal{
+  z-index:1200!important;
+  align-items:flex-start!important;
+  padding-top:calc(min(37.5vw,375px) + 10px + env(safe-area-inset-top))!important;
+  padding-bottom:calc(64px + env(safe-area-inset-bottom))!important;
+}
+.modalbox{
+  max-height:calc(100dvh - min(37.5vw,375px) - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+}
+
+/* Workout: use the old right-hand completion space for a wider table.
+   Max moves to upper-left; Complete All Sets moves underneath the whole exercise. */
+.exercise{
+  grid-template-columns:92px minmax(0,1fr)!important;
+  grid-template-rows:auto auto 48px!important;
+}
+.exercise .head{
+  grid-column:1!important;grid-row:1/3!important;
+  min-height:138px!important;padding-top:34px!important;
+}
+.exercise .maxbox{
+  grid-column:1!important;grid-row:1!important;
+  z-index:4!important;border:0!important;border-bottom:1px solid #8b28ad!important;
+  padding:5px 2px 4px!important;font-size:8px!important;
+  background:#080914!important;
+}
+.exercise table{grid-column:2!important;grid-row:1/3!important}
+.exercise .exComplete{
+  grid-column:1/3!important;grid-row:3!important;
+  min-height:42px!important;margin:5px!important;font-size:9px!important;
+}
+.exercise .head .week{top:29px!important;left:5px!important;right:5px!important;width:80px!important}
+.exercise .head .n{top:61px!important}
+.exercise .head .name{top:61%!important}
+.exercise .head .editMain{bottom:5px!important;width:80px!important}
+.exercise .flameimg{width:34px!important;height:34px!important}
+
+/* Landscape: header becomes normal page content so it cannot cover the workout.
+   Make the workout/table larger and bolder for sideways reading. */
+@media (orientation:landscape) and (max-height:600px){
+  img.logo[alt="Zag Science"]{
+    position:relative!important;top:auto!important;z-index:1!important;
+    height:72px!important;object-fit:cover!important;object-position:center 43%!important;
+  }
+  main{padding-top:8px!important}
+  .exercise{grid-template-columns:118px minmax(0,1fr)!important;margin:10px 0!important}
+  .exercise .head{min-height:170px!important}
+  .exercise table{font-size:12px!important;font-weight:750!important}
+  .exercise th,.exercise td{height:28px!important;font-weight:750!important}
+  .exercise .cell{font-size:12px!important;font-weight:800!important}
+  .exercise .name{font-size:13px!important;font-weight:950!important}
+  .exercise .maxbox{font-size:11px!important;font-weight:950!important}
+  .exercise .head .week{width:104px!important;font-size:11px!important}
+  .exercise .head .n{font-size:15px!important;width:30px!important;height:30px!important}
+  .exercise .exComplete{font-size:12px!important;font-weight:950!important;min-height:52px!important}
+  .modal{padding-top:14px!important;align-items:flex-start!important}
+  .modalbox{max-height:calc(100dvh - 80px)!important}
+}
+</style>
+<script id="zag-build-marker-v2724">window.ZAG_BUILD="27.24-ACCOUNT-MODAL-LANDSCAPE-WORKOUT";</script>
 </body></html>
 
 
