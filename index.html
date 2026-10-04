@@ -58,7 +58,13 @@ table{grid-column:2;grid-row:1/3;width:100%;border-collapse:collapse;table-layou
 .exerciseChevron{font-size:14px;color:#e67aff;transition:.15s}.exercise.collapsed .exerciseChevron{transform:rotate(-90deg)}
 .extras{padding:0!important;overflow:hidden}.extrasTitleRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;cursor:pointer}.extrasTitleRow h2{margin:0!important}.extrasBody{padding:0 8px 8px}.extras.collapsed .extrasBody{display:none}.extras.collapsed .extrasTitleRow{padding-bottom:10px}
 #zagPersistentInfo b{display:flex;align-items:center;gap:7px}.zagInfoBookIcon{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 6px #d63cff)}
-#zagInfoPanelV6{background:#05050c!important;overflow:hidden}.zagInfoSlide{position:absolute;inset:0;background-position:center;background-size:contain;background-repeat:no-repeat;display:none}.zagInfoSlide.active{display:block}.zagInfoHit{position:absolute;top:0;bottom:0;width:24%;z-index:4;background:transparent;border:0}.zagInfoPrevHit{left:0}.zagInfoNextHit{right:0}
+#zagInfoPanelV6{background:#05050c!important;overflow:hidden}.zagInfoSlide{position:absolute;inset:0;background-position:center;background-size:contain;background-repeat:no-repeat;display:none}.zagInfoSlide.active{display:block}.zagInfoHit{position:absolute;z-index:6;background:transparent;border:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.zagInfoPrevHit{left:3%;bottom:2.3%;width:34%;height:8.8%}
+.zagInfoNextHit{right:3%;bottom:2.3%;width:34%;height:8.8%}
+#zagInfoCloseTop{position:absolute;right:1.5%;top:1%;width:14%;height:10%;z-index:8;border:0;background:transparent;padding:0;-webkit-tap-highlight-color:transparent}
+#zagInfoPage2TopSets{position:absolute;right:4%;top:60%;width:16%;height:23%;z-index:7;border:0;background:transparent;padding:0;display:none;-webkit-tap-highlight-color:transparent}
+#zagInfoLastCTA{position:absolute;right:3%;bottom:2.3%;width:43%;height:8.8%;z-index:9;border:1.5px solid #e541ff;border-radius:16px;background:linear-gradient(180deg,rgba(74,8,96,.96),rgba(12,5,24,.98));box-shadow:0 0 12px #d72cff, inset 0 0 10px #9f1fcf;color:#fff;font-weight:900;font-style:italic;font-size:clamp(11px,2.7vw,22px);letter-spacing:.2px;text-shadow:0 0 8px #e544ff;display:none;align-items:center;justify-content:center;white-space:nowrap}
+#zagInfoPanelV6{width:min(94vw,calc(94vh * .6666667),700px)!important;height:auto!important;max-height:none!important;aspect-ratio:2/3!important}
 
 </style>
 <style>
@@ -942,11 +948,7 @@ document.addEventListener("visibilitychange",()=>{
  background:#05050c url("assets/images/asset-023-ea8255c026ac.png") center/contain no-repeat;
  border-radius:22px;
 }
-#zagInfoGoV6 {
- position:absolute; left:20%; bottom:2.5%; width:60%; height:9%;
- border:0; background:transparent; z-index:3; cursor:pointer;
- -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-}
+#zagInfoGoV6{display:none!important}
 
 .groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
 </style>
@@ -960,6 +962,8 @@ document.addEventListener("visibilitychange",()=>{
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
+  <button id="zagInfoPage2TopSets" type="button" aria-label="Open Just Log Your Top Sets"></button>
+  <button id="zagInfoLastCTA" type="button" aria-label="Let’s get stronger">LET’S GET STRONGER&nbsp;&nbsp;›</button>
   <button id="zagInfoGoV6" type="button" aria-label="Close information"></button>
  </div>
 </div>
@@ -967,9 +971,21 @@ document.addEventListener("visibilitychange",()=>{
 (function(){
  const overlay=document.getElementById("zagInfoOverlayV6");
  let zagInfoPage=0;
- function showInfoPage(n){const slides=[...overlay.querySelectorAll(".zagInfoSlide")];zagInfoPage=Math.max(0,Math.min(slides.length-1,n));slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage));}
+ function showInfoPage(n){
+   const slides=[...overlay.querySelectorAll(".zagInfoSlide")];
+   zagInfoPage=Math.max(0,Math.min(slides.length-1,n));
+   slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage));
+   const prev=overlay.querySelector(".zagInfoPrevHit"), next=overlay.querySelector(".zagInfoNextHit");
+   const jump=overlay.querySelector("#zagInfoPage2TopSets"), cta=overlay.querySelector("#zagInfoLastCTA");
+   if(prev) prev.style.display=zagInfoPage===0?"none":"block";
+   if(next) next.style.display=zagInfoPage===4?"none":"block";
+   if(jump) jump.style.display=zagInfoPage===1?"block":"none";
+   if(cta) cta.style.display=zagInfoPage===4?"flex":"none";
+ }
  overlay.querySelector(".zagInfoPrevHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage-1)});
  overlay.querySelector(".zagInfoNextHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage+1)});
+ overlay.querySelector("#zagInfoPage2TopSets")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(3)});
+ overlay.querySelector("#zagInfoLastCTA")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();closeInfo(e);if(typeof workout==="function")workout();});
  function closeInfo(e){
    if(e){e.preventDefault();e.stopPropagation();}
    overlay.classList.remove("open");
@@ -982,8 +998,7 @@ document.addEventListener("visibilitychange",()=>{
    overlay.setAttribute("aria-hidden","false");
  };
  window.closeZagInfo=closeInfo;
- document.getElementById("zagInfoCloseTop").addEventListener("click",closeInfo);document.getElementById("zagInfoGoV6").addEventListener("click",closeInfo);
- document.getElementById("zagInfoGoV6").addEventListener("pointerup",closeInfo);
+ document.getElementById("zagInfoCloseTop").addEventListener("click",closeInfo);
  overlay.addEventListener("click",function(e){if(e.target===overlay)closeInfo(e)});
 
  // Make every existing Home info control open THIS popup, regardless of old handlers.
