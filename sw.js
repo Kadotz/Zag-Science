@@ -1,4 +1,4 @@
-const CACHE = 'zag-science-v27.31-v2732';
+const CACHE = 'zag-science-v27.33';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));

@@ -652,9 +652,9 @@ function showStreakPopup(force=false){
  if(!force&&!st.notifications.streakScore)return;ensureStreakWeek();let k=streakDayKey();
  if(!force&&st.streak.lastPopup===k)return;
  const historyDone=Array.isArray(st.history)&&st.history.some(h=>{let raw=h.date||h.when||h.timestamp||h.time;if(!raw)return false;let d=new Date(raw);return !isNaN(d)&&streakDayKey(d)===k;});
- let done=(zagBrokenZeroPreview||zagRestDayCheckPreview)?false:(st.streak.lastWorkout===k)||historyDone;
- let lost=zagBrokenZeroPreview?true:(zagRestDayCheckPreview?false:!!st.streak.justLost);
- let restSaved=zagRestDayCheckPreview||(!done&&!lost&&!!st.streak.lastRestDay&&st.streak.lastRestDay===st.streak.lastProcessed);
+ let done=force?true:((zagBrokenZeroPreview||zagRestDayCheckPreview)?false:(st.streak.lastWorkout===k)||historyDone);
+ let lost=force?false:(zagBrokenZeroPreview?true:(zagRestDayCheckPreview?false:!!st.streak.justLost));
+ let restSaved=force?false:(zagRestDayCheckPreview||(!done&&!lost&&!!st.streak.lastRestDay&&st.streak.lastRestDay===st.streak.lastProcessed));
  // Don't show a REST DAY popup merely because today has no workout yet.
  if(!force&&!done&&!lost&&!restSaved)return;
  let title=lost?"STREAK LOST":(done?"WORKOUT COMPLETE":"REST DAY");
@@ -694,7 +694,7 @@ st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
 recordStreakWorkout();save();returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
 function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
-function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class=btn style="width:100%;margin:3px 0;text-align:left;font-size:11px" onclick="st.day=${i};save();workout()">Day ${i+1} — ${esc(d[0])} ${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span style="float:right">›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
+function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class="btn workoutDayBtn" onclick="st.day=${i};save();workout()"><span class=workoutDayName>Day ${i+1} — ${esc(d[0])}</span>${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span class=workoutDayChevron>›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function showRestInfo(){modal("REST?",`<p><b>At Zag Science, we don't believe rest days need to be planned into fixed positions in your split.</b></p><p>Everyone recovers differently. Some people will need more rest than others, and your needs can change depending on training intensity, sleep, stress and how your body feels.</p><p>Pay attention to signs of fatigue, unusual soreness, falling performance or poor recovery. If you feel you need a rest day, take one and return to your recommended workout when you're ready.</p><p><b>You decide when — and if — you need to rest. Train hard, recover properly, and always train safely.</b></p>`)}
 function editSplit(){
   let saved=Object.keys(st.customSplits||{});
@@ -3776,6 +3776,34 @@ if ('serviceWorker' in navigator) {
 }
 </style>
 <script id="zag-build-marker-v2730">window.ZAG_BUILD="27.30-LARGER-EXPANDED-TABLE";</script>
+
+<style id="zag-v27-33-workout-card-final-fix">
+/* Final mobile workout card layout: full exercise name, max pinned top-right. */
+.exerciseTitleRow{
+ display:grid!important;grid-template-columns:34px minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;
+ gap:6px 8px!important;min-height:82px!important;padding:8px!important;align-items:start!important;
+}
+.exerciseTitleRow .n{grid-column:1!important;grid-row:1!important;position:static!important;transform:none!important}
+.exerciseTitleRow .name{
+ grid-column:2!important;grid-row:1!important;position:static!important;transform:none!important;
+ white-space:normal!important;overflow:visible!important;text-overflow:clip!important;
+ min-width:0!important;max-width:none!important;width:auto!important;padding:2px 4px 2px 0!important;
+ font-size:12px!important;line-height:1.15!important;text-align:left!important;font-weight:900!important;
+}
+.exerciseTitleRow .titleMaxTop{
+ grid-column:3!important;grid-row:1!important;align-self:start!important;justify-self:end!important;
+ position:static!important;white-space:nowrap!important;text-align:right!important;font-size:10px!important;font-weight:950!important;
+ padding:3px 0 0 5px!important;color:#f3c8ff!important;
+}
+.exerciseControls{grid-column:1/-1!important;grid-row:2!important;display:grid!important;grid-template-columns:auto 78px 1fr auto!important;gap:7px!important;align-items:center!important}
+.exerciseControls .week{position:static!important;width:78px!important;min-width:78px!important;font-size:10px!important;padding:5px 3px!important}
+.exerciseControls .editMain{position:static!important;justify-self:end!important;width:auto!important;min-width:48px!important}
+.workoutDayBtn{width:100%!important;margin:3px 0!important;text-align:left!important;font-size:11px!important;display:flex!important;align-items:center!important;gap:7px!important}
+.workoutDayName{min-width:0!important;flex:1 1 auto!important}
+.recommendedBadge{float:none!important;margin:0!important;flex:0 0 auto!important}
+.workoutDayChevron{margin-left:auto!important;flex:0 0 auto!important;font-size:15px!important}
+</style>
+<script id="zag-build-marker-v2733">window.ZAG_BUILD="27.33-NAMES-MAX-RECOMMENDED-STREAK";</script>
 </body></html>
 
 
