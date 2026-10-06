@@ -3924,3 +3924,39 @@ if ('serviceWorker' in navigator) {
  inset:0!important;background-size:cover!important;background-position:center bottom!important;background-color:transparent!important;
 }
 </style>
+
+<style id="zag-v28-8-podium-full-artwork-final">
+/* v28.8 final podium framing: the source art is 1:2. Match the card to it so
+   the artwork can fill the full width without black side gutters OR vertical cropping. */
+.zagApprovedPodium{align-items:start!important;}
+.zagApprovedPodCard,
+.zagApprovedPodCard.rank1,
+.zagApprovedPodCard.rank2,
+.zagApprovedPodCard.rank3{
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1 / 2!important;
+  overflow:hidden!important;
+}
+.zagApprovedPodCard.rank1{margin-top:-12px!important;}
+.zagApprovedPodCard .zagApprovedMedal{position:absolute!important;inset:0!important;overflow:hidden!important;}
+.zagApprovedPodCard .zagApprovedMedal img,
+.zagApprovedPodCard.rank1 .zagApprovedMedal img,
+.zagApprovedPodCard.rank2 .zagApprovedMedal img,
+.zagApprovedPodCard.rank3 .zagApprovedMedal img{
+  position:absolute!important;
+  left:0!important;top:0!important;right:auto!important;bottom:auto!important;
+  width:100%!important;height:100%!important;
+  min-width:100%!important;min-height:100%!important;
+  max-width:none!important;max-height:none!important;
+  object-fit:fill!important;
+  object-position:center top!important;
+  transform:none!important;
+  margin:0!important;padding:0!important;
+  display:block!important;background:transparent!important;
+}
+/* Keep the name/score on the deliberately dark lower part of the artwork. */
+.zagApprovedPodCard>b{bottom:30px!important;}
+.zagApprovedScore{bottom:9px!important;}
+</style>
+<script id="zag-build-marker-v288-podium-full-artwork">window.ZAG_BUILD="28.8-PODIUM-FULL-ARTWORK";</script>
