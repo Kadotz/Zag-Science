@@ -3904,3 +3904,17 @@ if ('serviceWorker' in navigator) {
 .zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/zag-podium-3-v2718.jpg")!important}
 </style>
 <script id="zag-build-marker-v2739">window.ZAG_BUILD="27.39-PODIUM-ARTWORK-FRAMING";</script>
+
+
+<!-- v27.40 podium full-width framing -->
+<style id="zag-v27-40-podium-full-width-framing">
+/* Fill each podium card edge-to-edge horizontally while keeping the lower name/score area visible. */
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  inset:0!important;
+  background-size:100% auto!important;
+  background-position:center bottom!important;
+  background-repeat:no-repeat!important;
+  background-color:#080713!important;
+}
+</style>
+<script id="zag-build-marker-v2740">window.ZAG_BUILD="27.40-PODIUM-FULL-WIDTH";</script>
