@@ -2217,13 +2217,13 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
   inset:0!important;
   z-index:0!important;
   background-repeat:no-repeat!important;
-  background-position:center!important;
+  background-position:center bottom!important;
   background-size:cover!important;
 }
 /* Visual podium order: 2nd, 1st, 3rd. */
-.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/asset-044-f3c336eaadfa.webp")!important}
-.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/asset-045-6f01951f66bf.webp")!important}
-.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/asset-046-557604854fec.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/podium-cliff-2-v2738.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/podium-cliff-1-v2738.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/podium-cliff-3-v2738.webp")!important}
 
 .zagPersistentGroup .groupPodium .podiumCard::after{
   content:"";
@@ -3880,16 +3880,3 @@ if ('serviceWorker' in navigator) {
 
 
 
-<style id="zag-v27-22-podium-clear-label-zone">
-/* Updated podium artwork includes a clear lower cliff zone for name + score. Keep the full art visible. */
-.zagApprovedPodCard.rank1 .zagApprovedMedal img,
-.zagApprovedPodCard.rank2 .zagApprovedMedal img,
-.zagApprovedPodCard.rank3 .zagApprovedMedal img{
-  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
-  object-fit:cover!important;object-position:center center!important;
-  transform:translate(-50%,-50%)!important;
-}
-.zagApprovedPodCard>b{bottom:28px!important}
-.zagApprovedPodCard .zagApprovedScore{bottom:7px!important}
-</style>
-<script id="zag-build-marker-v2722">window.ZAG_BUILD="27.22-PODIUM-CLEAR-LABEL-ZONE";</script>
