@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Zag Science v27.35.2</title>
+<title>Zag Science v27.35.3</title>
 <style>
 :root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
 *{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
@@ -548,7 +548,10 @@ function parseStreakDay(k){let [y,m,d]=k.split("-").map(Number);return new Date(
 function streakWeekKey(d=new Date()){let x=new Date(d);x.setHours(0,0,0,0);let day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);return streakDayKey(x)}
 function daysBetween(a,b){return Math.round((parseStreakDay(b)-parseStreakDay(a))/86400000)}
 function ensureStreakState(){
- st.streak=st.streak||{};
+ if(!st.streak||typeof st.streak!=="object"){
+   const legacyCount=Number(st.streak)||0;
+   st.streak={count:legacyCount,lastWorkout:"",lastProcessed:"",weekKey:"",restUsed:0,lastPopup:"",weekRest:{},justLost:false};
+ }
  st.streak.count=Number(st.streak.count||0);
  st.streak.lastWorkout=st.streak.lastWorkout||"";
  st.streak.lastProcessed=st.streak.lastProcessed||"";
@@ -3133,7 +3136,12 @@ if ('serviceWorker' in navigator) {
      if(r.error||!r.data)return null;
      const pr=r.data,bw=Number(pr.bodyweight_kg);
      if(Number.isFinite(bw)&&bw>0){st.bodyweightKg=bw;st.bodyweight_kg=bw;st.bodyweight=bw;try{localStorage.setItem("zagBodyweightKg",String(bw))}catch(_){}}
-     if(Number.isFinite(Number(pr.streak)))st.streak=Number(pr.streak);
+     if(Number.isFinite(Number(pr.streak))){
+       st.streak=(st.streak&&typeof st.streak==="object")?st.streak:{count:0,lastWorkout:"",weekKey:"",restUsed:0,lastPopup:""};
+       // The full local/cloud streak object is authoritative. The profile field is
+       // only a leaderboard summary and must never replace the object.
+       if(!Number.isFinite(Number(st.streak.count))) st.streak.count=Number(pr.streak)||0;
+     }
      save();return pr;
    }catch(_){return null}
  }
