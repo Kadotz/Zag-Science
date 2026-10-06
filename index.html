@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Zag Science v27.35</title>
+<title>Zag Science v27.35.1</title>
 <style>
 :root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
 *{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
@@ -592,15 +592,18 @@ function processStreakCalendar(){
 }
 function ensureStreakWeek(){processStreakCalendar()}
 function recordStreakWorkout(){
- processStreakCalendar();const k=streakDayKey();
- // A completed workout must immediately advance the streak.
- st.streak.count=(st.streak.count||0)+1;
+ ensureStreakState();
+ const k=streakDayKey();
+ const alreadyToday=st.streak.lastWorkout===k;
+ // Mark today's completed workout before any calendar processing can interpret
+ // the current day as an untrained/rest state.
+ st.streak.lastWorkout=k;
+ st.streak.lastProcessed=k;
+ if(!alreadyToday) st.streak.count=Math.max(0,Number(st.streak.count||0))+1;
  st.streak.justLost=false;
  zagBrokenZeroPreview=false;
  zagRestDayCheckPreview=false;
- st.streak.lastWorkout=k;
  st.streak.lastPopup="";
- st.streak.lastProcessed=k;
  save();
 }
 function streakReminderDue(){
