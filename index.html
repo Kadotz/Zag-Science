@@ -3905,16 +3905,20 @@ if ('serviceWorker' in navigator) {
 </style>
 <script id="zag-build-marker-v2739">window.ZAG_BUILD="27.39-PODIUM-ARTWORK-FRAMING";</script>
 
-
-<!-- v27.40 podium full-width framing -->
-<style id="zag-v27-40-podium-full-width-framing">
-/* Fill each podium card edge-to-edge horizontally while keeping the lower name/score area visible. */
+<!-- v28.8 podium full-bleed correction: fill card width, preserve lower label area -->
+<style id="zag-v28-8-podium-full-bleed-fix">
+.zagApprovedPodCard .zagApprovedMedal{inset:0!important;overflow:hidden!important;border-radius:inherit!important;background:#080713!important}
+.zagApprovedPodCard .zagApprovedMedal img,
+.zagApprovedPodCard.rank1 .zagApprovedMedal img,
+.zagApprovedPodCard.rank2 .zagApprovedMedal img,
+.zagApprovedPodCard.rank3 .zagApprovedMedal img{
+  position:absolute!important;left:0!important;top:0!important;
+  width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+  object-fit:cover!important;object-position:center bottom!important;
+  transform:none!important;margin:0!important;background:transparent!important;
+}
 .zagPersistentGroup .groupPodium .podiumCard::before{
-  inset:0!important;
-  background-size:100% auto!important;
-  background-position:center bottom!important;
-  background-repeat:no-repeat!important;
-  background-color:#080713!important;
+  inset:0!important;background-size:cover!important;background-position:center bottom!important;background-repeat:no-repeat!important;background-color:#080713!important;
 }
 </style>
-<script id="zag-build-marker-v2740">window.ZAG_BUILD="27.40-PODIUM-FULL-WIDTH";</script>
+<script id="zag-build-marker-v288-podium-full-bleed">window.ZAG_BUILD="28.8";</script>
