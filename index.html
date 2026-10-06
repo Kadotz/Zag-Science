@@ -2221,9 +2221,9 @@ document.getElementById('zagProOverlay').addEventListener('click',function(e){if
   background-size:cover!important;
 }
 /* Visual podium order: 2nd, 1st, 3rd. */
-.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/zag-podium-2-v2718.jpg")!important}
-.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/zag-podium-1-v2718.jpg")!important}
-.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/zag-podium-3-v2718.jpg")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/podium-cliff-2-v2738.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/podium-cliff-1-v2738.webp")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/podium-cliff-3-v2738.webp")!important}
 
 .zagPersistentGroup .groupPodium .podiumCard::after{
   content:"";
@@ -3880,3 +3880,27 @@ if ('serviceWorker' in navigator) {
 
 
 
+
+<!-- v27.39 podium artwork framing correction -->
+<style id="zag-v27-39-podium-artwork-framing-correction">
+/* Use the existing approved zag-podium artwork without zooming/cropping away its lower text area. */
+.zagApprovedPodCard .zagApprovedMedal{inset:0!important;overflow:hidden!important;border-radius:inherit!important}
+.zagApprovedPodCard .zagApprovedMedal img,
+.zagApprovedPodCard.rank1 .zagApprovedMedal img,
+.zagApprovedPodCard.rank2 .zagApprovedMedal img,
+.zagApprovedPodCard.rank3 .zagApprovedMedal img{
+  left:50%!important;top:50%!important;
+  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;object-position:center center!important;
+  transform:translate(-50%,-50%)!important;
+  background:#080713!important;
+}
+/* Legacy/persistent podium: point at the same approved images and remove the old cliff zoom. */
+.zagPersistentGroup .groupPodium .podiumCard::before{
+  inset:0!important;background-size:contain!important;background-position:center center!important;background-color:#080713!important;
+}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(1)::before{background-image:url("assets/images/zag-podium-2-v2718.jpg")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(2)::before{background-image:url("assets/images/zag-podium-1-v2718.jpg")!important}
+.zagPersistentGroup .groupPodium .podiumCard:nth-child(3)::before{background-image:url("assets/images/zag-podium-3-v2718.jpg")!important}
+</style>
+<script id="zag-build-marker-v2739">window.ZAG_BUILD="27.39-PODIUM-ARTWORK-FRAMING";</script>
