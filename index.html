@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Zag Science v27.36</title>
+<title>Zag Science v27.37</title>
 <style>
 :root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
 *{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
@@ -688,26 +688,41 @@ function setExerciseWeek(ex,w){if(st.stickWeek)return;st.weeks[ex]=+w||1;save();
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
 function one(ex,i,btn){let key=k(ex,i),t=sets(ex)[i],row=btn?.closest("tr");if(st.draft[key]?.done){delete st.draft[key];btn?.classList.remove("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value="";if(ins[1])ins[1].value=""}}else{st.draft[key]={kg:t.kg,r:t.r,done:true};btn?.classList.add("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value=kgToDisplay(t.kg);if(ins[1])ins[1].value=t.r}}clickSound();save()}
+function zagRecordPB(ex,kg,reps){
+ kg=Number(kg);reps=Number(reps);
+ if(!Number.isFinite(kg)||!Number.isFinite(reps)||kg<=Number(st.max[ex]||0))return false;
+ const old=Number(st.max[ex]||0);
+ st.prHistory[ex]=st.prHistory[ex]||[];
+ st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:kg,reps});
+ st.max[ex]=kg;st.repsAtMax[ex]=reps;
+ zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);
+ return true;
+}
 function completeExercise(ex,e){
  const ts=sets(ex);let pbChanged=false;
- // Only use sets the user actually entered; do not autofill unfinished sets.
+ // Any completed, user-entered set can establish a PB on any week.
  ts.forEach((t,i)=>{
    const v=st.draft[k(ex,i)];
    if(!v||v.kg===""||v.kg==null||v.r===""||v.r==null)return;
    const kg=Number(v.kg),reps=Number(v.r);
    if(!Number.isFinite(kg)||!Number.isFinite(reps))return;
    v.done=true;
-   if(reps>=Number(t.r||0)&&kg>Number(st.max[ex]||0)){
-     const old=Number(st.max[ex]||0);
-     st.prHistory[ex]=st.prHistory[ex]||[];
-     st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:kg,reps});
-     st.max[ex]=kg;st.repsAtMax[ex]=reps;
-     zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);pbChanged=true;
-   }
+   if(zagRecordPB(ex,kg,reps))pbChanged=true;
  });
  clickSound();save();if(pbChanged)zagPushOnePB(ex);
  workout();
- requestAnimationFrame(()=>requestAnimationFrame(()=>{const next=document.getElementById("exercise-"+(e+1));if(next){next.classList.remove("collapsed");const b=next.querySelector(".exerciseExpand");if(b)b.textContent="COLLAPSE";next.scrollIntoView({behavior:"smooth",block:"start"})}}));
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const next=document.getElementById("exercise-"+(e+1));
+   if(next){
+     next.classList.remove("collapsed");
+     const b=next.querySelector(".exerciseExpand");if(b)b.textContent="COLLAPSE";
+     // Keep the entire title/control area below the sticky Zag Science header.
+     const logo=document.querySelector('img.logo[alt="Zag Science"]');
+     const headerH=logo?logo.getBoundingClientRect().height:0;
+     const y=Math.max(0,window.scrollY+next.getBoundingClientRect().top-headerH-8);
+     window.scrollTo({top:y,left:0,behavior:"smooth"});
+   }
+ }));
 }
 // Legacy name retained in case an older cached click handler calls it.
 function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
@@ -718,7 +733,7 @@ function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`
 function doSwap(extra,i){let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
 function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
 function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
-function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(+v.r>=t.r&&+v.kg>(st.max[ex]||0)){let old=st.max[ex]||0;st.prHistory[ex]=st.prHistory[ex]||[];st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:+v.kg,reps:+v.r});st.max[ex]=+v.kg;st.repsAtMax[ex]=+v.r;zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
+function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(zagRecordPB(ex,+v.kg,+v.r)){prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
 st.recommendedDay=(st.day+1)%st.days.length;
 d[1].forEach(ex=>{
  let w=Number(st.weeks[ex]||1);
