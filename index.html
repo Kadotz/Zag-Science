@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Zag Science v27.35.3</title>
+<title>Zag Science v27.36</title>
 <style>
 :root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
 *{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
@@ -679,7 +679,7 @@ function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(
 function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
 d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="allExercise('${q(ex)}')"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>ALL SETS</button></div></section>`});
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>EXERCISE</button></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
@@ -688,7 +688,29 @@ function setExerciseWeek(ex,w){if(st.stickWeek)return;st.weeks[ex]=+w||1;save();
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
 function one(ex,i,btn){let key=k(ex,i),t=sets(ex)[i],row=btn?.closest("tr");if(st.draft[key]?.done){delete st.draft[key];btn?.classList.remove("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value="";if(ins[1])ins[1].value=""}}else{st.draft[key]={kg:t.kg,r:t.r,done:true};btn?.classList.add("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value=kgToDisplay(t.kg);if(ins[1])ins[1].value=t.r}}clickSound();save()}
-function allExercise(ex){sets(ex).forEach((t,i)=>st.draft[k(ex,i)]={kg:t.kg,r:t.r,done:true});clickSound();save();workout()}
+function completeExercise(ex,e){
+ const ts=sets(ex);let pbChanged=false;
+ // Only use sets the user actually entered; do not autofill unfinished sets.
+ ts.forEach((t,i)=>{
+   const v=st.draft[k(ex,i)];
+   if(!v||v.kg===""||v.kg==null||v.r===""||v.r==null)return;
+   const kg=Number(v.kg),reps=Number(v.r);
+   if(!Number.isFinite(kg)||!Number.isFinite(reps))return;
+   v.done=true;
+   if(reps>=Number(t.r||0)&&kg>Number(st.max[ex]||0)){
+     const old=Number(st.max[ex]||0);
+     st.prHistory[ex]=st.prHistory[ex]||[];
+     st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:kg,reps});
+     st.max[ex]=kg;st.repsAtMax[ex]=reps;
+     zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);pbChanged=true;
+   }
+ });
+ clickSound();save();if(pbChanged)zagPushOnePB(ex);
+ workout();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{const next=document.getElementById("exercise-"+(e+1));if(next){next.classList.remove("collapsed");const b=next.querySelector(".exerciseExpand");if(b)b.textContent="COLLAPSE";next.scrollIntoView({behavior:"smooth",block:"start"})}}));
+}
+// Legacy name retained in case an older cached click handler calls it.
+function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
 function move(n){st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
 function closeModal(){document.getElementById("modalRoot").innerHTML=""}
 function modal(title,body){document.getElementById("modalRoot").innerHTML=`<div class=modal onclick="if(event.target===this)closeModal()"><div class=modalbox><button class="btn close" onclick=closeModal()>×</button><h2>${title}</h2>${body}</div></div>`}
@@ -811,8 +833,13 @@ async function zagPushOnePB(ex){
    const k=zagPBMarkerKey();if(k)localStorage.setItem(k,zagPBSignature());
  }catch(e){console.warn('PB direct sync failed',e);zagQueuePBSync()}
 }
-function zagSetMax(ex,v){st.max[ex]=+displayToKg(v);zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save();zagPushOnePB(ex)}
-function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number value="${kgToDisplay(st.max[x]||0)}" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
+function zagSetMax(ex,v){
+ const kg=+displayToKg(v);st.max[ex]=kg;
+ // Keep every visible copy of the same exercise PB in sync immediately.
+ document.querySelectorAll('input[data-zag-max-ex]').forEach(inp=>{if(inp.dataset.zagMaxEx===ex&&inp!==document.activeElement)inp.value=kgToDisplay(kg)});
+ zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save();zagPushOnePB(ex)
+}
+function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number data-zag-max-ex="${esc(x)}" value="${kgToDisplay(st.max[x]||0)}" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
 function toggleMaxSection(i){let el=document.getElementById("maxsec-"+i);if(!el)return;el.classList.toggle("collapsed");let b=el.querySelector(".maxToggle");if(b)b.textContent=el.classList.contains("collapsed")?"EXPAND":"COLLAPSE"}
 function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach((sec,i)=>{s+=`<section id="maxsec-${i}" class="maxsection collapsed"><div class=maxSectionHead onclick="toggleMaxSection(${i})"><h2>${esc(sec.name)}</h2><button type=button class="btn maxToggle" onclick="event.stopPropagation();toggleMaxSection(${i})">EXPAND</button></div><div class=maxSectionBody>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</div></section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
