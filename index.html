@@ -679,7 +679,7 @@ function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(
 function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><h1>${esc(d[0])}</h1><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
 d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png">COMPLETE<br>EXERCISE</button></div></section>`});
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
@@ -723,6 +723,15 @@ function completeExercise(ex,e){
      window.scrollTo({top:y,left:0,behavior:"smooth"});
    }
  }));
+}
+function fillAllSets(ex){
+ const ts=sets(ex);
+ ts.forEach((t,i)=>{st.draft[k(ex,i)]={kg:t.kg,r:t.r,done:true};});
+ clickSound();save();workout();
+ requestAnimationFrame(()=>{
+   const e=st.days[st.day][1].indexOf(ex),card=document.getElementById("exercise-"+e);
+   if(card){card.classList.remove("collapsed");const b=card.querySelector(".exerciseExpand");if(b)b.textContent="COLLAPSE";}
+ });
 }
 // Legacy name retained in case an older cached click handler calls it.
 function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
@@ -3875,6 +3884,21 @@ if ('serviceWorker' in navigator) {
 .workoutDayName{grid-column:1!important;min-width:0!important}.recommendedBadge{grid-column:2!important;margin:0!important}.workoutDayChevron{grid-column:3!important;justify-self:end!important;margin:0!important}
 </style>
 <script id="zag-build-marker-v2734">window.ZAG_BUILD="27.34-VERIFIED-FIX";</script>
+
+<style id="zag-v28-8-next-exercise-all-sets">
+/* v28.8 workout actions: Next Exercise plus a compact ALL quick-fill button. */
+.exercise .exerciseBody .exerciseBottomActions{
+ grid-column:1!important;grid-row:2!important;display:grid!important;grid-template-columns:minmax(0,1fr) 54px!important;gap:5px!important;width:100%!important;padding:4px!important;align-items:stretch!important;
+}
+.exercise .exerciseBody .exerciseBottomActions .exComplete{
+ grid-column:auto!important;grid-row:auto!important;width:100%!important;margin:0!important;min-height:46px!important;position:static!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+}
+.exercise .exerciseBody .exerciseBottomActions .exComplete span{white-space:nowrap!important;}
+.allSetsBtn{position:relative!important;min-width:54px!important;width:54px!important;min-height:46px!important;padding:2px!important;border:1px solid #e23cff!important;border-radius:7px!important;background:linear-gradient(135deg,#120519,#2d0738,#0a0710)!important;box-shadow:0 0 9px #dd37ff4c!important;color:#fff!important;overflow:hidden!important;}
+.allSetsFist{display:block!important;width:38px!important;height:38px!important;margin:0 auto!important;background:url("assets/images/asset-001-4394b03b6f48.png") center/38px 38px no-repeat!important;filter:drop-shadow(0 0 4px #d63cff)!important;}
+.allSetsBtn>span:first-child{position:absolute!important;z-index:2!important;left:0!important;right:0!important;top:50%!important;transform:translateY(-50%)!important;font-size:10px!important;font-weight:1000!important;font-style:italic!important;letter-spacing:.6px!important;text-shadow:0 1px 3px #000,0 0 5px #000!important;pointer-events:none!important;}
+</style>
+<script id="zag-build-marker-v288-next-all">window.ZAG_BUILD="28.8-NEXT-EXERCISE-ALL-SETS";</script>
 </body></html>
 
 
