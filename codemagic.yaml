@@ -38,3 +38,44 @@ workflows:
 
     artifacts:
       - build/Build/Products/Debug-iphonesimulator/*.app
+
+      
+  zag-science-iphone:
+    name: Zag Science iPhone Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      node: 22
+      xcode: latest
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci
+
+      - name: Prepare web app
+        script: |
+          mkdir -p www
+          cp index.html manifest.webmanifest sw.js www/
+          cp -R assets www/
+
+      - name: Generate iOS project
+        script: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Prepare iPhone archive
+        script: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/ZagScience.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+
+    artifacts:
+      - build/ZagScience.xcarchive
