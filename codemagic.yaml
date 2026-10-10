@@ -46,6 +46,8 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
+      integrations:
+          app_store_connect: "Zag Science Codemagic"
       node: 22
       xcode: latest
       ios_signing:
@@ -84,6 +86,5 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        api_key: "Zag Science Codemagic"
         submit_to_testflight: true
         
