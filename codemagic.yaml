@@ -78,5 +78,5 @@ workflows:
             --project ios/App/App.xcodeproj \
             --scheme App
 
-      artifacts:
+    artifacts:
       - build/ios/ipa/*.ipa
