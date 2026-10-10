@@ -48,6 +48,9 @@ workflows:
     environment:
       node: 22
       xcode: latest
+      ios_signing:
+          distribution_type: app_store
+          bundle_identifier: com.zagscience.app
 
     scripts:
       - name: Install dependencies
@@ -64,18 +67,16 @@ workflows:
         script: |
           npx cap add ios
           npx cap sync ios
-
-      - name: Prepare iPhone archive
+          
+      - name: Apply Apple signing profile
         script: |
-          xcodebuild \
-            -project ios/App/App.xcodeproj \
-            -scheme App \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            -archivePath build/ZagScience.xcarchive \
-            CODE_SIGNING_ALLOWED=NO \
-            archive
+          xcode-project use-profiles
 
-    artifacts:
-      - build/ZagScience.xcarchive
+      - name: Build signed iPhone IPA
+        script: |
+          xcode-project build-ipa \
+            --project ios/App/App.xcodeproj \
+            --scheme App
+
+      artifacts:
+      - build/ios/ipa/*.ipa
