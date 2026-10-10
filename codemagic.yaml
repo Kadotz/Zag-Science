@@ -84,4 +84,6 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
+        api_key: "Zag Science Codemagic"
         submit_to_testflight: true
+        
