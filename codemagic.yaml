@@ -87,6 +87,24 @@ workflows:
           }
           EOF
 
+      - name: Connect Apple push registration to Capacitor
+        script: |
+          set -e
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          p = Path('ios/App/App/AppDelegate.swift')
+          s = p.read_text()
+          if 'capacitorDidRegisterForRemoteNotifications' not in s:
+              if 'class AppDelegate' not in s or not s.rstrip().endswith('}'):
+                  raise SystemExit('Unexpected AppDelegate.swift; cannot safely patch APNs callbacks')
+              i = s.rfind('}')
+              s = s[:i] + '\n    // Forward Apple push registration to Capacitor Push Notifications.\n    override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {\n        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)\n    }\n\n    override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {\n        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)\n    }\n' + '\n' + s[i:]
+              p.write_text(s)
+              print('Added APNs callbacks to AppDelegate.swift')
+          else:
+              print('APNs callbacks already present')
+          PYTHON
+
       - name: Enable iOS push entitlement
         script: |
           mkdir -p ios/App/App
