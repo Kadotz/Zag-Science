@@ -73,6 +73,20 @@ workflows:
           npx cap add ios
           npx cap sync ios
           
+      - name: Set Zag Science home screen icon
+        script: |
+          ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          mkdir -p "$ICON_DIR"
+          cp assets/icons/ios-app-icon.png "$ICON_DIR/AppIcon-512@2x.png"
+          cat > "$ICON_DIR/Contents.json" <<'EOF'
+          {
+            "images": [
+              {"filename": "AppIcon-512@2x.png", "idiom": "universal", "platform": "ios", "size": "1024x1024"}
+            ],
+            "info": {"author": "xcode", "version": 1}
+          }
+          EOF
+
       - name: Enable iOS push entitlement
         script: |
           mkdir -p ios/App/App
