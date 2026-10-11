@@ -969,7 +969,7 @@ function streakRestSelector(){
   return `<div class=settingLine><div class=grow><b style="font-size:15px">Allowed rest days</b><div class=note style="margin-top:4px">Rest days available each week without breaking your streak.</div></div><select class=week onchange="st.streakRestDays=Number(this.value);save();settings()">${[1,2,3,4,5].map(n=>`<option value="${n}" ${st.streakRestDays===n?'selected':''}>${n}</option>`).join('')}</select></div>`;
 }
 async function requestZagNotifications(){
- if(zagNativeNotifications()){try{const ok=await zagNativePermission(true);if(ok)await zagRescheduleNative();alert(ok?"iPhone notifications enabled.":"Notification permission was not granted.");settings()}catch(e){alert("Unable to enable iPhone notifications: "+e.message)}return;}
+ if(zagNativeNotifications()){try{const ok=await zagNativePermission(true);if(ok){await zagRescheduleNative();await zagStartPushNotifications(true)}alert(ok?"iPhone notifications enabled.":"Notification permission was not granted.");settings()}catch(e){alert("Unable to enable iPhone notifications: "+e.message)}return;}
  if(!("Notification" in window)){alert("This browser does not support web notifications.");return}
  try{
    let p=await Notification.requestPermission();
@@ -2906,6 +2906,35 @@ window.zagSelectGroupEmblem=function(id){
 .zagAccountOverlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.84);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box}.zagAccountBox{position:relative;width:min(430px,96vw);max-height:80vh;overflow:auto;background:#080b15;border:2px solid #e33cff;border-radius:14px;padding:18px 14px 14px;box-sizing:border-box;box-shadow:0 0 35px #c32cff66}.zagAccountBox h2{margin:0 0 10px;font-size:25px}.zagAccountClose{position:absolute;right:12px;top:12px;width:42px;height:42px}.zagAuthMsg{min-height:18px;font-size:11px;margin:9px 0;line-height:1.45}.zagAuthUser{padding:12px;border:1px solid #332a3d;border-radius:10px;background:#0b0910;margin:10px 0}.zagAuthUser b{display:block;margin-bottom:4px}
 </style>
 <script>
+
+// Native APNs device registration for signed iOS builds.
+// The Supabase RLS policies only allow the signed-in user to register their own token.
+let zagPushStarted=false,zagPushToken=null;
+function zagPushPlugin(){
+ try{return window.Capacitor?.isNativePlatform?.()?(window.Capacitor.Plugins?.PushNotifications||window.Capacitor.registerPlugin?.('PushNotifications')):null}catch(_){return null}
+}
+async function zagSavePushToken(){
+ if(!zagPushToken||!zagSb||!zagSession?.user?.id)return;
+ const uid=zagSession.user.id;
+ const data={user_id:uid,device_token:zagPushToken,platform:'ios',leaderboard_enabled:!!st.notifications?.leaderboardChanges,group_prs_enabled:!!st.notifications?.groupPRs,updated_at:new Date().toISOString()};
+ const {error}=await zagSb.from('push_tokens').upsert(data,{onConflict:'device_token'});
+ if(error)console.warn('Zag push token could not be saved',error.message);
+}
+async function zagStartPushNotifications(request=false){
+ const push=zagPushPlugin();if(!push)return false;
+ try{
+  if(!zagPushStarted){
+   zagPushStarted=true;
+   await push.addListener('registration',async token=>{zagPushToken=token.value;await zagSavePushToken()});
+   await push.addListener('registrationError',e=>console.warn('Zag APNs registration error',e));
+   await push.addListener('pushNotificationActionPerformed',()=>{try{window.focus()}catch(_){}});
+  }
+  let p=await push.checkPermissions();
+  if(p.receive!=='granted'&&request)p=await push.requestPermissions();
+  if(p.receive==='granted'){await push.register();return true}
+ }catch(e){console.warn('Zag push setup failed',e)}
+ return false;
+}
 const ZAG_SUPABASE_URL='https://ptzmevofxzptypyiwahm.supabase.co';
 const ZAG_SUPABASE_KEY='sb_publishable_IIv1dN8XfC2kFYVEGJtfvA_z1axIl5d';
 let zagSb=null,zagSession=null,zagAuthMode='signin';
@@ -3105,7 +3134,7 @@ function zagQueueStateSync(){
  zagStateSyncTimer=setTimeout(()=>zagUploadCloudState().catch(e=>console.warn('Training cloud backup failed',e)),900);
 }
 
-(async()=>{if(!zagSb)return;const {data}=await zagSb.auth.getSession();zagSession=data.session||null;zagRefreshAccountStatus();if(zagSession){zagInitStateSync().then(()=>zagInitPBSync());}zagSb.auth.onAuthStateChange((event,session)=>{zagSession=session||null;setTimeout(zagRefreshAccountStatus,0);if(session){setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),150);setTimeout(zagSyncBodyweightProfile,300);}if(event==='PASSWORD_RECOVERY')setTimeout(()=>{const pw=prompt('Enter your new Zag Science password:');if(pw&&pw.length>=6)zagSb.auth.updateUser({password:pw}).then(({error})=>alert(error?error.message:'Password updated.'))},200)})})();
+(async()=>{if(!zagSb)return;const {data}=await zagSb.auth.getSession();zagSession=data.session||null;zagRefreshAccountStatus();if(zagSession){setTimeout(()=>zagStartPushNotifications(false),500);zagInitStateSync().then(()=>zagInitPBSync());}zagSb.auth.onAuthStateChange((event,session)=>{zagSession=session||null;setTimeout(zagRefreshAccountStatus,0);if(session)setTimeout(()=>{zagStartPushNotifications(false).then(zagSavePushToken)},500);if(session){setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),150);setTimeout(zagSyncBodyweightProfile,300);}if(event==='PASSWORD_RECOVERY')setTimeout(()=>{const pw=prompt('Enter your new Zag Science password:');if(pw&&pw.length>=6)zagSb.auth.updateUser({password:pw}).then(({error})=>alert(error?error.message:'Password updated.'))},200)})})();
 </script>
 
 <script>
