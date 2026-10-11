@@ -12,6 +12,7 @@ workflows:
       - name: Install dependencies
         script: |
           npm ci
+          npm install @capacitor/local-notifications@^8 --no-save --package-lock=false
 
       - name: Prepare web app
         script: |
@@ -59,6 +60,7 @@ workflows:
       - name: Install dependencies
         script: |
           npm ci
+          npm install @capacitor/local-notifications@^8 --no-save --package-lock=false
 
       - name: Prepare web app
         script: |

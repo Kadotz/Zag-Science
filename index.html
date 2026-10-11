@@ -918,14 +918,58 @@ function createGroup(){groupCreateState={combined:false,bodyweight:false,individ
 function finishCreateGroup(){let n=(document.getElementById('gname')?.value||'').trim();if(!n){alert('Give your group a name first.');return}let exercises=[...(groupCreateState.selectedExercises||new Set())];st.demoGroup={name:n,members:[],exercises:exercises,leaderboards:{combined:groupCreateState.combined,bodyweight:groupCreateState.bodyweight,individual:groupCreateState.individual,bodyweightCombined:groupCreateState.ratioCombined,bodyweightIndividual:groupCreateState.ratioIndividual}};st.groupView='total';save();closeModal();groupsPage();setTimeout(inviteMembers,180)}
 function inviteMembers(){let chosen=new Set((st.demoGroup&&st.demoGroup.members)||[]);let people=groupMembers().filter(x=>x.name!=='Kieron');modal("Add Members",`<p class=small>Test accounts are available so you can try the group setup before real accounts are connected.</p><div class=createChoices>${people.map(p=>`<label><input class=demoMember type=checkbox value="${esc(p.name)}" ${chosen.has(p.name)?'checked':''}><b>${esc(p.name)}</b><span class=small> • ⚡ ${p.streak} day streak</span></label>`).join('')}</div><button class=pick onclick="saveDemoMembers()">Add to Group</button>`)}
 function saveDemoMembers(){if(!st.demoGroup)return;st.demoGroup.members=[...document.querySelectorAll('.demoMember:checked')].map(x=>x.value);save();closeModal();groupsPage()}
+// Capacitor native iOS local notifications. Remote group notifications require APNs/backend separately.
+function zagNativeNotifications(){
+ try {if(window.Capacitor?.isNativePlatform?.())return window.Capacitor.Plugins?.LocalNotifications || window.Capacitor.registerPlugin?.('LocalNotifications');}catch(e){}
+ return null;
+}
+async function zagNativePermission(request=false){
+ const n=zagNativeNotifications();if(!n)return false;
+ const p=request?await n.requestPermissions():await n.checkPermissions();
+ return p.display==='granted';
+}
+async function zagRescheduleNative(){
+ const n=zagNativeNotifications();if(!n)return;
+ if(!await zagNativePermission(false))return;
+ // Reserved IDs: 8200 workout, 8201 streak, 8202 bodyweight.
+ try{await n.cancel({notifications:[8200,8201,8202].map(id=>({id}))})}catch(e){}
+ const list=[],now=new Date();
+ const daily=(id,title,body,clock)=>{
+  const [h,m]=String(clock||'19:00').split(':').map(Number);
+  const at=new Date();at.setHours(Number.isFinite(h)?h:19,Number.isFinite(m)?m:0,0,0);
+  if(at<=now)at.setDate(at.getDate()+1);
+  list.push({id,title,body,schedule:{at:at.toISOString(),repeats:true,every:'day'},extra:{zagKind:id===8201?'streak':'workout'}});
+ };
+ if(st.notifications?.workoutReminder)daily(8200,'Workout reminder','Your Zag Science workout is ready. Open the app to train.','18:00');
+ if(st.notifications?.streakScore)daily(8201,'Keep your streak alive','Train today or use an available rest day.',st.streakReminderTime||'19:00');
+ if(st.notifications?.bodyweightReminder){
+  const anchor=Number(st.bodyweightReminderAnchor)||Date.now();
+  const fortnight=14*86400000;let due=anchor+fortnight;
+  while(due<=Date.now())due+=fortnight;
+  list.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString(),repeats:true,every:'day'},extra:{zagKind:'bodyweight'}});
+ }
+ // iOS local repeating intervals are daily/weekly etc; bodyweight is scheduled as a one-off and renewed on app open.
+ const bw=list.find(x=>x.id===8202);if(bw){delete bw.schedule.repeats;delete bw.schedule.every;}
+ if(list.length)await n.schedule({notifications:list});
+}
+async function zagNativeTest(kind){
+ const n=zagNativeNotifications();if(!n)return false;
+ if(!await zagNativePermission(true)){alert('Enable notifications in iPhone Settings to receive alerts.');return true;}
+ const isStreak=kind==='streak',isBodyweight=kind==='bodyweight';
+ const id=8290+Math.floor(Math.random()*9);
+ await n.schedule({notifications:[{id,title:isBodyweight?'Update your bodyweight':isStreak?'Keep your streak alive':'Workout reminder',body:isBodyweight?'Time to update your weight.':isStreak?'Train today or use a rest day.':'Your Zag Science workout is ready.',schedule:{at:new Date(Date.now()+5000).toISOString()},extra:{zagKind:kind}}]});
+ return true;
+}
+try{zagNativeNotifications()?.addListener('localNotificationActionPerformed',event=>{const kind=event?.notification?.extra?.zagKind;if(kind==='workout'||kind==='streak')setTimeout(()=>zagNotificationPopup(kind),350);else if(kind==='bodyweight')setTimeout(settings,350)})}catch(e){}
 function notificationToggle(key,label,desc){
   const on=!!st.notifications[key];
-  return `<div class=settingLine style="align-items:center;gap:14px"><div class=grow><b style="font-size:15px">${label}</b><div class=note style="margin-top:4px">${desc}</div></div><button class=btn onclick="st.notifications.${key}=!st.notifications.${key};save();settings()">${on?"On":"Off"}</button></div>`;
+  return `<div class=settingLine style="align-items:center;gap:14px"><div class=grow><b style="font-size:15px">${label}</b><div class=note style="margin-top:4px">${desc}</div></div><button class=btn onclick="st.notifications.${key}=!st.notifications.${key};save();zagRescheduleNative().catch(console.warn);settings()">${on?"On":"Off"}</button></div>`;
 }
 function streakRestSelector(){
   return `<div class=settingLine><div class=grow><b style="font-size:15px">Allowed rest days</b><div class=note style="margin-top:4px">Rest days available each week without breaking your streak.</div></div><select class=week onchange="st.streakRestDays=Number(this.value);save();settings()">${[1,2,3,4,5].map(n=>`<option value="${n}" ${st.streakRestDays===n?'selected':''}>${n}</option>`).join('')}</select></div>`;
 }
 async function requestZagNotifications(){
+ if(zagNativeNotifications()){try{const ok=await zagNativePermission(true);if(ok)await zagRescheduleNative();alert(ok?"iPhone notifications enabled.":"Notification permission was not granted.");settings()}catch(e){alert("Unable to enable iPhone notifications: "+e.message)}return;}
  if(!("Notification" in window)){alert("This browser does not support web notifications.");return}
  try{
    let p=await Notification.requestPermission();
@@ -934,6 +978,7 @@ async function requestZagNotifications(){
  }catch(e){alert("Notifications could not be enabled in this browser.")}
 }
 async function zagShowNotification(kind){
+ if(zagNativeNotifications()){try{await zagNativeTest(kind)}catch(e){alert("Notification test failed: "+e.message)}return;}
  if(!("Notification" in window)){alert("Notifications are not supported on this device.");return}
  if(Notification.permission!=="granted"){await requestZagNotifications();if(Notification.permission!=="granted")return}
  if(!("serviceWorker" in navigator)){alert("The Zag Science service worker is not available yet.");return}
@@ -984,11 +1029,11 @@ function zagHandleNotificationAction(){
 setInterval(()=>{try{maybeBrowserStreakReminder()}catch(e){}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)try{processStreakCalendar();maybeBrowserStreakReminder();zagCheckBodyweightReminder()}catch(e){}});
 function zagBodyweightDisplay(){if(st.bodyweightKg===null||st.bodyweightKg===""||!Number.isFinite(Number(st.bodyweightKg)))return "";return kgToDisplay(Number(st.bodyweightKg))}
-function zagSaveBodyweight(input){let v=(input?.value||"").trim();if(!v){st.bodyweightKg=null;save();settings();return}let kg=displayToKg(v);if(!Number.isFinite(Number(kg))||Number(kg)<=0){alert("Enter a valid bodyweight.");return}st.bodyweightKg=Math.round(Number(kg)*1000)/1000;st.bodyweightReminderAnchor=Date.now();st.bodyweightReminderLastShown=0;save();zagSyncBodyweightProfile();settings()}
+function zagSaveBodyweight(input){let v=(input?.value||"").trim();if(!v){st.bodyweightKg=null;save();settings();return}let kg=displayToKg(v);if(!Number.isFinite(Number(kg))||Number(kg)<=0){alert("Enter a valid bodyweight.");return}st.bodyweightKg=Math.round(Number(kg)*1000)/1000;st.bodyweightReminderAnchor=Date.now();st.bodyweightReminderLastShown=0;save();zagRescheduleNative().catch(console.warn);zagSyncBodyweightProfile();settings()}
 async function zagSyncBodyweightProfile(){if(!zagSb||!zagSession?.user||!Number.isFinite(Number(st.bodyweightKg))||Number(st.bodyweightKg)<=0)return;try{await zagSb.from('profiles').update({bodyweight_kg:Number(st.bodyweightKg),updated_at:new Date().toISOString()}).eq('id',zagSession.user.id)}catch(e){console.warn('Bodyweight cloud update failed',e)}}
 function zagCheckBodyweightReminder(){try{if(!st.notifications?.bodyweightReminder)return;const anchor=Number(st.bodyweightReminderAnchor||Date.now()),due=14*24*60*60*1000;if(Date.now()-anchor<due)return;const last=Number(st.bodyweightReminderLastShown||0);if(Date.now()-last<24*60*60*1000)return;st.bodyweightReminderLastShown=Date.now();save();zagShowNotification('bodyweight')}catch(e){console.warn('Bodyweight reminder failed',e)}}
 function streakReminderTimeSetting(){
-  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="st.streakReminderTime=this.value;save();settings()" style="min-width:110px"></div>`;
+  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="st.streakReminderTime=this.value;save();zagRescheduleNative().catch(console.warn);settings()" style="min-width:110px"></div>`;
 }
 function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon style="font-size:18px;font-weight:900">ZS</div><div class=grow><b>Account & Cloud</b><div class=coming id="zagAccountStatus">${zagAccountStatusText()}</div></div>${zagSession?.user?`<button class=btn onclick="zagChangeUsername()">Change Username</button>`:""}<button class=btn onclick="openZagAccount()">Account</button></div></div><div class=pagecard><b>Training</b>
 <div class=settingLine><div class=grow><b style="font-size:15px">Stick Week</b><div class=note style="margin-top:4px">Locks every exercise to Stick Week: the Week 8 PB sets through 105%, followed by 4 empty back-off set slots.</div></div><button class="btn stickWeekSwitch ${st.stickWeek?'on':''}" onclick="toggleStickWeek()">${st.stickWeek?"On":"Off"}</button></div>
@@ -1002,9 +1047,9 @@ ${notificationToggle("streakScore","Streak score","Daily streak reminders and st
 ${notificationToggle("bodyweightReminder","Bodyweight reminder","Remind you every 2 weeks to update your bodyweight.")}
 ${streakRestSelector()}
 ${streakReminderTimeSetting()}
-<div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable"}</button></div>
+<div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${zagNativeNotifications()?"Enable / Check":(("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable")}</button></div>
 <div class=settingLine><div class=grow><b style="font-size:15px">Test notifications</b><div class=note style="margin-top:4px">Send a test to check the iPhone notification design and Rest Day action.</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class=btn onclick="zagShowNotification('workout')">Workout</button><button class=btn onclick="zagShowNotification('streak')">Streak</button><button class=btn onclick="zagShowNotification('bodyweight')">Bodyweight</button></div></div>
-<div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. Test notifications work now. Reliable timed delivery while the app is fully closed requires the push backend that will be connected in the next notification stage.</div>
+<div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are renewed when you open the app.</div>
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
@@ -1014,7 +1059,7 @@ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active")
 let zagResumePage="";try{zagResumePage=sessionStorage.getItem("zagActivePage")||""}catch(_){}
 const zagRoutes={home:home,workout:workout,maxes:maxes,groups:()=>groupsPage(),history:historyPage,settings:settings};
 if(zagResumePage&&zagResumePage!=="home"&&zagRoutes[zagResumePage])zagRoutes[zagResumePage]();else home();
-zagHandleNotificationAction();setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);setTimeout(zagCheckBodyweightReminder,1800);
+zagHandleNotificationAction();setTimeout(()=>zagRescheduleNative().catch(console.warn),2200);setTimeout(()=>{try{maybeBrowserStreakReminder()}catch(e){}},1200);setTimeout(zagCheckBodyweightReminder,1800);
 // v23: backgrounding/resuming keeps the user on the current page.
 let zagHiddenAt=0;
 document.addEventListener("visibilitychange",()=>{
