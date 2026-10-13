@@ -919,9 +919,18 @@ function finishCreateGroup(){let n=(document.getElementById('gname')?.value||'')
 function inviteMembers(){let chosen=new Set((st.demoGroup&&st.demoGroup.members)||[]);let people=groupMembers().filter(x=>x.name!=='Kieron');modal("Add Members",`<p class=small>Test accounts are available so you can try the group setup before real accounts are connected.</p><div class=createChoices>${people.map(p=>`<label><input class=demoMember type=checkbox value="${esc(p.name)}" ${chosen.has(p.name)?'checked':''}><b>${esc(p.name)}</b><span class=small> • ⚡ ${p.streak} day streak</span></label>`).join('')}</div><button class=pick onclick="saveDemoMembers()">Add to Group</button>`)}
 function saveDemoMembers(){if(!st.demoGroup)return;st.demoGroup.members=[...document.querySelectorAll('.demoMember:checked')].map(x=>x.value);save();closeModal();groupsPage()}
 // Capacitor native iOS local notifications. Remote group notifications require APNs/backend separately.
+function zagIsNativeIOS(){
+ try{
+  const cap=window.Capacitor;
+  return !!(cap?.isNativePlatform?.() || cap?.getPlatform?.()==='ios' || location.protocol==='capacitor:');
+ }catch(e){return location.protocol==='capacitor:';}
+}
 function zagNativeNotifications(){
- try {if(window.Capacitor?.isNativePlatform?.())return window.Capacitor.Plugins?.LocalNotifications || window.Capacitor.registerPlugin?.('LocalNotifications');}catch(e){}
- return null;
+ if(!zagIsNativeIOS())return null;
+ try{
+  const cap=window.Capacitor;
+  return cap?.Plugins?.LocalNotifications || cap?.registerPlugin?.('LocalNotifications') || null;
+ }catch(e){console.warn('Zag native local notification bridge unavailable',e);return null;}
 }
 async function zagNativePermission(request=false){
  const n=zagNativeNotifications();if(!n)return false;
@@ -970,6 +979,7 @@ function streakRestSelector(){
 }
 async function requestZagNotifications(){
  if(zagNativeNotifications()){try{const ok=await zagNativePermission(true);if(ok){await zagRescheduleNative();await zagStartPushNotifications(true)}alert(ok?"iPhone notifications enabled.":"Notification permission was not granted.");settings()}catch(e){alert("Unable to enable iPhone notifications: "+e.message)}return;}
+ if(zagIsNativeIOS()){alert("Zag Science is running on iPhone, but the native notification plugin is unavailable. Please check that the latest TestFlight build includes Capacitor Local Notifications.");return;}
  if(!("Notification" in window)){alert("This browser does not support web notifications.");return}
  try{
    let p=await Notification.requestPermission();
@@ -979,6 +989,7 @@ async function requestZagNotifications(){
 }
 async function zagShowNotification(kind){
  if(zagNativeNotifications()){try{await zagNativeTest(kind)}catch(e){alert("Notification test failed: "+e.message)}return;}
+ if(zagIsNativeIOS()){alert("The iPhone notification plugin is unavailable in this build. Please check the Capacitor installation.");return;}
  if(!("Notification" in window)){alert("Notifications are not supported on this device.");return}
  if(Notification.permission!=="granted"){await requestZagNotifications();if(Notification.permission!=="granted")return}
  if(!("serviceWorker" in navigator)){alert("The Zag Science service worker is not available yet.");return}
@@ -2911,7 +2922,7 @@ window.zagSelectGroupEmblem=function(id){
 // The Supabase RLS policies only allow the signed-in user to register their own token.
 let zagPushStarted=false,zagPushToken=null;
 function zagPushPlugin(){
- try{return window.Capacitor?.isNativePlatform?.()?(window.Capacitor.Plugins?.PushNotifications||window.Capacitor.registerPlugin?.('PushNotifications')):null}catch(_){return null}
+ try{return zagIsNativeIOS()?(window.Capacitor?.Plugins?.PushNotifications||window.Capacitor?.registerPlugin?.('PushNotifications')||null):null}catch(_){return null}
 }
 async function zagSavePushToken(){
  if(!zagPushToken||!zagSb||!zagSession?.user?.id)return;
