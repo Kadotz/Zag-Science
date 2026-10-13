@@ -12,13 +12,24 @@ workflows:
       - name: Install dependencies
         script: |
           npm ci
-          npm install @capacitor/local-notifications@^8 @capacitor/push-notifications@^8 --no-save --package-lock=false
+          npm install @capacitor/local-notifications@^8 @capacitor/push-notifications@^8 esbuild@^0.25 --no-save --package-lock=false
 
       - name: Prepare web app
         script: |
           mkdir -p www
           cp index.html manifest.webmanifest sw.js www/
           cp -R assets www/
+
+      - name: Bundle native notification bridge
+        script: |
+          set -e
+          cat > zag-native-entry.js <<'EOF'
+          import { LocalNotifications } from '@capacitor/local-notifications';
+          import { PushNotifications } from '@capacitor/push-notifications';
+          window.ZagNativePlugins = { LocalNotifications, PushNotifications };
+          EOF
+          npx esbuild zag-native-entry.js --bundle --platform=browser --format=iife --target=es2020 --outfile=www/zag-native-bridge.js
+          test -s www/zag-native-bridge.js
 
       - name: Generate iOS project
         script: |
@@ -60,13 +71,24 @@ workflows:
       - name: Install dependencies
         script: |
           npm ci
-          npm install @capacitor/local-notifications@^8 @capacitor/push-notifications@^8 --no-save --package-lock=false
+          npm install @capacitor/local-notifications@^8 @capacitor/push-notifications@^8 esbuild@^0.25 --no-save --package-lock=false
 
       - name: Prepare web app
         script: |
           mkdir -p www
           cp index.html manifest.webmanifest sw.js www/
           cp -R assets www/
+
+      - name: Bundle native notification bridge
+        script: |
+          set -e
+          cat > zag-native-entry.js <<'EOF'
+          import { LocalNotifications } from '@capacitor/local-notifications';
+          import { PushNotifications } from '@capacitor/push-notifications';
+          window.ZagNativePlugins = { LocalNotifications, PushNotifications };
+          EOF
+          npx esbuild zag-native-entry.js --bundle --platform=browser --format=iife --target=es2020 --outfile=www/zag-native-bridge.js
+          test -s www/zag-native-bridge.js
 
       - name: Generate iOS project
         script: |

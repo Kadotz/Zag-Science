@@ -404,6 +404,7 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
 <button id="nav-history" onclick="historyPage()"><img src="assets/images/asset-011-2ef5e92c1282.svg">History</button>
 <button id="nav-settings" onclick="settings()"><img src="assets/images/asset-012-d09e717dde98.svg">Settings</button>
 </div></div><div id="modalRoot"></div>
+<script src="zag-native-bridge.js"></script>
 <script>
 const warm=[[.2,20],[.4,8],[.6,5],[.75,3],[.9,2]];
 const plans={1:[[.7,8],[.725,8],[.75,8],[.725,8],[.7,10]],2:[[.725,8],[.75,7],[.775,6],[.725,8],[.7,10]],3:[[.75,6],[.8,5],[.825,4],[.75,6],[.7,10]],4:[[.775,5],[.825,4],[.85,3],[.775,5],[.725,8]],5:[[.8,5],[.85,3],[.875,3],[.8,5],[.75,8]],6:[[.825,4],[.875,2],[.9,2],[.8,5]],7:[[.6,8],[.65,6],[.7,5]],8:[[.9,1],[1,1],[1.05,1]]};
@@ -929,7 +930,7 @@ function zagNativeNotifications(){
  if(!zagIsNativeIOS())return null;
  try{
   const cap=window.Capacitor;
-  return cap?.Plugins?.LocalNotifications || cap?.registerPlugin?.('LocalNotifications') || null;
+  return window.ZagNativePlugins?.LocalNotifications || cap?.Plugins?.LocalNotifications || cap?.registerPlugin?.('LocalNotifications') || null;
  }catch(e){console.warn('Zag native local notification bridge unavailable',e);return null;}
 }
 async function zagNativePermission(request=false){
@@ -2922,7 +2923,7 @@ window.zagSelectGroupEmblem=function(id){
 // The Supabase RLS policies only allow the signed-in user to register their own token.
 let zagPushStarted=false,zagPushToken=null;
 function zagPushPlugin(){
- try{return zagIsNativeIOS()?(window.Capacitor?.Plugins?.PushNotifications||window.Capacitor?.registerPlugin?.('PushNotifications')||null):null}catch(_){return null}
+ try{return zagIsNativeIOS()?(window.ZagNativePlugins?.PushNotifications||window.Capacitor?.Plugins?.PushNotifications||window.Capacitor?.registerPlugin?.('PushNotifications')||null):null}catch(_){return null}
 }
 async function zagSavePushToken(){
  if(!zagPushToken||!zagSb||!zagSession?.user?.id)return;
