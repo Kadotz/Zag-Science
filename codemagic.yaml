@@ -11,8 +11,9 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          npm ci
-          npm install @capacitor/local-notifications@^8 @capacitor/push-notifications@^8 esbuild@^0.25 --no-save --package-lock=false
+          # Resolve permanent plugin dependencies and refresh the lockfile on the build machine.
+          # Once the updated lockfile is committed, this can switch back to npm ci.
+          npm install --no-audit --no-fund
 
       - name: Prepare web app
         script: |
@@ -35,6 +36,12 @@ workflows:
         script: |
           npx cap add ios
           npx cap sync ios
+          echo "--- Capacitor plugin discovery ---"
+          npx cap ls ios
+          echo "--- Native plugin package checks ---"
+          test -d node_modules/@capacitor/local-notifications
+          test -d node_modules/@capacitor/push-notifications
+          echo "Both notification plugin packages are installed"
 
       - name: Build iOS simulator app
         script: |
@@ -70,8 +77,9 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          npm ci
-          npm install @capacitor/local-notifications@^8 @capacitor/push-notifications@^8 esbuild@^0.25 --no-save --package-lock=false
+          # Resolve permanent plugin dependencies and refresh the lockfile on the build machine.
+          # Once the updated lockfile is committed, this can switch back to npm ci.
+          npm install --no-audit --no-fund
 
       - name: Prepare web app
         script: |
@@ -94,6 +102,12 @@ workflows:
         script: |
           npx cap add ios
           npx cap sync ios
+          echo "--- Capacitor plugin discovery ---"
+          npx cap ls ios
+          echo "--- Native plugin package checks ---"
+          test -d node_modules/@capacitor/local-notifications
+          test -d node_modules/@capacitor/push-notifications
+          echo "Both notification plugin packages are installed"
           
       - name: Set Zag Science home screen icon
         script: |
