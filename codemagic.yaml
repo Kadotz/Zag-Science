@@ -98,7 +98,7 @@ workflows:
               if 'class AppDelegate' not in s or not s.rstrip().endswith('}'):
                   raise SystemExit('Unexpected AppDelegate.swift; cannot safely patch APNs callbacks')
               i = s.rfind('}')
-              s = s[:i] + '\n    // Forward Apple push registration to Capacitor Push Notifications.\n    override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {\n        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)\n    }\n\n    override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {\n        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)\n    }\n' + '\n' + s[i:]
+              s = s[:i] + '\n    // Forward Apple push registration to Capacitor Push Notifications.\n    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {\n        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)\n    }\n\n    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {\n        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)\n    }\n' + '\n' + s[i:]
               p.write_text(s)
               print('Added APNs callbacks to AppDelegate.swift')
           else:
