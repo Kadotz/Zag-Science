@@ -754,7 +754,7 @@ d[1].forEach(ex=>{
 });
 st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
-recordStreakWorkout();save();returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
+recordStreakWorkout();save();zagRescheduleNative().catch(console.warn);returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
 function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
 function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class="btn workoutDayBtn" onclick="st.day=${i};save();workout()"><span class=workoutDayName>Day ${i+1} — ${esc(d[0])}</span>${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span class=workoutDayChevron>›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function showRestInfo(){modal("REST?",`<p><b>At Zag Science, we don't believe rest days need to be planned into fixed positions in your split.</b></p><p>Everyone recovers differently. Some people will need more rest than others, and your needs can change depending on training intensity, sleep, stress and how your body feels.</p><p>Pay attention to signs of fatigue, unusual soreness, falling performance or poor recovery. If you feel you need a rest day, take one and return to your recommended workout when you're ready.</p><p><b>You decide when — and if — you need to rest. Train hard, recover properly, and always train safely.</b></p>`)}
@@ -939,25 +939,24 @@ async function zagNativePermission(request=false){
  const p=request?await n.requestPermissions():await n.checkPermissions();
  return p.display==='granted';
 }
-// Schedule only reminders that are currently needed. Rebuild the next week on app use.
+// Zag Science: schedule only the next relevant reminder, never a seven-day backlog.
 function zagTodayWorkoutDone(dayKey){
- const done=st.streak?.lastWorkout===dayKey || (Array.isArray(st.history)&&st.history.some(h=>{
-  const raw=h.date||h.when||h.timestamp||h.time;if(!raw)return false;
+ return st.streak?.lastWorkout===dayKey || (Array.isArray(st.history)&&st.history.some(h=>{
+  const raw=h.date||h.when||h.timestamp||h.time;
+  if(!raw)return false;
   const d=new Date(raw);return !isNaN(d)&&streakDayKey(d)===dayKey;
  }));
- return !!done;
 }
 function zagTodayRestUsed(dayKey){
  const s=st.streak||{};
- // A rest-day entry is stored in the streak calendar; use it when available.
- return !!(s.restDays?.[dayKey]||s.restDates?.[dayKey]||s.restDayDates?.includes?.(dayKey));
+ return s.lastRestDay===dayKey || !!(s.restDays?.[dayKey]||s.restDates?.[dayKey]||s.restDayDates?.includes?.(dayKey));
 }
-// Schedule future reminders only; never post notifications simply because the app opened.
-// Keep IDs stable and replace pending items rather than accumulating duplicates.
 let zagSchedulingPromise=null;
+let zagLastReminderSignature='';
 function zagNextReminderDate(clock,daysAhead=0){
  const [h,m]=String(clock||'19:00').split(':').map(Number);
- const d=new Date();d.setHours(Number.isInteger(h)&&h>=0&&h<24?h:19,Number.isInteger(m)&&m>=0&&m<60?m:0,0,0);
+ const d=new Date();
+ d.setHours(Number.isInteger(h)&&h>=0&&h<24?h:19,Number.isInteger(m)&&m>=0&&m<60?m:0,0,0);
  d.setDate(d.getDate()+daysAhead);
  return d;
 }
@@ -965,34 +964,45 @@ async function zagRescheduleNative(){
  if(zagSchedulingPromise)return zagSchedulingPromise;
  zagSchedulingPromise=(async()=>{
   const n=zagNativeNotifications();if(!n)return;
-  const permitted=await zagNativePermission(false);
-  if(!permitted)return;
+  if(!await zagNativePermission(false))return;
   const now=Date.now(),list=[];
-  // Old builds used many IDs. Cancel all outstanding app-owned local reminders once.
-  const pending=await n.getPending();
-  const existing=(pending?.notifications||[]).map(x=>({id:Number(x.id)})).filter(x=>Number.isInteger(x.id));
-  if(existing.length)await n.cancel({notifications:existing});
-  // A maximum of one streak reminder per day for the next seven days.
-  // Never schedule today's reminder after its time has already passed.
-  for(let i=0;i<7;i++){
-   const d=zagNextReminderDate(st.streakReminderTime||'19:00',i);
-   if(d.getTime()<=now+60000)continue;
+  // Schedule only the next streak alert. Later days are evaluated on subsequent opens.
+  if(st.notifications?.streakScore){
+   let d=zagNextReminderDate(st.streakReminderTime||'19:00');
+   if(d.getTime()<=now+60000)d=zagNextReminderDate(st.streakReminderTime||'19:00',1);
    const key=streakDayKey(d);
-   if(st.notifications?.streakScore&&!zagTodayWorkoutDone(key)&&!zagTodayRestUsed(key))
-    list.push({id:8220+i,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:d.toISOString()},extra:{zagKind:'streak'}});
+   if(!zagTodayWorkoutDone(key)&&!zagTodayRestUsed(key)){
+    list.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:d.toISOString()},extra:{zagKind:'streak'}});
+   }else{
+    // Today's workout/rest is complete: next reminder can only be tomorrow.
+    const tomorrow=zagNextReminderDate(st.streakReminderTime||'19:00',1);
+    list.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:tomorrow.toISOString()},extra:{zagKind:'streak'}});
+   }
   }
-  // One workout reminder for tomorrow, avoiding a flood of future workout alerts.
-  if(st.notifications?.workoutReminder){
-   const d=zagNextReminderDate('18:00',1);
-   list.push({id:8210,title:'Workout reminder',body:'Your Zag Science workout is ready.',schedule:{at:d.toISOString()},extra:{zagKind:'workout'}});
-  }
+  // Do not queue a workout reminder while the app is open or after a workout.
+  // The streak reminder above is the single workout-related reminder.
   if(st.notifications?.bodyweightReminder){
    const anchor=Number(st.bodyweightReminderAnchor)||now;
    let due=anchor+14*86400000;
    while(due<=now+60000)due+=14*86400000;
    list.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString()},extra:{zagKind:'bodyweight'}});
   }
+  const signature=JSON.stringify(list.map(x=>[x.id,x.schedule.at]));
+  // Avoid repeatedly cancelling and re-registering the same alerts on every app focus.
+  if(signature===zagLastReminderSignature)return;
+  const pending=await n.getPending();
+  const existing=(pending?.notifications||[]).map(x=>({id:Number(x.id)})).filter(x=>Number.isInteger(x.id));
+  if(existing.length)await n.cancel({notifications:existing});
+  // Remove the stale seven-alert batch from previous versions.
+  if(typeof n.getDelivered==='function'&&typeof n.removeDeliveredNotifications==='function'){
+   try{
+    const delivered=await n.getDelivered();
+    const stale=(delivered?.notifications||[]).filter(x=>Number(x.id)>=8200&&Number(x.id)<8300).map(x=>({id:Number(x.id)}));
+    if(stale.length)await n.removeDeliveredNotifications({notifications:stale});
+   }catch(e){console.warn('Could not clear old delivered reminders',e)}
+  }
   if(list.length)await n.schedule({notifications:list});
+  zagLastReminderSignature=signature;
  })().catch(e=>console.warn('Zag reminder scheduling failed',e)).finally(()=>{zagSchedulingPromise=null});
  return zagSchedulingPromise;
 }
