@@ -951,7 +951,9 @@ function zagTodayRestUsed(dayKey){
  const s=st.streak||{};
  return s.lastRestDay===dayKey || !!(s.restDays?.[dayKey]||s.restDates?.[dayKey]||s.restDayDates?.includes?.(dayKey));
 }
+// Only one synchronisation runs at a time; changes made while it runs are not lost.
 let zagSchedulingPromise=null;
+let zagScheduleRequestedAgain=false;
 let zagLastReminderSignature='';
 function zagNextReminderDate(clock,daysAhead=0){
  const [h,m]=String(clock||'19:00').split(':').map(Number);
@@ -961,49 +963,64 @@ function zagNextReminderDate(clock,daysAhead=0){
  return d;
 }
 async function zagRescheduleNative(){
- if(zagSchedulingPromise)return zagSchedulingPromise;
+ if(zagSchedulingPromise){zagScheduleRequestedAgain=true;return zagSchedulingPromise;}
  zagSchedulingPromise=(async()=>{
-  const n=zagNativeNotifications();if(!n)return;
-  if(!await zagNativePermission(false))return;
-  const now=Date.now(),list=[];
-  // Schedule only the next streak alert. Later days are evaluated on subsequent opens.
-  if(st.notifications?.streakScore){
-   let d=zagNextReminderDate(st.streakReminderTime||'19:00');
-   if(d.getTime()<=now+60000)d=zagNextReminderDate(st.streakReminderTime||'19:00',1);
-   const key=streakDayKey(d);
-   if(!zagTodayWorkoutDone(key)&&!zagTodayRestUsed(key)){
-    list.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:d.toISOString()},extra:{zagKind:'streak'}});
-   }else{
-    // Today's workout/rest is complete: next reminder can only be tomorrow.
-    const tomorrow=zagNextReminderDate(st.streakReminderTime||'19:00',1);
-    list.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:tomorrow.toISOString()},extra:{zagKind:'streak'}});
+  do{
+   zagScheduleRequestedAgain=false;
+   const n=zagNativeNotifications();if(!n)return;
+   if(!await zagNativePermission(false))return;
+   const now=Date.now();
+   const list=[];
+   // A completed workout or rest day must never produce a same-day reminder.
+   if(st.notifications?.streakScore){
+    let when=zagNextReminderDate(st.streakReminderTime||'19:00');
+    const today=streakDayKey();
+    if(when.getTime()<=now+120000||zagTodayWorkoutDone(today)||zagTodayRestUsed(today)){
+     when=zagNextReminderDate(st.streakReminderTime||'19:00',1);
+    }
+    if(when.getTime()>now+120000){
+     list.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:when.toISOString()},extra:{zagKind:'streak'}});
+    }
    }
-  }
-  // Do not queue a workout reminder while the app is open or after a workout.
-  // The streak reminder above is the single workout-related reminder.
-  if(st.notifications?.bodyweightReminder){
-   const anchor=Number(st.bodyweightReminderAnchor)||now;
-   let due=anchor+14*86400000;
-   while(due<=now+60000)due+=14*86400000;
-   list.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString()},extra:{zagKind:'bodyweight'}});
-  }
-  const signature=JSON.stringify(list.map(x=>[x.id,x.schedule.at]));
-  // Avoid repeatedly cancelling and re-registering the same alerts on every app focus.
-  if(signature===zagLastReminderSignature)return;
-  const pending=await n.getPending();
-  const existing=(pending?.notifications||[]).map(x=>({id:Number(x.id)})).filter(x=>Number.isInteger(x.id));
-  if(existing.length)await n.cancel({notifications:existing});
-  // Remove the stale seven-alert batch from previous versions.
-  if(typeof n.getDelivered==='function'&&typeof n.removeDeliveredNotifications==='function'){
-   try{
-    const delivered=await n.getDelivered();
-    const stale=(delivered?.notifications||[]).filter(x=>Number(x.id)>=8200&&Number(x.id)<8300).map(x=>({id:Number(x.id)}));
-    if(stale.length)await n.removeDeliveredNotifications({notifications:stale});
-   }catch(e){console.warn('Could not clear old delivered reminders',e)}
-  }
-  if(list.length)await n.schedule({notifications:list});
-  zagLastReminderSignature=signature;
- })().catch(e=>console.warn('Zag reminder scheduling failed',e)).finally(()=>{zagSchedulingPromise=null});
+   if(st.notifications?.bodyweightReminder){
+    // An unset/invalid date cannot justify an immediate reminder.
+    let anchor=Number(st.bodyweightReminderAnchor);
+    if(!Number.isFinite(anchor)||anchor<=0||anchor>now+86400000){
+     anchor=now;st.bodyweightReminderAnchor=anchor;save();
+    }
+    const interval=14*86400000;
+    let due=anchor+interval;
+    if(due<=now+120000)due+=Math.ceil((now+120000-due)/interval)*interval;
+    list.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString()},extra:{zagKind:'bodyweight'}});
+   }
+   const signature=JSON.stringify(list.map(x=>[x.id,x.schedule.at]));
+   // Clear every pending local notification from the old builds (including old test IDs).
+   // This only affects Zag Science local notifications, not APNs push messages.
+   const pending=await n.getPending();
+   const current=(pending?.notifications||[]);
+   const currentSig=JSON.stringify(current.filter(x=>[8202,8220].includes(Number(x.id))).map(x=>[Number(x.id),x.schedule?.at]).sort((a,b)=>a[0]-b[0]));
+   const wantedSig=JSON.stringify(list.map(x=>[x.id,x.schedule.at]).sort((a,b)=>a[0]-b[0]));
+   if(current.length!==list.length||currentSig!==wantedSig){
+    if(current.length)await n.cancel({notifications:current.map(x=>({id:Number(x.id)}))});
+    if(list.length)await n.schedule({notifications:list});
+   }
+   // Remove previously delivered banners/notification-centre entries, including old IDs.
+   // Do this only once per app launch, not on every setting change.
+   if(!window.zagOldDeliveredCleared){
+    window.zagOldDeliveredCleared=true;
+    try{
+     if(typeof n.removeAllDeliveredNotifications==='function'){
+      await n.removeAllDeliveredNotifications();
+     }else if(typeof n.getDelivered==='function'&&typeof n.removeDeliveredNotifications==='function'){
+      const delivered=await n.getDelivered();
+      const old=(delivered?.notifications||[]).map(x=>({id:Number(x.id)})).filter(x=>Number.isFinite(x.id));
+      if(old.length)await n.removeDeliveredNotifications({notifications:old});
+     }
+    }catch(e){console.warn('Could not clear old Zag Science notifications',e)}
+   }
+   zagLastReminderSignature=signature;
+  }while(zagScheduleRequestedAgain);
+ })().catch(e=>console.warn('Zag reminder scheduling failed',e)).finally(()=>{zagSchedulingPromise=null;if(zagScheduleRequestedAgain){zagScheduleRequestedAgain=false;zagRescheduleNative().catch(console.warn)}});
  return zagSchedulingPromise;
 }
 async function zagNativeTest(kind){

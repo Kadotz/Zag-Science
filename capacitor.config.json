@@ -1,5 +1,13 @@
 {
   "appId": "com.zagscience.app",
   "appName": "Zag Science",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "presentationOptions": []
+    },
+    "PushNotifications": {
+      "presentationOptions": []
+    }
+  }
 }
