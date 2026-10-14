@@ -952,33 +952,49 @@ function zagTodayRestUsed(dayKey){
  // A rest-day entry is stored in the streak calendar; use it when available.
  return !!(s.restDays?.[dayKey]||s.restDates?.[dayKey]||s.restDayDates?.includes?.(dayKey));
 }
+// Schedule future reminders only; never post notifications simply because the app opened.
+// Keep IDs stable and replace pending items rather than accumulating duplicates.
+let zagSchedulingPromise=null;
+function zagNextReminderDate(clock,daysAhead=0){
+ const [h,m]=String(clock||'19:00').split(':').map(Number);
+ const d=new Date();d.setHours(Number.isInteger(h)&&h>=0&&h<24?h:19,Number.isInteger(m)&&m>=0&&m<60?m:0,0,0);
+ d.setDate(d.getDate()+daysAhead);
+ return d;
+}
 async function zagRescheduleNative(){
- const n=zagNativeNotifications();if(!n)return;
- if(!await zagNativePermission(false))return;
- // Cancel older repeating reminders as well as this version's one-shot IDs.
- const ids=[8200,8201,8202,...Array.from({length:7},(_,i)=>8210+i),...Array.from({length:7},(_,i)=>8220+i)];
- try{await n.cancel({notifications:ids.map(id=>({id}))})}catch(e){console.warn('Unable to clear old reminders',e)}
- const list=[],now=new Date();
- const addNext=(id,title,body,clock,kind,offset)=>{
-  const [h,m]=String(clock||'19:00').split(':').map(Number);
-  const at=new Date();at.setHours(Number.isFinite(h)?h:19,Number.isFinite(m)?m:0,0,0);
-  at.setDate(at.getDate()+offset);
-  if(at<=now)return;
-  const key=streakDayKey(at);
-  if(kind==='streak'&&(zagTodayWorkoutDone(key)||zagTodayRestUsed(key)))return;
-  list.push({id,title,body,schedule:{at:at.toISOString()},extra:{zagKind:kind}});
- };
- for(let i=0;i<7;i++){
-  if(st.notifications?.workoutReminder)addNext(8210+i,'Workout reminder','Your Zag Science workout is ready. Open the app to train.','18:00','workout',i);
-  if(st.notifications?.streakScore)addNext(8220+i,'Keep your streak alive','Train today or use an available rest day.',st.streakReminderTime||'19:00','streak',i);
- }
- if(st.notifications?.bodyweightReminder){
-  const anchor=Number(st.bodyweightReminderAnchor)||Date.now();
-  const fortnight=14*86400000;let due=anchor+fortnight;
-  while(due<=Date.now())due+=fortnight;
-  list.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString()},extra:{zagKind:'bodyweight'}});
- }
- if(list.length)await n.schedule({notifications:list});
+ if(zagSchedulingPromise)return zagSchedulingPromise;
+ zagSchedulingPromise=(async()=>{
+  const n=zagNativeNotifications();if(!n)return;
+  const permitted=await zagNativePermission(false);
+  if(!permitted)return;
+  const now=Date.now(),list=[];
+  // Old builds used many IDs. Cancel all outstanding app-owned local reminders once.
+  const pending=await n.getPending();
+  const existing=(pending?.notifications||[]).map(x=>({id:Number(x.id)})).filter(x=>Number.isInteger(x.id));
+  if(existing.length)await n.cancel({notifications:existing});
+  // A maximum of one streak reminder per day for the next seven days.
+  // Never schedule today's reminder after its time has already passed.
+  for(let i=0;i<7;i++){
+   const d=zagNextReminderDate(st.streakReminderTime||'19:00',i);
+   if(d.getTime()<=now+60000)continue;
+   const key=streakDayKey(d);
+   if(st.notifications?.streakScore&&!zagTodayWorkoutDone(key)&&!zagTodayRestUsed(key))
+    list.push({id:8220+i,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:d.toISOString()},extra:{zagKind:'streak'}});
+  }
+  // One workout reminder for tomorrow, avoiding a flood of future workout alerts.
+  if(st.notifications?.workoutReminder){
+   const d=zagNextReminderDate('18:00',1);
+   list.push({id:8210,title:'Workout reminder',body:'Your Zag Science workout is ready.',schedule:{at:d.toISOString()},extra:{zagKind:'workout'}});
+  }
+  if(st.notifications?.bodyweightReminder){
+   const anchor=Number(st.bodyweightReminderAnchor)||now;
+   let due=anchor+14*86400000;
+   while(due<=now+60000)due+=14*86400000;
+   list.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString()},extra:{zagKind:'bodyweight'}});
+  }
+  if(list.length)await n.schedule({notifications:list});
+ })().catch(e=>console.warn('Zag reminder scheduling failed',e)).finally(()=>{zagSchedulingPromise=null});
+ return zagSchedulingPromise;
 }
 async function zagNativeTest(kind){
  const n=zagNativeNotifications();if(!n)return false;
@@ -1078,7 +1094,7 @@ ${notificationToggle("bodyweightReminder","Bodyweight reminder","Remind you ever
 ${streakRestSelector()}
 ${streakReminderTimeSetting()}
 <div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${zagNativeNotifications()?"Enable / Check":(("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable")}</button></div>
-<div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are renewed when you open the app.</div>
+<div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are scheduled for two weeks after your last saved weigh-in.</div>
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
