@@ -990,18 +990,24 @@ async function zagRescheduleNative(){
   const desired=zagDesiredReminders();
   const wanted=JSON.stringify(desired.map(x=>[x.id,x.schedule.at]).sort((a,b)=>a[0]-b[0]));
   const previous=localStorage.getItem('zagNativeReminderSignatureV3');
-  // The persisted signature prevents a screen unlock from repeatedly cancelling and
-  // rescheduling future notifications (which caused unexpected delivery on iOS).
-  if(previous===wanted)return;
   const pending=(await n.getPending())?.notifications||[];
-  if(pending.length)await n.cancel({notifications:pending.map(x=>({id:Number(x.id)})).filter(x=>Number.isInteger(x.id))});
-  // Save only after native scheduling succeeds. Never schedule a past-time notification.
+  const desiredIds=new Set(desired.map(x=>x.id));
+  // A saved signature is not proof iOS still has the reminder. Check the native queue.
+  const hasAll=desired.every(x=>pending.some(p=>Number(p.id)===x.id));
+  const hasUnexpected=pending.some(p=>Number(p.id)>=8200&&Number(p.id)<8300&&!desiredIds.has(Number(p.id)));
+  if(previous===wanted&&hasAll&&!hasUnexpected)return;
+  const ours=pending.filter(x=>Number(x.id)>=8200&&Number(x.id)<8300).map(x=>({id:Number(x.id)}));
+  if(ours.length)await n.cancel({notifications:ours});
   if(desired.length)await n.schedule({notifications:desired});
+  // Read back from iOS, not just the JavaScript call, before claiming success.
+  const confirmed=(await n.getPending())?.notifications||[];
+  const missing=desired.filter(x=>!confirmed.some(p=>Number(p.id)===x.id));
+  if(missing.length)throw Error('iPhone did not retain reminder(s): '+missing.map(x=>x.id).join(', '));
   localStorage.setItem('zagNativeReminderSignatureV3',wanted);
-  try{
-   if(typeof n.removeAllDeliveredNotifications==='function')await n.removeAllDeliveredNotifications();
-  }catch(e){console.warn('Could not clear previously delivered reminders',e)}
- })().catch(e=>{console.warn('Zag reminder scheduling failed',e);localStorage.removeItem('zagNativeReminderSignatureV3')}).finally(()=>{
+ })().catch(e=>{
+  console.warn('Zag reminder scheduling failed',e);
+  localStorage.removeItem('zagNativeReminderSignatureV3');
+ }).finally(()=>{
   zagSchedulingPromise=null;
   if(zagScheduleAgain){zagScheduleAgain=false;zagRescheduleNative().catch(console.warn)}
  });
@@ -1089,8 +1095,19 @@ function zagBodyweightDisplay(){if(st.bodyweightKg===null||st.bodyweightKg===""|
 function zagSaveBodyweight(input){let v=(input?.value||"").trim();if(!v){st.bodyweightKg=null;save();settings();return}let kg=displayToKg(v);if(!Number.isFinite(Number(kg))||Number(kg)<=0){alert("Enter a valid bodyweight.");return}st.bodyweightKg=Math.round(Number(kg)*1000)/1000;st.bodyweightReminderAnchor=Date.now();st.bodyweightReminderLastShown=0;save();zagRescheduleNative().catch(console.warn);zagSyncBodyweightProfile();settings()}
 async function zagSyncBodyweightProfile(){if(!zagSb||!zagSession?.user||!Number.isFinite(Number(st.bodyweightKg))||Number(st.bodyweightKg)<=0)return;try{await zagSb.from('profiles').update({bodyweight_kg:Number(st.bodyweightKg),updated_at:new Date().toISOString()}).eq('id',zagSession.user.id)}catch(e){console.warn('Bodyweight cloud update failed',e)}}
 function zagCheckBodyweightReminder(){/* Native iPhone reminders are scheduled by zagRescheduleNative; never send a new alert on every app open. */}
+// iOS time wheels: commit on change, but never redraw Settings while the picker is open.
+function zagCommitStreakTime(input){
+ const value=String(input?.value||'');
+ if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value))return;
+ if(st.streakReminderTime===value)return;
+ st.streakReminderTime=value;
+ save();
+ // The selected time changes the desired schedule. Do not call settings() here:
+ // rebuilding the input destroys iOS's native time picker before its blue Done tick.
+ zagRescheduleNative().catch(console.warn);
+}
 function streakReminderTimeSetting(){
-  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="st.streakReminderTime=this.value;save();zagRescheduleNative().catch(console.warn);settings()" style="min-width:110px"></div>`;
+  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="zagCommitStreakTime(this)" style="min-width:110px"></div>`;
 }
 function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon style="font-size:18px;font-weight:900">ZS</div><div class=grow><b>Account & Cloud</b><div class=coming id="zagAccountStatus">${zagAccountStatusText()}</div></div>${zagSession?.user?`<button class=btn onclick="zagChangeUsername()">Change Username</button>`:""}<button class=btn onclick="openZagAccount()">Account</button></div></div><div class=pagecard><b>Training</b>
 <div class=settingLine><div class=grow><b style="font-size:15px">Stick Week</b><div class=note style="margin-top:4px">Locks every exercise to Stick Week: the Week 8 PB sets through 105%, followed by 4 empty back-off set slots.</div></div><button class="btn stickWeekSwitch ${st.stickWeek?'on':''}" onclick="toggleStickWeek()">${st.stickWeek?"On":"Off"}</button></div>
