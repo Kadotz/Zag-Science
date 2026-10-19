@@ -1098,7 +1098,7 @@ function zagCheckBodyweightReminder(){/* Native iPhone reminders are scheduled b
 // iOS time wheels: commit on change, but never redraw Settings while the picker is open.
 function zagCommitStreakTime(input){
  const value=String(input?.value||'');
- if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value))return;
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(value))return;
  if(st.streakReminderTime===value)return;
  st.streakReminderTime=value;
  save();
