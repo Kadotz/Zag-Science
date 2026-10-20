@@ -404,7 +404,20 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
   .exerciseBody table th{font-size:clamp(11px,1.45vw,15px)!important}
 }
 </style>
-</head>
+<style id="zag-landscape-readable-v2">
+@media screen and (orientation:landscape) and (max-height:650px){
+ .exerciseBody table{font-size:20px!important}
+ .exerciseBody table th{font-size:clamp(17px,2.4vw,25px)!important;height:39px!important;line-height:1.12!important}
+ .exerciseBody table td{height:52px!important;font-size:clamp(18px,2.5vw,26px)!important;line-height:1.12!important}
+ .exerciseBody table .cell,.exerciseBody table input.cell,.exerciseBody table button.cell{font-size:clamp(23px,3.4vw,34px)!important;font-weight:900!important;min-height:43px!important;line-height:1.1!important;padding:3px 1px!important;width:98%!important}
+ .exerciseBody table .fist{min-width:42px!important;min-height:42px!important}
+ .exerciseTitleRow .name{font-size:clamp(20px,2.8vw,30px)!important}
+ .exerciseTitleRow .n{font-size:18px!important;width:34px!important;height:34px!important}
+ .exerciseTitleRow .titleMaxTop,.exerciseControls .titleMax{font-size:clamp(16px,2.2vw,23px)!important}
+ .exerciseControls .week,.exerciseControls .editMain,.exerciseControls .exerciseExpand{font-size:clamp(15px,2vw,21px)!important}
+ .exComplete{font-size:clamp(14px,1.9vw,19px)!important}
+}
+</style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
 <main id="screen"></main></div>
@@ -998,7 +1011,9 @@ async function zagRescheduleNative(){
  if(zagSchedulingPromise){zagScheduleAgain=true;return zagSchedulingPromise;}
  zagSchedulingPromise=(async()=>{
   const n=zagNativeNotifications();
-  if(!n||!await zagNativePermission(false))return;
+  if(!n){window.zagLastScheduleError='Native notification plugin unavailable';return;}
+  if(!await zagNativePermission(false)){window.zagLastScheduleError='Notification permission not granted';return;}
+  window.zagLastScheduleError='';
   const desired=zagDesiredReminders();
   const wanted=JSON.stringify(desired.map(x=>[x.id,x.schedule.at]).sort((a,b)=>a[0]-b[0]));
   const previous=localStorage.getItem('zagNativeReminderSignatureV3');
@@ -1018,6 +1033,7 @@ async function zagRescheduleNative(){
   localStorage.setItem('zagNativeReminderSignatureV3',wanted);
  })().catch(e=>{
   console.warn('Zag reminder scheduling failed',e);
+  window.zagLastScheduleError=String(e?.message||e);
   localStorage.removeItem('zagNativeReminderSignatureV3');
  }).finally(()=>{
   zagSchedulingPromise=null;
@@ -1119,6 +1135,19 @@ function zagCommitStreakTime(input){
  zagRescheduleNative().catch(console.warn);
 }
 // Read the real iOS pending queue and show the next streak reminder.
+async function zagRepairStreakSchedule(){
+ const show=t=>{const el=document.getElementById('zagStreakScheduleStatus');if(el)el.textContent=t;};
+ show('Requesting permission and rebuilding reminders…');
+ try{
+  const n=zagNativeNotifications();
+  if(!n){show('Cannot access the native LocalNotifications plugin. Check the iOS build includes @capacitor/local-notifications.');return;}
+  const granted=await zagNativePermission(true);
+  if(!granted){show('Notifications are not permitted. Open iPhone Settings → Notifications → Zag Science.');return;}
+  localStorage.removeItem('zagNativeReminderSignatureV3');
+  await zagRescheduleNative();
+  await zagCheckStreakSchedule();
+ }catch(e){show('Scheduling error: '+String(e?.message||e));}
+}
 async function zagCheckStreakSchedule(){
  const el=document.getElementById('zagStreakScheduleStatus');
  const show=(message)=>{const target=document.getElementById('zagStreakScheduleStatus');if(target)target.textContent=message;};
@@ -1133,7 +1162,7 @@ async function zagCheckStreakSchedule(){
   const pending=(await n.getPending())?.notifications||[];
   const reminder=pending.find(x=>Number(x.id)===8220);
   if(!st.notifications?.streakScore){show('Streak notifications are switched off.');return;}
-  if(!reminder){show('No streak reminder is scheduled on this iPhone. Try enabling notifications again.');return;}
+  if(!reminder){show('No streak reminder is scheduled on this iPhone. '+(window.zagLastScheduleError?'Scheduling error: '+window.zagLastScheduleError:'Tap Repair scheduling below to try again.'));return;}
   const desired=zagDesiredReminders().find(x=>x.id===8220);
   const date=desired&&new Date(desired.schedule.at);
   if(!date||!Number.isFinite(date.getTime())){show('A streak reminder is queued on this iPhone.');return;}
@@ -1144,7 +1173,7 @@ async function zagCheckStreakSchedule(){
  }catch(e){console.warn('Streak reminder status failed',e);show('Could not confirm the iPhone reminder. Check notification permissions and try again.');}
 }
 function streakReminderTimeSetting(){
-  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="zagCommitStreakTime(this)" style="min-width:110px"></div><div class="note" style="padding:7px 0 3px">Reminders are skipped after a completed workout or rest day.</div><button class="btn" onclick="zagCheckStreakSchedule()" style="font-size:12px;margin:4px 0 6px">Check scheduled reminder</button><div id="zagStreakScheduleStatus" class="note" style="font-size:12px;line-height:1.45;padding:3px 0 9px" aria-live="polite"></div>`;
+  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="zagCommitStreakTime(this)" style="min-width:110px"></div><div class="note" style="padding:7px 0 3px">Reminders are skipped after a completed workout or rest day.</div><button class="btn" onclick="zagCheckStreakSchedule()" style="font-size:12px;margin:4px 0 6px">Check scheduled reminder</button><button class="btn" style="margin:6px 0 8px 8px" onclick="zagRepairStreakSchedule()">Repair scheduling</button><div id="zagStreakScheduleStatus" class="note" style="font-size:12px;line-height:1.45;padding:3px 0 9px" aria-live="polite"></div>`;
 }
 function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon style="font-size:18px;font-weight:900">ZS</div><div class=grow><b>Account & Cloud</b><div class=coming id="zagAccountStatus">${zagAccountStatusText()}</div></div>${zagSession?.user?`<button class=btn onclick="zagChangeUsername()">Change Username</button>`:""}<button class=btn onclick="openZagAccount()">Account</button></div></div><div class=pagecard><b>Training</b>
 <div class=settingLine><div class=grow><b style="font-size:15px">Stick Week</b><div class=note style="margin-top:4px">Locks every exercise to Stick Week: the Week 8 PB sets through 105%, followed by 4 empty back-off set slots.</div></div><button class="btn stickWeekSwitch ${st.stickWeek?'on':''}" onclick="toggleStickWeek()">${st.stickWeek?"On":"Off"}</button></div>
