@@ -432,6 +432,19 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
  .exerciseBottomActions button,.exComplete{font-size:clamp(10px,1.4vw,15px)!important}
 }
 </style>
+<style id="zag-landscape-targeted-numbers-v4">
+@media screen and (orientation:landscape) and (max-height:650px){
+/* Exercise headings and table labels stay compact. Only the values grow. */
+.exerciseTitleRow .name{font-size:12px!important}
+.exerciseTitleRow .titleMaxTop,.exerciseControls .titleMax{font-size:11px!important}
+.exerciseBody table th{font-size:10px!important;height:30px!important;line-height:1.05!important}
+.exerciseBody table td{font-size:clamp(28px,4.3vw,44px)!important;font-weight:900!important;line-height:1!important;height:64px!important;letter-spacing:-.7px!important}
+.exerciseBody table td input.cell{font-size:clamp(30px,4.5vw,46px)!important;font-weight:900!important;height:56px!important;min-height:56px!important;padding:0!important;line-height:1!important;max-width:100%!important}
+.exerciseBody table td:last-child{font-size:12px!important}
+.exerciseBody table .fist{min-width:36px!important;min-height:36px!important}
+.exerciseBottomActions .exComplete,.exerciseBottomActions .allSetsBtn{font-size:12px!important}
+}
+</style>
 </head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
@@ -1008,7 +1021,7 @@ function zagDesiredReminders(){
   if(at.getTime()<=now+60000||zagTodayWorkoutDone(today)||zagTodayRestUsed(today)){
    at=zagNextReminderDate(st.streakReminderTime||'19:00',1);
   }
-  out.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:at.toISOString()},extra:{zagKind:'streak'}});
+  out.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:at},extra:{zagKind:'streak'}});
  }
  if(st.notifications?.bodyweightReminder){
   let anchor=Number(st.bodyweightReminderAnchor);
@@ -1018,7 +1031,7 @@ function zagDesiredReminders(){
   const interval=14*86400000;
   let due=anchor+interval;
   if(due<=now+60000)due+=Math.ceil((now+60000-due)/interval)*interval;
-  out.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due).toISOString()},extra:{zagKind:'bodyweight'}});
+  out.push({id:8202,title:'Update your bodyweight',body:'Time for your fortnightly Zag Science weigh-in.',schedule:{at:new Date(due)},extra:{zagKind:'bodyweight'}});
  }
  return out;
 }
@@ -1170,11 +1183,11 @@ async function zagDiagnosticReminder(){
   const id=8288;
   try{await n.cancel({notifications:[{id}]});}catch(e){}
   const at=new Date(Date.now()+120000);
-  const result=await n.schedule({notifications:[{id,title:'Zag Science notification check',body:'Your iPhone received this test reminder.',schedule:{at:at.toISOString(),allowWhileIdle:true}}]});
+  const result=await n.schedule({notifications:[{id,title:'Zag Science notification check',body:'Your iPhone received this test reminder.',schedule:{at:at,allowWhileIdle:true}}]});
   await new Promise(resolve=>setTimeout(resolve,500));
   const pending=(await n.getPending())?.notifications||[];
   const found=pending.some(x=>Number(x.id)===id);
-  show(found?'Test reminder scheduled for '+at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. Lock your phone and wait.':'Test reminder NOT in iPhone pending queue. Pending count: '+pending.length+'. Schedule returned: '+JSON.stringify(result||{}).slice(0,180));
+  show(found?'iOS CONFIRMED test reminder at '+at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. Lock your phone and wait.':'iOS DID NOT retain test reminder. Pending: '+pending.length+'; schedule result: '+JSON.stringify(result??null).slice(0,160)+'; native: '+String(window.Capacitor?.getPlatform?.())+'. Please screenshot this message.');
  }catch(e){show('Native test error: '+String(e?.message||e));}
 }
 async function zagRepairStreakSchedule(){
@@ -1204,7 +1217,7 @@ async function zagCheckStreakSchedule(){
   const pending=(await n.getPending())?.notifications||[];
   const reminder=pending.find(x=>Number(x.id)===8220);
   if(!st.notifications?.streakScore){show('Streak notifications are switched off.');return;}
-  if(!reminder){show('No streak reminder is scheduled on this iPhone. '+(window.zagLastScheduleError?'Scheduling error: '+window.zagLastScheduleError:'Tap Repair scheduling below to try again.'));return;}
+  if(!reminder){show('No streak reminder in the iPhone notification queue. '+(window.zagLastScheduleError?'Scheduling error: '+window.zagLastScheduleError:'Tap Repair scheduling below to try again.'));return;}
   const desired=zagDesiredReminders().find(x=>x.id===8220);
   const date=desired&&new Date(desired.schedule.at);
   if(!date||!Number.isFinite(date.getTime())){show('A streak reminder is queued on this iPhone.');return;}
