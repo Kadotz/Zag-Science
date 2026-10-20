@@ -4178,6 +4178,19 @@ window.zagOpenWorkoutGuide=function(){idx=0;document.getElementById('zagWorkoutG
 const overlay=document.getElementById('zagWorkoutGuide');overlay.addEventListener('click',e=>{if(e.target===overlay)zagCloseWorkoutGuide()});overlay.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX},{passive:true});overlay.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>65)zagGuideMove(dx<0?1:-1)},{passive:true});
 })();
 </script>
+
+<style id="zag-landscape-final-number-sizing-v8">
+/* Final override deliberately placed after all earlier workout styles. */
+@media screen and (orientation:landscape) and (max-height:650px){
+ .exercise .exerciseBody table{table-layout:fixed!important;font-size:11px!important}
+ .exercise .exerciseBody table th{height:17px!important;font-size:10px!important;line-height:1!important;padding:0!important}
+ .exercise .exerciseBody table td{height:37px!important;min-height:37px!important;padding:0!important;line-height:1!important;font-size:36px!important;font-weight:900!important;vertical-align:middle!important}
+ .exercise .exerciseBody table td input.cell,
+ .exercise .exerciseBody table td button.cell,
+ .exercise .exerciseBody table td .cell:not(.fist){display:inline-block!important;box-sizing:border-box!important;width:94%!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:0 1px!important;margin:0!important;font-size:36px!important;line-height:32px!important;font-weight:900!important;text-align:center!important;border-radius:4px!important}
+ .exercise .exerciseBody table td .fist{height:28px!important;min-height:28px!important;width:28px!important;min-width:28px!important;background-size:24px 24px!important}
+}
+</style>
 </body></html>
 
 
