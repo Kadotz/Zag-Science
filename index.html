@@ -392,7 +392,19 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
  .zagOnlineGroupCard .zagRealEmblemBox,.groupHero .zagRealEmblemBox{width:138px!important;height:138px!important;min-width:138px!important;max-width:138px!important}
  .zagOnlineGroupCard .zagRealEmblemImage,.groupHero .zagRealEmblemImage{width:138px!important;height:138px!important;min-width:138px!important;max-width:138px!important;transform:scale(1.55)!important}
 }
-</style></head>
+</style>
+<style id="zag-landscape-number-readability-v2">
+@media (orientation:landscape) and (max-height:600px){
+  .exerciseBody table{font-size:clamp(13px,1.8vw,19px)!important}
+  .exerciseBody table td{height:clamp(32px,5.2vh,45px)!important;padding:2px 1px!important}
+  .exerciseBody table td .cell,
+  .exerciseBody table td input.cell,
+  .exerciseBody table td button.cell{font-size:clamp(16px,2.35vw,23px)!important;font-weight:900!important;line-height:1.05!important;min-height:29px!important;width:96%!important;padding:3px 1px!important}
+  .exerciseBody table td .fist{min-width:32px!important;min-height:32px!important}
+  .exerciseBody table th{font-size:clamp(11px,1.45vw,15px)!important}
+}
+</style>
+</head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
 <main id="screen"></main></div>
@@ -1106,8 +1118,33 @@ function zagCommitStreakTime(input){
  // rebuilding the input destroys iOS's native time picker before its blue Done tick.
  zagRescheduleNative().catch(console.warn);
 }
+// Read the real iOS pending queue and show the next streak reminder.
+async function zagCheckStreakSchedule(){
+ const el=document.getElementById('zagStreakScheduleStatus');
+ const show=(message)=>{const target=document.getElementById('zagStreakScheduleStatus');if(target)target.textContent=message;};
+ show('Checking iPhone reminder…');
+ const n=zagNativeNotifications();
+ if(!n){show('iPhone notification scheduling is only available in the installed iPhone app.');return;}
+ try{
+  if(!await zagNativePermission(false)){
+   show('Notifications are not allowed. Enable them in iPhone Settings → Notifications → Zag Science.');return;
+  }
+  await zagRescheduleNative();
+  const pending=(await n.getPending())?.notifications||[];
+  const reminder=pending.find(x=>Number(x.id)===8220);
+  if(!st.notifications?.streakScore){show('Streak notifications are switched off.');return;}
+  if(!reminder){show('No streak reminder is scheduled on this iPhone. Try enabling notifications again.');return;}
+  const desired=zagDesiredReminders().find(x=>x.id===8220);
+  const date=desired&&new Date(desired.schedule.at);
+  if(!date||!Number.isFinite(date.getTime())){show('A streak reminder is queued on this iPhone.');return;}
+  const time=date.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const today=streakDayKey();
+  const skip=zagTodayWorkoutDone(today)||zagTodayRestUsed(today);
+  show('Scheduled on iPhone: '+time+(skip?' (today is skipped because your workout or rest day is recorded)':'')+'. If you have the app open, iOS may not show a banner.');
+ }catch(e){console.warn('Streak reminder status failed',e);show('Could not confirm the iPhone reminder. Check notification permissions and try again.');}
+}
 function streakReminderTimeSetting(){
-  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="zagCommitStreakTime(this)" style="min-width:110px"></div>`;
+  return `<div class=settingLine><div class=grow><b style="font-size:15px">Streak reminder time</b><div class=note style="margin-top:4px">If you have not trained that day, remind you at this time.</div></div><input type="time" class=week value="${st.streakReminderTime}" onchange="zagCommitStreakTime(this)" style="min-width:110px"></div><div class="note" style="padding:7px 0 3px">Reminders are skipped after a completed workout or rest day.</div><button class="btn" onclick="zagCheckStreakSchedule()" style="font-size:12px;margin:4px 0 6px">Check scheduled reminder</button><div id="zagStreakScheduleStatus" class="note" style="font-size:12px;line-height:1.45;padding:3px 0 9px" aria-live="polite"></div>`;
 }
 function settings(){setActiveNav("settings");document.getElementById("screen").innerHTML=`<div class=title><h1>Settings</h1></div><div class=pagecard><div class=accountRow><div class=accountIcon style="font-size:18px;font-weight:900">ZS</div><div class=grow><b>Account & Cloud</b><div class=coming id="zagAccountStatus">${zagAccountStatusText()}</div></div>${zagSession?.user?`<button class=btn onclick="zagChangeUsername()">Change Username</button>`:""}<button class=btn onclick="openZagAccount()">Account</button></div></div><div class=pagecard><b>Training</b>
 <div class=settingLine><div class=grow><b style="font-size:15px">Stick Week</b><div class=note style="margin-top:4px">Locks every exercise to Stick Week: the Week 8 PB sets through 105%, followed by 4 empty back-off set slots.</div></div><button class="btn stickWeekSwitch ${st.stickWeek?'on':''}" onclick="toggleStickWeek()">${st.stickWeek?"On":"Off"}</button></div>
