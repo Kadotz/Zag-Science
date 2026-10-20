@@ -407,6 +407,16 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
 .exerciseBody .exComplete{font-size:11px!important}
 }
 </style>
+<style id="zag-landscape-compact-big-values-v6">
+@media screen and (orientation:landscape) and (max-height:650px){
+ .exerciseBody table{font-size:12px!important;table-layout:fixed!important}
+ .exerciseBody table th{height:17px!important;font-size:9px!important;padding:0!important;line-height:1!important}
+ .exerciseBody table td{height:33px!important;min-height:0!important;padding:0!important;font-size:clamp(26px,3.6vw,37px)!important;line-height:1!important;font-weight:900!important}
+ .exerciseBody table td .cell,.exerciseBody table td input.cell,.exerciseBody table td button.cell{height:29px!important;min-height:0!important;max-height:29px!important;padding:0!important;width:91%!important;font-size:clamp(26px,3.6vw,37px)!important;line-height:1!important;font-weight:900!important;border-radius:4px!important}
+ .exerciseBody table td .fist,.exerciseBody table .fist{height:27px!important;width:27px!important;min-height:27px!important;min-width:27px!important;background-size:23px 23px!important}
+ .exerciseBody .exComplete{font-size:10px!important}
+}
+</style>
 </head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
@@ -980,7 +990,7 @@ function zagDesiredReminders(){
  if(st.notifications?.streakScore){
   const today=streakDayKey();
   let at=zagNextReminderDate(st.streakReminderTime||'19:00');
-  if(at.getTime()<=now+60000||zagTodayWorkoutDone(today)||zagTodayRestUsed(today)){
+  if(at.getTime()<=now+5000||zagTodayWorkoutDone(today)||zagTodayRestUsed(today)){
    at=zagNextReminderDate(st.streakReminderTime||'19:00',1);
   }
   out.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:at},extra:{zagKind:'streak'}});
@@ -1005,7 +1015,7 @@ async function zagRescheduleNative(){
   if(!await zagNativePermission(false)){window.zagLastScheduleError='Notification permission not granted';return;}
   window.zagLastScheduleError='';
   const desired=zagDesiredReminders();
-  const wanted=JSON.stringify(desired.map(x=>[x.id,x.schedule.at]).sort((a,b)=>a[0]-b[0]));
+  const wanted=JSON.stringify(desired.map(x=>[x.id,new Date(x.schedule.at).getTime()]).sort((a,b)=>a[0]-b[0]));
   const pending=(await n.getPending())?.notifications||[];
   const ids=new Set(desired.map(x=>x.id));
   const ours=pending.filter(x=>Number(x.id)>=8200&&Number(x.id)<8300);
@@ -1186,7 +1196,7 @@ async function zagCheckStreakSchedule(){
   const time=date.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const today=streakDayKey();
   const skip=zagTodayWorkoutDone(today)||zagTodayRestUsed(today);
-  show('Scheduled on iPhone: '+time+(skip?' (today is skipped because your workout or rest day is recorded)':'')+'. This is the NEXT scheduled reminder, not a confirmation it was delivered. Keep the phone locked at that time; iOS may suppress banners while the app is open.');
+  show('Scheduled on iPhone: '+time+(skip?' (today skipped: workout completed or rest day used)':'')+'. This is the NEXT scheduled reminder, not a confirmation it was delivered. Keep the phone locked at that time; iOS may suppress banners while the app is open.');
  }catch(e){console.warn('Streak reminder status failed',e);show('Could not confirm the iPhone reminder. Check notification permissions and try again.');}
 }
 function streakReminderTimeSetting(){
