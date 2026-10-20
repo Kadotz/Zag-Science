@@ -393,56 +393,18 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
  .zagOnlineGroupCard .zagRealEmblemImage,.groupHero .zagRealEmblemImage{width:138px!important;height:138px!important;min-width:138px!important;max-width:138px!important;transform:scale(1.55)!important}
 }
 </style>
-<style id="zag-landscape-number-readability-v2">
-@media (orientation:landscape) and (max-height:600px){
-  .exerciseBody table{font-size:clamp(13px,1.8vw,19px)!important}
-  .exerciseBody table td{height:clamp(32px,5.2vh,45px)!important;padding:2px 1px!important}
-  .exerciseBody table td .cell,
-  .exerciseBody table td input.cell,
-  .exerciseBody table td button.cell{font-size:clamp(16px,2.35vw,23px)!important;font-weight:900!important;line-height:1.05!important;min-height:29px!important;width:96%!important;padding:3px 1px!important}
-  .exerciseBody table td .fist{min-width:32px!important;min-height:32px!important}
-  .exerciseBody table th{font-size:clamp(11px,1.45vw,15px)!important}
-}
-</style>
-<style id="zag-landscape-readable-v2">
+<style id="zag-landscape-compact-big-values-v5">
 @media screen and (orientation:landscape) and (max-height:650px){
- .exerciseBody table{font-size:20px!important}
- .exerciseBody table th{font-size:clamp(17px,2.4vw,25px)!important;height:39px!important;line-height:1.12!important}
- .exerciseBody table td{height:52px!important;font-size:clamp(18px,2.5vw,26px)!important;line-height:1.12!important}
- .exerciseBody table .cell,.exerciseBody table input.cell,.exerciseBody table button.cell{font-size:clamp(23px,3.4vw,34px)!important;font-weight:900!important;min-height:43px!important;line-height:1.1!important;padding:3px 1px!important;width:98%!important}
- .exerciseBody table .fist{min-width:42px!important;min-height:42px!important}
- .exerciseTitleRow .name{font-size:clamp(20px,2.8vw,30px)!important}
- .exerciseTitleRow .n{font-size:18px!important;width:34px!important;height:34px!important}
- .exerciseTitleRow .titleMaxTop,.exerciseControls .titleMax{font-size:clamp(16px,2.2vw,23px)!important}
- .exerciseControls .week,.exerciseControls .editMain,.exerciseControls .exerciseExpand{font-size:clamp(15px,2vw,21px)!important}
- .exComplete{font-size:clamp(14px,1.9vw,19px)!important}
-}
-</style>
-<style id="zag-landscape-numbers-priority-v3">
-@media screen and (orientation:landscape) and (max-height:650px){
- /* Keep labels and instructions compact, make the values themselves large. */
- .exerciseTitleRow .name{font-size:clamp(10px,1.35vw,15px)!important}
- .exerciseTitleRow .n{font-size:12px!important;width:27px!important;height:27px!important}
- .exerciseTitleRow .titleMaxTop,.exerciseControls .titleMax{font-size:clamp(9px,1.2vw,13px)!important}
- .exerciseControls .week,.exerciseControls .editMain,.exerciseControls .exerciseExpand{font-size:clamp(9px,1.1vw,12px)!important}
- .exerciseBody table th{font-size:clamp(9px,1.2vw,13px)!important;height:32px!important}
- .exerciseBody table td{font-size:clamp(24px,3.8vw,39px)!important;font-weight:900!important;height:62px!important;line-height:1.05!important;white-space:nowrap!important}
- .exerciseBody table td input.cell,.exerciseBody table td .cell{font-size:clamp(26px,4vw,42px)!important;font-weight:900!important;min-height:52px!important;line-height:1.05!important;width:99%!important;padding:2px 0!important}
- .exerciseBody table td .fist{min-width:38px!important;min-height:38px!important}
- .exerciseBottomActions button,.exComplete{font-size:clamp(10px,1.4vw,15px)!important}
-}
-</style>
-<style id="zag-landscape-targeted-numbers-v4">
-@media screen and (orientation:landscape) and (max-height:650px){
-/* Exercise headings and table labels stay compact. Only the values grow. */
+/* Restore compact rows: larger numbers should not increase box height. */
+.exerciseBody table{font-size:25px!important;table-layout:fixed!important}
+.exerciseBody table th{font-size:10px!important;font-weight:600!important;height:20px!important;padding:1px 0!important;line-height:1!important}
+.exerciseBody table td{font-size:clamp(23px,3.15vw,30px)!important;font-weight:850!important;height:40px!important;padding:1px 0!important;line-height:1.02!important;white-space:nowrap!important}
+.exerciseBody table td input.cell,.exerciseBody table td button.cell,.exerciseBody table td .cell{box-sizing:border-box!important;font-size:clamp(23px,3.15vw,30px)!important;font-weight:850!important;height:35px!important;min-height:0!important;line-height:1!important;padding:1px 0!important;width:94%!important;border-radius:4px!important}
+.exerciseBody table td .fist,.exerciseBody table .fist{min-width:27px!important;min-height:27px!important;width:29px!important;height:29px!important;background-size:24px 24px!important}
 .exerciseTitleRow .name{font-size:12px!important}
-.exerciseTitleRow .titleMaxTop,.exerciseControls .titleMax{font-size:11px!important}
-.exerciseBody table th{font-size:10px!important;height:30px!important;line-height:1.05!important}
-.exerciseBody table td{font-size:clamp(28px,4.3vw,44px)!important;font-weight:900!important;line-height:1!important;height:64px!important;letter-spacing:-.7px!important}
-.exerciseBody table td input.cell{font-size:clamp(30px,4.5vw,46px)!important;font-weight:900!important;height:56px!important;min-height:56px!important;padding:0!important;line-height:1!important;max-width:100%!important}
-.exerciseBody table td:last-child{font-size:12px!important}
-.exerciseBody table .fist{min-width:36px!important;min-height:36px!important}
-.exerciseBottomActions .exComplete,.exerciseBottomActions .allSetsBtn{font-size:12px!important}
+.exerciseTitleRow .titleMaxTop,.exerciseControls .titleMax{font-size:10px!important}
+.exerciseControls .week,.exerciseControls .editMain,.exerciseControls .exerciseExpand{font-size:10px!important}
+.exerciseBody .exComplete{font-size:11px!important}
 }
 </style>
 </head>
@@ -1187,7 +1149,7 @@ async function zagDiagnosticReminder(){
   await new Promise(resolve=>setTimeout(resolve,500));
   const pending=(await n.getPending())?.notifications||[];
   const found=pending.some(x=>Number(x.id)===id);
-  show(found?'iOS CONFIRMED test reminder at '+at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. Lock your phone and wait.':'iOS DID NOT retain test reminder. Pending: '+pending.length+'; schedule result: '+JSON.stringify(result??null).slice(0,160)+'; native: '+String(window.Capacitor?.getPlatform?.())+'. Please screenshot this message.');
+  show(found?'iOS has QUEUED the test for '+at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. This does not confirm delivery. Lock your phone until after that time. If no alert appears, check iPhone Settings → Notifications → Zag Science → Allow Notifications, Lock Screen and Banners; also check Focus and Scheduled Summary.':'iOS DID NOT retain test reminder. Pending: '+pending.length+'; schedule result: '+JSON.stringify(result??null).slice(0,160)+'; native: '+String(window.Capacitor?.getPlatform?.())+'. Please screenshot this message.');
  }catch(e){show('Native test error: '+String(e?.message||e));}
 }
 async function zagRepairStreakSchedule(){
@@ -1224,7 +1186,7 @@ async function zagCheckStreakSchedule(){
   const time=date.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const today=streakDayKey();
   const skip=zagTodayWorkoutDone(today)||zagTodayRestUsed(today);
-  show('Scheduled on iPhone: '+time+(skip?' (today is skipped because your workout or rest day is recorded)':'')+'. If you have the app open, iOS may not show a banner.');
+  show('Scheduled on iPhone: '+time+(skip?' (today is skipped because your workout or rest day is recorded)':'')+'. This is the NEXT scheduled reminder, not a confirmation it was delivered. Keep the phone locked at that time; iOS may suppress banners while the app is open.');
  }catch(e){console.warn('Streak reminder status failed',e);show('Could not confirm the iPhone reminder. Check notification permissions and try again.');}
 }
 function streakReminderTimeSetting(){
