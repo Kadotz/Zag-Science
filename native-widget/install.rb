@@ -29,6 +29,9 @@ widget.build_configurations.each do |cfg|
     'TARGETED_DEVICE_FAMILY' => '1,2',
     'CODE_SIGN_ENTITLEMENTS' => 'ZagStrengthWidget/ZagStrengthWidget.entitlements',
     'SKIP_INSTALL' => 'YES',
+    # Keep extension's build product outside App.app/PlugIns. The embed phase
+    # alone copies it into the app; otherwise archive can produce it twice.
+    'CONFIGURATION_BUILD_DIR' => '$(BUILD_DIR)/ZagWidgetProducts/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)',
     'APPLICATION_EXTENSION_API_ONLY' => 'YES',
     'LD_RUNPATH_SEARCH_PATHS' => '$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks',
     'SWIFT_EMIT_LOC_STRINGS' => 'YES'
@@ -37,7 +40,15 @@ end
 app.build_configurations.each do |cfg|
   cfg.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/App.entitlements'
 end
-embed = app.new_copy_files_build_phase('Embed App Extensions')
+# Only one embed phase and one product reference may install the extension.
+app.copy_files_build_phases.each do |phase|
+  phase.files.each do |file|
+    if file.file_ref == widget.product_reference || file.file_ref&.path.to_s.end_with?('ZagStrengthWidget.appex')
+      phase.remove_build_file(file)
+    end
+  end
+end
+embed = app.copy_files_build_phases.find { |phase| phase.name == 'Embed App Extensions' } || app.new_copy_files_build_phase('Embed App Extensions')
 embed.dst_subfolder_spec = '13'
 build_file = embed.add_file_reference(widget.product_reference)
 build_file.settings = {'ATTRIBUTES'=>['RemoveHeadersOnCopy']}
