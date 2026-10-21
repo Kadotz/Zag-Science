@@ -1530,7 +1530,7 @@ document.addEventListener("visibilitychange",()=>{
 <script>
 function openZagPro(e){if(e){e.preventDefault();e.stopPropagation()}const o=document.getElementById('zagProOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false')}
 function closeZagPro(e){if(e){e.preventDefault();e.stopPropagation()}const o=document.getElementById('zagProOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true')}
-function zagPurchase(plan){alert(plan==='monthly'?'Zag Pro monthly purchasing will connect here when the App Store / payment checkout is enabled.':'Zag Pro lifetime purchasing will connect here when the App Store / payment checkout is enabled.')}
+function zagPurchase(plan){alert("Apple payments are not enabled in this test build yet. Do not submit for App Store review until purchase verification and restoration are implemented.")}
 document.getElementById('zagProOverlay').addEventListener('click',function(e){if(e.target===this)closeZagPro(e)});
 </script>
 
@@ -4192,6 +4192,37 @@ const overlay=document.getElementById('zagWorkoutGuide');overlay.addEventListene
  .exercise .exerciseBody table td .fist{height:28px!important;min-height:28px!important;width:28px!important;min-width:28px!important;background-size:24px 24px!important}
 }
 </style>
+
+<script id="zag-pro-access-gates">
+/* Phase 1: UI gates only. The native entitlement verification service is not yet connected.
+   Do not replace this with a localStorage flag: users could grant themselves Pro. */
+window.zagProEntitled = false;
+window.zagRequirePro = function(){
+  if(window.zagProEntitled === true) return true;
+  if(typeof closeModal === 'function') closeModal();
+  if(typeof openZagPro === 'function') openZagPro();
+  return false;
+};
+function zagGateFunction(name){
+  const existing=window[name];
+  if(typeof existing !== 'function' || existing.__zagProGated) return;
+  const wrapped=function(...args){
+    if(!window.zagRequirePro()) return;
+    return existing.apply(this,args);
+  };
+  wrapped.__zagProGated=true;
+  window[name]=wrapped;
+}
+// Editing controls and both local and online group creation are premium.
+// Joining and viewing groups remain free.
+window.addEventListener('load',()=>{
+  ['editSplit','editDayExercises','dayExerciseEditor','renameDay','moveDay',
+   'dupDay','deleteSplitDay','openAddDay','addDay','addExerciseTo',
+   'removeExercise','renameExercise','saveAsSplit','loadSplitFromEditor',
+   'createGroup','finishCreateGroup','zagCreateOnlineGroupModal',
+   'zagCreateOnlineGroup'].forEach(zagGateFunction);
+});
+</script>
 </body></html>
 
 
