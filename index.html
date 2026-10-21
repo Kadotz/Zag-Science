@@ -776,7 +776,7 @@ function move(n){st.day=(st.day+n+st.days.length)%st.days.length;save();workout(
 function closeModal(){document.getElementById("modalRoot").innerHTML=""}
 function modal(title,body){document.getElementById("modalRoot").innerHTML=`<div class=modal onclick="if(event.target===this)closeModal()"><div class=modalbox><button class="btn close" onclick=closeModal()>×</button><h2>${title}</h2>${body}</div></div>`}
 function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`<p class=small>Tap the current exercise you want to replace.</p>${mains.map((x,i)=>`<button class=pick onclick="doSwap('${q(extra)}',${i})">${i+1}. ${esc(x)}</button>`).join("")}`)}
-function doSwap(extra,i){if(typeof window.zagRequirePro === "function" && !window.zagRequirePro())return;let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
+function doSwap(extra,i){let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
 function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
 function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
 function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(zagRecordPB(ex,+v.kg,+v.r)){prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
@@ -4196,7 +4196,32 @@ const overlay=document.getElementById('zagWorkoutGuide');overlay.addEventListene
 <script id="zag-pro-access-gates">
 /* Phase 1: UI gates only. The native entitlement verification service is not yet connected.
    Do not replace this with a localStorage flag: users could grant themselves Pro. */
-window.zagProEntitled = false;
+// TESTFLIGHT-ONLY developer override. NEVER ship this file to the public App Store.
+window.zagProEntitled = localStorage.getItem('zag_dev_pro_test_only') === '1';
+window.zagSetDevPro = function(enabled){
+  window.zagProEntitled = !!enabled;
+  localStorage.setItem('zag_dev_pro_test_only', enabled ? '1' : '0');
+  if(typeof closeZagPro === 'function') closeZagPro();
+  if(typeof settings === 'function') settings();
+};
+window.addEventListener('load', function(){
+  const originalSettings=window.settings;
+  if(typeof originalSettings !== 'function') return;
+  window.settings=function(...args){
+    const result=originalSettings.apply(this,args);
+    const screen=document.getElementById('screen');
+    if(screen && !document.getElementById('zag-dev-pro-panel')){
+      const panel=document.createElement('div');
+      panel.id='zag-dev-pro-panel';
+      panel.style.cssText='margin:15px 8px 20px;padding:14px;border:2px dashed #ffb347;border-radius:12px;background:#1e140c;color:white;text-align:center';
+      panel.innerHTML='<strong>DEVELOPER TEST MODE — NOT FOR APP STORE</strong><p id="zag-dev-pro-status" style="font-size:13px"></p><button class="btn" type="button" id="zag-dev-pro-switch">Switch Free / Pro</button>';
+      screen.appendChild(panel);
+      panel.querySelector('#zag-dev-pro-status').textContent='Current access: '+(window.zagProEntitled?'TEST PRO':'FREE');
+      panel.querySelector('#zag-dev-pro-switch').addEventListener('click',()=>window.zagSetDevPro(!window.zagProEntitled));
+    }
+    return result;
+  };
+});
 window.zagRequirePro = function(){
   if(window.zagProEntitled === true) return true;
   if(typeof closeModal === 'function') closeModal();
