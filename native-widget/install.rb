@@ -18,10 +18,17 @@ widget_group = project.main_group.find_subpath('ZagStrengthWidget', true)
 widget_file = widget_group.new_file('ZagStrengthWidget/ZagStrengthWidget.swift')
 widget = project.new_target(:app_extension, 'ZagStrengthWidget', :ios, '17.0')
 widget.source_build_phase.add_file_reference(widget_file)
+# Xcode's output path is taken from the product reference *path*, not its
+# display name. Without this, Xcode archives the extension as `.appex`.
 widget.product_reference.name = 'ZagStrengthWidget.appex'
+widget.product_reference.path = 'ZagStrengthWidget.appex'
+widget.product_reference.source_tree = 'BUILT_PRODUCTS_DIR'
 widget.build_configurations.each do |cfg|
   cfg.build_settings.merge!({
     'PRODUCT_BUNDLE_IDENTIFIER' => 'com.zagscience.app.StrengthWidget',
+    'PRODUCT_NAME' => 'ZagStrengthWidget',
+    'EXECUTABLE_NAME' => '$(EXECUTABLE_PREFIX)$(PRODUCT_NAME)$(EXECUTABLE_SUFFIX)',
+    'WRAPPER_NAME' => '$(PRODUCT_NAME).appex',
     'INFOPLIST_FILE' => 'ZagStrengthWidget/Info.plist',
     'GENERATE_INFOPLIST_FILE' => 'NO',
     'SWIFT_VERSION' => '5.0',
