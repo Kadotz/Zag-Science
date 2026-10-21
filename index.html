@@ -1264,11 +1264,12 @@ document.addEventListener("visibilitychange",()=>{
 </style>
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1.png')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-bordered.jpg')"></div>
   <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2.jpg')"></div>
   <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3.jpg')"></div>
   <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4.jpg')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5.jpg')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-widget.jpg')"></div>
+  <div class="zagInfoSlide" data-i="5" style="background-image:url('assets/images/info-page-5.jpg')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -1289,10 +1290,10 @@ document.addEventListener("visibilitychange",()=>{
    const prev=overlay.querySelector(".zagInfoPrevHit"), next=overlay.querySelector(".zagInfoNextHit");
    const follow=overlay.querySelector("#zagInfoPage2FollowPlan"), jump=overlay.querySelector("#zagInfoPage2TopSets"), cta=overlay.querySelector("#zagInfoLastCTA");
    if(prev) prev.style.display=zagInfoPage===0?"none":"block";
-   if(next) next.style.display=zagInfoPage===4?"none":"block";
+   if(next) next.style.display=zagInfoPage===slides.length-1?"none":"block";
    if(follow) follow.style.display=zagInfoPage===1?"block":"none";
    if(jump) jump.style.display=zagInfoPage===1?"block":"none";
-   if(cta) cta.style.display=zagInfoPage===4?"flex":"none";
+   if(cta) cta.style.display=zagInfoPage===slides.length-1?"flex":"none";
  }
  overlay.querySelector(".zagInfoPrevHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage-1)});
  overlay.querySelector(".zagInfoNextHit")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();showInfoPage(zagInfoPage+1)});
