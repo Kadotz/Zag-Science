@@ -4251,50 +4251,84 @@ function zagStrengthRecords(){
    return {date:h.date||'',by};
  });
 }
+function zagStrengthDate(raw){
+ if(!raw)return null;
+ const m=String(raw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+ if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d.getTime())?null:d;}
+ const d=new Date(raw);return isNaN(d.getTime())?null:d;
+}
 function zagStrengthGraphHTML(){
  if(!window.zagProEntitled)return '<div class="pagecard zagStrengthLocked"><h2>Strength Progress · ZAG PRO</h2><p class="note">See how your strength changes over time using all your completed sets.</p><button class="btn" onclick="openZagPro()">Unlock with Zag Pro</button></div>';
  const records=zagStrengthRecords();
  const exercises=[...new Set(records.flatMap(r=>Object.keys(r.by)))].sort();
  const selected=window.zagStrengthExercise||'all';
+ const period=window.zagStrengthPeriod||'all',interval=window.zagStrengthInterval||'workout';
  const opts='<option value="all">Overall strength (all exercises)</option>'+exercises.map(x=>'<option value="'+esc(x)+'" '+(x===selected?'selected':'')+'>'+esc(x)+'</option>').join('');
- return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected)+'</div><p class="zagStrengthLegend">Estimated strength based on your completed sets (weight × [1 + reps ÷ 30]). Overall uses each exercise’s latest recorded estimated strength against its own starting value (100% baseline); rest days do not add points. It is not total volume lifted.</p></div>';
+ const periodOptions=[['1m','Last month'],['3m','Last 3 months'],['6m','Last 6 months'],['1y','Last year'],['all','All time']];
+ const intervalOptions=[['workout','Every workout'],['day','Daily'],['week','Weekly'],['month','Monthly']];
+ const makeOpts=(arr,value)=>arr.map(([v,label])=>'<option value="'+v+'"'+(v===value?' selected':'')+'>'+label+'</option>').join('');
+ return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" aria-label="Exercise" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div class="zagStrengthControls"><label>Time period<select class="zagStrengthSelect" aria-label="Time period" onchange="window.zagStrengthPeriod=this.value;historyPage()">'+makeOpts(periodOptions,period)+'</select></label><label>Graph interval<select class="zagStrengthSelect" aria-label="Graph interval" onchange="window.zagStrengthInterval=this.value;historyPage()">'+makeOpts(intervalOptions,interval)+'</select></label></div><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected,period,interval)+'</div><p class="zagStrengthLegend">Estimated strength from completed sets (weight × [1 + reps ÷ 30]). Overall shows average relative strength against each exercise’s first recorded result (100% baseline). Rest days never count as zero.</p></div>';
 }
-function zagStrengthSVG(records,selected){
+function zagStrengthSVG(records,selected,period,interval){
  const baseline=Object.create(null),latest=Object.create(null),points=[];
- records.forEach((r,i)=>{
-   let changed=false;
-   for(const [name,value] of Object.entries(r.by)){
-     if(!Number.isFinite(value)||value<=0)continue;
-     if(!(name in baseline))baseline[name]=value;
-     latest[name]=value;
-     if(selected==='all'||selected===name)changed=true;
-   }
-   if(!changed)return;
-   let v;
-   if(selected==='all'){
-     const names=Object.keys(latest).filter(name=>baseline[name]>0);
-     if(names.length)v=names.reduce((sum,name)=>sum+100*latest[name]/baseline[name],0)/names.length;
-   }else if(latest[selected]>0)v=latest[selected];
-   if(Number.isFinite(v))points.push({i,v,date:r.date});
+ const dated=records.map(r=>({...r,when:zagStrengthDate(r.date)})).filter(r=>r.when).sort((a,b)=>a.when-b.when);
+ // Build baselines from the entire history, even when the visible range is shorter.
+ const now=new Date(),cutoff=new Date(now);
+ if(period==='1m')cutoff.setMonth(cutoff.getMonth()-1);
+ else if(period==='3m')cutoff.setMonth(cutoff.getMonth()-3);
+ else if(period==='6m')cutoff.setMonth(cutoff.getMonth()-6);
+ else if(period==='1y')cutoff.setFullYear(cutoff.getFullYear()-1);
+ const visibleStart=period==='all'?-Infinity:cutoff.getTime();
+ dated.forEach(r=>{
+  let changed=false;
+  for(const [name,value] of Object.entries(r.by)){
+   if(!Number.isFinite(value)||value<=0)continue;
+   if(!(name in baseline))baseline[name]=value;
+   latest[name]=value;
+   if(selected==='all'||selected===name)changed=true;
+  }
+  if(!changed||r.when.getTime()<visibleStart) return;
+  let v;
+  if(selected==='all'){
+   const names=Object.keys(latest).filter(name=>baseline[name]>0);
+   if(names.length)v=names.reduce((sum,name)=>sum+100*latest[name]/baseline[name],0)/names.length;
+  }else if(latest[selected]>0)v=latest[selected];
+  if(Number.isFinite(v))points.push({time:r.when.getTime(),v,date:r.when});
  });
- if(points.length<2)return '<p class="note">Complete at least two workouts with recorded sets to see your progress.</p>';
- const w=330,h=180,px=35;
+ if(interval!=='workout'){
+  const grouped=new Map();
+  for(const pt of points){
+   const d=new Date(pt.time);
+   if(interval==='week'){const wd=(d.getDay()+6)%7;d.setDate(d.getDate()-wd);}
+   if(interval==='month')d.setDate(1);
+   d.setHours(0,0,0,0);
+   const key=d.getTime();
+   // Latest workout in the period, rather than a misleading sum or zero on rest days.
+   grouped.set(key,{...pt,time:key});
+  }
+  points.splice(0,points.length,...[...grouped.values()].sort((a,b)=>a.time-b.time));
+ }
+ if(!points.length)return '<p class="note">No completed workouts in this time period. Try a longer period.</p>';
+ if(points.length===1)return '<p class="note">Only one strength reading in this period. Select a longer period to see a trend.</p>';
+ const w=330,h=180,px=40,right=314;
  let min=Math.min(...points.map(p=>p.v)),max=Math.max(...points.map(p=>p.v));
  if(selected==='all'){min=Math.min(min,100);max=Math.max(max,100);}
- const pad=Math.max((max-min)*0.12,selected==='all'?2:1);
- min-=pad;max+=pad;
- const range=max-min;
- const xy=points.map(pt=>[px+(pt.i/(Math.max(records.length-1,1)))*(w-px-16),h-22-(pt.v-min)/range*(h-44)]);
+ const pad=Math.max((max-min)*.12,selected==='all'?2:1);min-=pad;max+=pad;
+ const range=max-min,first=points[0].time,last=points[points.length-1].time;
+ const xy=points.map(pt=>[px+((pt.time-first)/Math.max(last-first,1))*(right-px),h-22-(pt.v-min)/range*(h-44)]);
  const path=xy.map((pt,i)=>(i?'L':'M')+pt[0].toFixed(1)+' '+pt[1].toFixed(1)).join(' ');
  const baselineY=h-22-(100-min)/range*(h-44);
+ const label=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
  return '<svg class="zagStrengthChart" viewBox="0 0 330 180" role="img" aria-label="Strength progress chart">'
   +'<line x1="'+px+'" y1="8" x2="'+px+'" y2="158" stroke="#654075"/>'
-  +'<line x1="'+px+'" y1="158" x2="314" y2="158" stroke="#654075"/>'
-  +(selected==='all'?'<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="314" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>':'')
+  +'<line x1="'+px+'" y1="158" x2="'+right+'" y2="158" stroke="#654075"/>'
+  +(selected==='all'?'<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="'+right+'" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>':'')
   +'<path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'
   +xy.map(pt=>'<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="2.8" fill="#fff"/>').join('')
   +'<text x="2" y="17" fill="#dda5ff" font-size="10">'+max.toFixed(1)+'</text>'
-  +'<text x="2" y="157" fill="#dda5ff" font-size="10">'+min.toFixed(1)+'</text></svg>';
+  +'<text x="2" y="157" fill="#dda5ff" font-size="10">'+min.toFixed(1)+'</text>'
+  +'<text x="'+px+'" y="174" fill="#dda5ff" font-size="9">'+label(points[0].date)+'</text>'
+  +'<text x="'+right+'" y="174" text-anchor="end" fill="#dda5ff" font-size="9">'+label(points[points.length-1].date)+'</text></svg>';
 }
 </script>
 </body></html>
@@ -4431,6 +4465,7 @@ function zagRenderTip(){
  if(custom)custom.style.display='none';
  img.style.display='block';
  img.src=zagTipImages[zagTipIndex];
+ img.classList.toggle('zagTipTrimEdge',zagTipIndex===5);
  document.getElementById('zagTipPrev').style.visibility='visible';
  document.getElementById('zagTipNext').style.visibility='visible';
 }
@@ -4438,3 +4473,10 @@ function zagStepTip(d){zagTipIndex=(zagTipIndex+d+zagTipImages.length)%zagTipIma
 document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
 </script>
 <div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-01-landscape.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
+<style id="zag-v27-40-tip-trim-and-time-controls">
+.zagTipsPanel{background:#06020b!important}
+.zagTipsPanel img.zagTipTrimEdge{width:108%!important;height:108%!important;max-width:none!important;position:absolute!important;left:-4%!important;top:-4%!important;object-fit:fill!important;aspect-ratio:auto!important}
+.zagStrengthControls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.zagStrengthControls label{font-size:11px;color:#dca6ff;font-weight:700}
+.zagStrengthControls .zagStrengthSelect{margin:5px 0 0;font-size:12px;padding:8px 5px;min-width:0}
+</style>
