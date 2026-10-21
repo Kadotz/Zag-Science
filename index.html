@@ -772,11 +772,11 @@ function fillAllSets(ex){
 }
 // Legacy name retained in case an older cached click handler calls it.
 function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
-function move(n){st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
+function move(n){if(st.plannedDays&&st.plannedDays[st.day])st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
 function closeModal(){document.getElementById("modalRoot").innerHTML=""}
 function modal(title,body){document.getElementById("modalRoot").innerHTML=`<div class=modal onclick="if(event.target===this)closeModal()"><div class=modalbox><button class="btn close" onclick=closeModal()>×</button><h2>${title}</h2>${body}</div></div>`}
 function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`<p class=small>Tap the current exercise you want to replace.</p>${mains.map((x,i)=>`<button class=pick onclick="doSwap('${q(extra)}',${i})">${i+1}. ${esc(x)}</button>`).join("")}`)}
-function doSwap(extra,i){let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
+function doSwap(extra,i){if(!window.zagRequirePro())return;let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
 function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
 function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
 function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(zagRecordPB(ex,+v.kg,+v.r)){prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
@@ -911,7 +911,7 @@ function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=
 function toggleMaxSection(i){let el=document.getElementById("maxsec-"+i);if(!el)return;el.classList.toggle("collapsed");let b=el.querySelector(".maxToggle");if(b)b.textContent=el.classList.contains("collapsed")?"EXPAND":"COLLAPSE"}
 function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach((sec,i)=>{s+=`<section id="maxsec-${i}" class="maxsection collapsed"><div class=maxSectionHead onclick="toggleMaxSection(${i})"><h2>${esc(sec.name)}</h2><button type=button class="btn maxToggle" onclick="event.stopPropagation();toggleMaxSection(${i})">EXPAND</button></div><div class=maxSectionBody>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</div></section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
-function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
+function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${zagStrengthGraphHTML()}${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
 function groupMembers(){
   if(Array.isArray(window.zagRealGroupPeople) && window.zagRealGroupPeople.length) return window.zagRealGroupPeople;
   const meName=(st.profile?.username||st.username||"You");
@@ -1225,7 +1225,7 @@ ${streakRestSelector()}
 ${streakReminderTimeSetting()}
 <div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${zagNativeNotifications()?"Enable / Check":(("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable")}</button></div>
 <div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are scheduled for two weeks after your last saved weigh-in.</div>
-</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
+</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">Testing only — remove before public release.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
 processStreakCalendar();save();
@@ -4204,24 +4204,6 @@ window.zagSetDevPro = function(enabled){
   if(typeof closeZagPro === 'function') closeZagPro();
   if(typeof settings === 'function') settings();
 };
-window.addEventListener('load', function(){
-  const originalSettings=window.settings;
-  if(typeof originalSettings !== 'function') return;
-  window.settings=function(...args){
-    const result=originalSettings.apply(this,args);
-    const screen=document.getElementById('screen');
-    if(screen && !document.getElementById('zag-dev-pro-panel')){
-      const panel=document.createElement('div');
-      panel.id='zag-dev-pro-panel';
-      panel.style.cssText='margin:15px 8px 20px;padding:14px;border:2px dashed #ffb347;border-radius:12px;background:#1e140c;color:white;text-align:center';
-      panel.innerHTML='<strong>DEVELOPER TEST MODE — NOT FOR APP STORE</strong><p id="zag-dev-pro-status" style="font-size:13px"></p><button class="btn" type="button" id="zag-dev-pro-switch">Switch Free / Pro</button>';
-      screen.appendChild(panel);
-      panel.querySelector('#zag-dev-pro-status').textContent='Current access: '+(window.zagProEntitled?'TEST PRO':'FREE');
-      panel.querySelector('#zag-dev-pro-switch').addEventListener('click',()=>window.zagSetDevPro(!window.zagProEntitled));
-    }
-    return result;
-  };
-});
 window.zagRequirePro = function(){
   if(window.zagProEntitled === true) return true;
   if(typeof closeModal === 'function') closeModal();
@@ -4247,6 +4229,55 @@ window.addEventListener('load',()=>{
    'createGroup','finishCreateGroup','zagCreateOnlineGroupModal',
    'zagCreateOnlineGroup'].forEach(zagGateFunction);
 });
+</script>
+
+<style id="zag-strength-progress-style">
+.zagStrengthLocked{text-align:center;padding:14px}
+.zagStrengthChart{width:100%;height:190px;display:block;overflow:visible}
+.zagStrengthSelect{width:100%;margin:8px 0;padding:10px;background:#090914;color:white;border:1px solid #d83cf1;border-radius:8px}
+.zagStrengthLegend{font-size:11px;color:#dca6ff;margin:5px 0}
+</style>
+<script id="zag-strength-progress-logic">
+function zagStrengthRecords(){
+ const rows=(st.history||[]).slice().reverse().filter(h=>h&&Array.isArray(h.sets));
+ return rows.map(h=>{
+   const by={};
+   h.sets.forEach(v=>{
+     const kg=Number(v.kg),reps=Number(v.reps);
+     if(!v.exercise||!Number.isFinite(kg)||kg<=0||!Number.isFinite(reps)||reps<1||reps>30)return;
+     const e1rm=kg*(1+reps/30);
+     by[v.exercise]=Math.max(by[v.exercise]||0,e1rm);
+   });
+   return {date:h.date||'',by};
+ });
+}
+function zagStrengthGraphHTML(){
+ if(!window.zagProEntitled)return '<div class="pagecard zagStrengthLocked"><h2>Strength Progress · ZAG PRO</h2><p class="note">See how your strength changes over time using all your completed sets.</p><button class="btn" onclick="openZagPro()">Unlock with Zag Pro</button></div>';
+ const records=zagStrengthRecords();
+ const exercises=[...new Set(records.flatMap(r=>Object.keys(r.by)))].sort();
+ const selected=window.zagStrengthExercise||'all';
+ const opts='<option value="all">Overall strength (all exercises)</option>'+exercises.map(x=>'<option value="'+esc(x)+'" '+(x===selected?'selected':'')+'>'+esc(x)+'</option>').join('');
+ return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected)+'</div><p class="zagStrengthLegend">Estimated strength based on your completed sets (weight × [1 + reps ÷ 30]). Overall compares each exercise against its own starting value; it is not total volume lifted.</p></div>';
+}
+function zagStrengthSVG(records,selected){
+ const baseline={},pts=[];
+ records.forEach((r,i)=>{
+  const values=Object.entries(r.by);
+  values.forEach(([name,value])=>{if(!(name in baseline))baseline[name]=value;});
+  let v;
+  if(selected==='all'){
+   const ratios=values.filter(([name])=>baseline[name]>0).map(([name,value])=>100*value/baseline[name]);
+   if(ratios.length)v=ratios.reduce((a,b)=>a+b,0)/ratios.length;
+  }else if(r.by[selected])v=r.by[selected];
+  if(Number.isFinite(v))pts.push({i,v});
+ });
+ if(pts.length<2)return '<p class="note">Complete at least two workouts with recorded sets to see your progress.</p>';
+ const w=330,h=180,p=27,min=Math.min(...pts.map(p=>p.v)),max=Math.max(...pts.map(p=>p.v)),range=Math.max(max-min,1);
+ const xy=pts.map((p,j)=>[p.i/(records.length-1)*(w-2*pX())+pX(),h-22-(p.v-min)/range*(h-46)]);
+ function pX(){return 30}
+ const path=xy.map((pt,i)=>(i?'L':'M')+pt[0].toFixed(1)+' '+pt[1].toFixed(1)).join(' ');
+ return '<svg class="zagStrengthChart" viewBox="0 0 330 180" role="img" aria-label="Strength progress chart"><line x1="30" y1="8" x2="30" y2="158" stroke="#654075"/><line x1="30" y1="158" x2="310" y2="158" stroke="#654075"/><path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'+xy.map(pt=>'<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="3" fill="#fff"/>').join('')+'<text x="3" y="17" fill="#dda5ff" font-size="10">'+max.toFixed(1)+'</text><text x="3" y="157" fill="#dda5ff" font-size="10">'+min.toFixed(1)+'</text></svg>';
+}
 </script>
 </body></html>
 
@@ -4372,12 +4403,12 @@ window.addEventListener('load',()=>{
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg'];
+const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','__zag_motivation_tip__'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
-function zagRenderTip(){document.getElementById('zagTipImage').src=zagTipImages[zagTipIndex];document.getElementById('zagTipPrev').style.visibility='visible';document.getElementById('zagTipNext').style.visibility='visible';}
+function zagRenderTip(){const img=document.getElementById('zagTipImage');const custom=document.getElementById('zagMotivationTip');if(zagTipImages[zagTipIndex]==='__zag_motivation_tip__'){img.style.display='none';custom.style.display='flex';}else{img.style.display='block';custom.style.display='none';img.src=zagTipImages[zagTipIndex];}document.getElementById('zagTipPrev').style.visibility='visible';document.getElementById('zagTipNext').style.visibility='visible';}
 function zagStepTip(d){zagTipIndex=(zagTipIndex+d+zagTipImages.length)%zagTipImages.length;zagRenderTip();}
 document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
 </script>
-<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-01-landscape.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
+<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-01-landscape.jpg" alt="Zag Science workout tip"><div id="zagMotivationTip" style="display:none;position:absolute;inset:0;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12%;border:3px solid #e73cff;border-radius:16px;background:radial-gradient(ellipse at center,#39074e,#08030e 65%,#010105);box-shadow:inset 0 0 35px #b72aff"><div style="font-size:clamp(24px,6vw,46px);font-weight:1000;font-style:italic;color:white;text-shadow:0 0 12px #e73cff">AIM FOR THE<br>IMPOSSIBLE</div><p style="font-size:clamp(12px,2.7vw,19px);line-height:1.55">Some targets will feel out of reach. That's the point: aim higher, challenge yourself, and give each set your best effort. If the prescribed weight or reps are too much, adjust them slightly while keeping your technique strong. Progress comes from consistently pushing your limits—not sacrificing form.</p><div style="position:absolute;bottom:4%;left:5%;right:5%;display:flex;justify-content:space-between;color:#fff;font-weight:900;text-shadow:0 0 8px #e73cff"><span>❮ PREVIOUS</span><span>NEXT ❯</span></div><div style="position:absolute;top:3%;right:5%;font-size:28px;font-weight:bold">×</div></div><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
