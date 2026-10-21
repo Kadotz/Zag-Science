@@ -43,6 +43,12 @@ workflows:
           test -d node_modules/@capacitor/push-notifications
           echo "Both notification plugin packages are installed"
 
+      - name: Install native Strength Widget extension
+        script: |
+          set -e
+          gem install xcodeproj --no-document
+          ruby native-widget/install.rb
+
       - name: Build iOS simulator app
         script: |
           xcodebuild \
@@ -109,6 +115,12 @@ workflows:
           test -d node_modules/@capacitor/push-notifications
           echo "Both notification plugin packages are installed"
           
+      - name: Install native Strength Widget extension
+        script: |
+          set -e
+          gem install xcodeproj --no-document
+          ruby native-widget/install.rb
+
       - name: Set Zag Science home screen icon
         script: |
           ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
@@ -140,14 +152,6 @@ workflows:
           else:
               print('APNs callbacks already present')
           PYTHON
-
-      - name: Enable iOS push entitlement
-        script: |
-          mkdir -p ios/App/App
-          printf '%s' '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>aps-environment</key><string>production</string></dict></plist>' > ios/App/App/App.entitlements
-          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER = com.zagscience.app;/i\
-          CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
-          ' ios/App/App.xcodeproj/project.pbxproj
 
       - name: Automatically increment iPhone build number
         script: |

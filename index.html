@@ -520,7 +520,7 @@ function syncPlannedDays(){st.plannedDays=JSON.parse(JSON.stringify(st.days))}
 })();
 
 if(st.units!=='lb'&&st.units!=='kg')st.units='kg';
-function save(){zagRestoreManualPBs();localStorage.setItem("zagScienceV2",JSON.stringify(st));if(typeof zagQueuePBSync==="function")zagQueuePBSync();if(typeof zagQueueStateSync==="function")zagQueueStateSync()}
+function save(){zagRestoreManualPBs();localStorage.setItem("zagScienceV2",JSON.stringify(st));if(typeof zagWidgetScheduleSync==="function")zagWidgetScheduleSync();if(typeof zagQueuePBSync==="function")zagQueuePBSync();if(typeof zagQueueStateSync==="function")zagQueueStateSync()}
 function weightUnit(){return st.units==='lb'?'lb':'kg'}
 function kgToDisplay(v){if(v===''||v==null)return '';let n=Number(v);if(!Number.isFinite(n))return v;let out=weightUnit()==='lb'?n*2.2046226218:n;return Math.round(out*10)/10}
 function displayToKg(v){if(v===''||v==null)return '';let n=Number(v);if(!Number.isFinite(n))return v;let out=weightUnit()==='lb'?n/2.2046226218:n;return Math.round(out*1000)/1000}
@@ -4333,6 +4333,25 @@ function zagStrengthSVG(records,selected,period,interval){
   +'<text x="'+px+'" y="174" fill="#dda5ff" font-size="9">'+label(points[0].date)+'</text>'
   +'<text x="'+right+'" y="174" text-anchor="end" fill="#dda5ff" font-size="9">'+label(points[points.length-1].date)+'</text></svg>';
 }
+</script>
+<script id="zag-native-widget-sync">
+// Share exactly the workout-based strength series used by the History graph.
+// App Group writes happen in native iOS code, not browser localStorage.
+(function(){
+ let timer;
+ window.zagWidgetScheduleSync=function(){clearTimeout(timer);timer=setTimeout(window.zagWidgetSync,600)};
+ window.zagWidgetSync=function(){
+  try{
+   if(!window.webkit?.messageHandlers?.zagWidgetSync||typeof zagStrengthRecords!=='function')return;
+   const records=zagStrengthRecords().map((r,i)=>({date:r.date,by:r.by,order:i}));
+   window.webkit.messageHandlers.zagWidgetSync.postMessage({records,pro:window.zagProEntitled===true});
+  }catch(e){console.warn('Widget sync:',e)}
+ };
+ window.addEventListener('load',()=>setTimeout(window.zagWidgetSync,1200));
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)window.zagWidgetScheduleSync()});
+ const old=window.zagSetDevPro;
+ if(typeof old==='function')window.zagSetDevPro=function(...a){const r=old.apply(this,a);window.zagWidgetScheduleSync();return r};
+})();
 </script>
 </body></html>
 

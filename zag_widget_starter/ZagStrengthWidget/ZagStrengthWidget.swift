@@ -74,6 +74,12 @@ private struct StrengthRecord: Decodable {
     let workoutId: String?
 }
 
+private struct WorkoutRecord: Decodable {
+    let date: String
+    let by: [String: Double]
+    let order: Int
+}
+
 struct StrengthEntry: TimelineEntry {
     let date: Date
     let isPro: Bool
@@ -102,11 +108,10 @@ struct StrengthProvider: AppIntentTimelineProvider {
         let label = configuration.exercise?.name ?? "Overall strength"
         let empty = StrengthEntry(date: .now, isPro: isPro, points: [], change: nil,
                                   exerciseLabel: label, periodLabel: configuration.period.label)
-        guard isPro, let json = defaults?.data(forKey: "zag_widget_history"),
-              let records = try? JSONDecoder().decode([StrengthRecord].self, from: json) else { return empty }
-
-        let now = Date()
+        guard isPro, let json = defaults?.data(forKey: "zag_widget_workouts"),
+              let records = try? JSONDecoder().decode([WorkoutRecord].self, from: json) else { return empty }
         let calendar = Calendar.current
+        let now = Date()
         let start: Date?
         switch configuration.period {
         case .month1: start = calendar.date(byAdding: .month, value: -1, to: now)
@@ -115,45 +120,52 @@ struct StrengthProvider: AppIntentTimelineProvider {
         case .year1: start = calendar.date(byAdding: .year, value: -1, to: now)
         case .all: start = nil
         }
-        let parser = ISO8601DateFormatter()
-        parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let fallbackParser = ISO8601DateFormatter()
-        let selectedRecords = records.compactMap { record -> (Date, StrengthRecord)? in
-            guard record.value.isFinite, record.value > 0,
-                  selected == "all" || record.exercise == selected,
-                  let date = parser.date(from: record.timestamp) ?? fallbackParser.date(from: record.timestamp),
-                  date <= now, start.map({ date >= $0 }) ?? true else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        formatter.locale = Locale(identifier: "en_GB")
+        let iso = ISO8601DateFormatter()
+        let dated = records.compactMap { record -> (Date, WorkoutRecord)? in
+            guard let date = formatter.date(from: record.date) ?? iso.date(from: record.date), date <= now else { return nil }
             return (date, record)
-        }.sorted { $0.0 < $1.0 }
-
-        // Average all working sets in each interval. Missing intervals are omitted, not zeroed.
-        var buckets: [String: (sum: Double, count: Int, date: Date)] = [:]
-        for (date, record) in selectedRecords {
-            let key: String
-            let bucketDate: Date
-            switch configuration.interval {
-            case .workout:
-                // Session IDs should be stable and unique per workout; fall back to timestamp.
-                key = record.workoutId ?? record.timestamp
-                bucketDate = date
-            case .daily:
-                bucketDate = calendar.startOfDay(for: date)
-                key = "\(bucketDate.timeIntervalSince1970)"
-            case .weekly:
-                bucketDate = calendar.dateInterval(of: .weekOfYear, for: date)?.start ?? date
-                key = "\(bucketDate.timeIntervalSince1970)"
-            case .monthly:
-                bucketDate = calendar.dateInterval(of: .month, for: date)?.start ?? date
-                key = "\(bucketDate.timeIntervalSince1970)"
+        }.sorted { $0.0 < $1.0 || ($0.0 == $1.0 && $0.1.order < $1.1.order) }
+        var baseline: [String: Double] = [:]
+        var latest: [String: Double] = [:]
+        var raw: [(Date, Double)] = []
+        for (date, record) in dated {
+            var changed = false
+            for (name, value) in record.by where value.isFinite && value > 0 {
+                if baseline[name] == nil { baseline[name] = value }
+                latest[name] = value
+                if selected == "all" || selected == name { changed = true }
             }
-            let previous = buckets[key]
-            buckets[key] = ((previous?.sum ?? 0) + record.value,
-                            (previous?.count ?? 0) + 1,
-                            min(previous?.date ?? bucketDate, bucketDate))
+            guard changed, start.map({ date >= $0 }) ?? true else { continue }
+            let value: Double?
+            if selected == "all" {
+                let ratios = latest.compactMap { (name, v) -> Double? in
+                    guard let base = baseline[name], base > 0 else { return nil }
+                    return 100 * v / base
+                }
+                value = ratios.isEmpty ? nil : ratios.reduce(0, +) / Double(ratios.count)
+            } else { value = latest[selected] }
+            if let value = value, value.isFinite { raw.append((date, value)) }
         }
-        let points = buckets.values.sorted { $0.date < $1.date }.map { $0.sum / Double($0.count) }
-        let change: Double? = points.count >= 2 && points[0] > 0
-            ? (points[points.count - 1] / points[0] - 1) * 100 : nil
+        var plotted = raw
+        if configuration.interval != .workout {
+            var buckets: [Date: Double] = [:]
+            for (date, value) in raw {
+                let key: Date
+                switch configuration.interval {
+                case .daily: key = calendar.startOfDay(for: date)
+                case .weekly: key = calendar.dateInterval(of: .weekOfYear, for: date)?.start ?? date
+                case .monthly: key = calendar.dateInterval(of: .month, for: date)?.start ?? date
+                case .workout: key = date
+                }
+                buckets[key] = value // last reading in interval, not average or zero
+            }
+            plotted = buckets.map { ($0.key, $0.value) }.sorted { $0.0 < $1.0 }
+        }
+        let points = plotted.map { $0.1 }
+        let change = points.count >= 2 && points[0] > 0 ? (points[points.count - 1] / points[0] - 1) * 100 : nil
         return StrengthEntry(date: now, isPro: true, points: points, change: change,
                              exerciseLabel: label, periodLabel: configuration.period.label)
     }
