@@ -781,6 +781,7 @@ function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+es
 function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
 function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(zagRecordPB(ex,+v.kg,+v.r)){prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
 st.recommendedDay=(st.day+1)%st.days.length;
+ if(typeof zagRescheduleNative==="function")setTimeout(()=>zagRescheduleNative().catch(console.warn),0);
 d[1].forEach(ex=>{
  let w=Number(st.weeks[ex]||1);
  st.weeks[ex]=w>=8?1:w+1;
@@ -789,7 +790,7 @@ st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
 recordStreakWorkout();save();zagRescheduleNative().catch(console.warn);returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
 function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
-function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class="btn workoutDayBtn" onclick="st.day=${i};save();workout()"><span class=workoutDayName>Day ${i+1} — ${esc(d[0])}</span>${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span class=workoutDayChevron>›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
+function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt="">Information</b><span>How Zag Science works</span></button><button class="zagHomeCard zagTipsCard" type="button" onclick="zagOpenTips()"><b>✦ Tips &amp; Tricks</b><span>Quick training advice</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class="btn workoutDayBtn" onclick="st.day=${i};save();workout()"><span class=workoutDayName>Day ${i+1} — ${esc(d[0])}</span>${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span class=workoutDayChevron>›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function showRestInfo(){modal("REST?",`<p><b>At Zag Science, we don't believe rest days need to be planned into fixed positions in your split.</b></p><p>Everyone recovers differently. Some people will need more rest than others, and your needs can change depending on training intensity, sleep, stress and how your body feels.</p><p>Pay attention to signs of fatigue, unusual soreness, falling performance or poor recovery. If you feel you need a rest day, take one and return to your recommended workout when you're ready.</p><p><b>You decide when — and if — you need to rest. Train hard, recover properly, and always train safely.</b></p>`)}
 function editSplit(){
   let saved=Object.keys(st.customSplits||{});
@@ -1001,7 +1002,7 @@ function zagDesiredReminders(){
   if(at.getTime()<=now+5000||zagTodayWorkoutDone(today)||zagTodayRestUsed(today)){
    at=zagNextReminderDate(st.streakReminderTime||'19:00',1);
   }
-  out.push({id:8220,title:'Keep your streak alive',body:'Train today or use an available rest day.',schedule:{at:at},extra:{zagKind:'streak'}});
+  const rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day; const dayName=String(st.days?.[rec]?.[0]||'Your next workout'); out.push({id:8220,title:'Don’t break the chain!',body:dayName+' is ready for you! 🔥',schedule:{at:at},extra:{zagKind:'streak',recommendedDay:rec}});
  }
  if(st.notifications?.bodyweightReminder){
   let anchor=Number(st.bodyweightReminderAnchor);
@@ -4289,3 +4290,38 @@ const overlay=document.getElementById('zagWorkoutGuide');overlay.addEventListene
  .exercise:not(.collapsed) .exerciseBody table td .fist{font-size:0!important;}
 }
 </style>
+
+<style id="zag-tips-and-landscape-v1">
+.zagHomeCards{grid-template-columns:1fr .67fr 1fr!important;gap:6px!important}
+.zagHomeCard{min-width:0!important;padding:8px 6px!important}
+.zagTipsCard{border-color:#db35ff!important;background:linear-gradient(135deg,#180820,#2c0a3d)!important;text-align:center!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+.zagTipsCard b{font-size:clamp(10px,2.5vw,14px)!important;line-height:1.15!important}
+.zagTipsCard span{font-size:9px!important}
+.zagTipsOverlay{position:fixed;inset:0;background:#000e;z-index:100100;display:none;align-items:center;justify-content:center;padding:12px}
+.zagTipsOverlay.open{display:flex}
+.zagTipsPanel{position:relative;height:min(94dvh,900px);aspect-ratio:2/3;max-width:94vw;overflow:hidden;box-shadow:0 0 25px #d13cff66;border-radius:15px}
+.zagTipsPanel img{display:block;width:100%;height:100%;object-fit:fill}
+.zagTipsClick{position:absolute;border:0;background:transparent;cursor:pointer;touch-action:manipulation}
+.zagTipsClose{right:1%;top:1%;width:13%;height:8%}
+.zagTipsPrev{left:3%;bottom:3%;width:40%;height:9%}
+.zagTipsNext{right:3%;bottom:3%;width:40%;height:9%}
+@media screen and (orientation:landscape) and (max-height:650px){
+ body:has(#nav-workout.active) .nav{display:none!important}
+ body:has(#nav-workout.active) .app{padding-bottom:0!important;margin-bottom:0!important}
+ body:has(#nav-workout.active) #screen{padding-bottom:0!important}
+ .exercise:not(.collapsed) .exerciseBody table th{height:15px!important;line-height:1!important;padding:0!important;font-size:9px!important}
+ .exercise:not(.collapsed) .exerciseBody table td{height:clamp(27px,5.3dvh,34px)!important;min-height:0!important;padding:0!important;font-size:clamp(19px,3vw,25px)!important;line-height:1!important}
+ .exercise:not(.collapsed) .exerciseBody table td input.cell,.exercise:not(.collapsed) .exerciseBody table td button.cell,.exercise:not(.collapsed) .exerciseBody table td .cell:not(.fist){height:clamp(25px,4.8dvh,31px)!important;min-height:0!important;max-height:31px!important;font-size:clamp(19px,3vw,25px)!important;line-height:1!important;padding:0!important}
+ .exercise:not(.collapsed) .exerciseBody table td .fist{width:25px!important;height:25px!important;min-height:25px!important}
+}
+</style>
+<script id="zag-tips-logic-v1">
+const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg'];
+let zagTipIndex=0,zagTipTouchX=null;
+function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
+function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
+function zagRenderTip(){document.getElementById('zagTipImage').src=zagTipImages[zagTipIndex];document.getElementById('zagTipPrev').style.visibility=zagTipIndex===0?'hidden':'visible';document.getElementById('zagTipNext').style.visibility=zagTipIndex===zagTipImages.length-1?'hidden':'visible';}
+function zagStepTip(d){zagTipIndex=Math.max(0,Math.min(zagTipImages.length-1,zagTipIndex+d));zagRenderTip();}
+document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
+</script>
+<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-01-landscape.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
