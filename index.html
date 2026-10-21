@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Zag Science v27.38</title>
+<title>Zag Science v27.39 - Tips Widget</title>
 <style>
 :root{--bg:#02040a;--panel:#070a14;--purple:#e73cff;--purple2:#7d1cac;--lav:#dfa8ff;--line:#27304a;--green:#20f3a0}
 *{box-sizing:border-box}html,body{margin:0;background:#02040a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Arial Narrow",Arial,sans-serif}body{background:radial-gradient(circle at 50% 0,#210b35,#040712 26%,#02040a 70%);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1000px;margin:auto;padding-bottom:66px}
@@ -1262,8 +1262,10 @@ document.addEventListener("visibilitychange",()=>{
 
 .groupSectionBox{border:1.5px solid #b82bd8;border-radius:14px;padding:12px;margin:12px 0 18px;background:linear-gradient(180deg,rgba(15,9,25,.96),rgba(4,6,13,.98));box-shadow:0 0 14px #a726d72b}.groupSectionBox .pagecard{margin-left:0;margin-right:0}.groupSectionBox .groupHero{margin-top:0}.groupSectionLabel{display:none!important;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#df8cff;margin:1px 2px 8px}.createAnotherGroup{width:100%;font-size:16px;padding:13px;margin:2px 0 12px}.podiumMedal img,.rankMedalImg{display:block;object-fit:contain;margin:auto}.podiumMedal img{width:54px;height:54px}.rankMedalImg{width:42px;height:42px}.showcaseNote{font-size:9px;color:#b990ca;margin-top:3px}
 </style>
+<!-- ZAG TIPS UPDATE 2026-10-21 v2: complete border and iPhone widget guide -->
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
+  <div id="zagInfoCounterV2" aria-live="polite" style="position:absolute;top:2%;left:5%;z-index:7;color:#f5d5ff;font-size:11px;font-weight:800;text-shadow:0 0 8px #e53cff;pointer-events:none">TIP 1 / 6</div>
   <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-bordered.jpg')"></div>
   <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2.jpg')"></div>
   <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3.jpg')"></div>
@@ -1286,7 +1288,7 @@ document.addEventListener("visibilitychange",()=>{
  function showInfoPage(n){
    const slides=[...overlay.querySelectorAll(".zagInfoSlide")];
    zagInfoPage=Math.max(0,Math.min(slides.length-1,n));
-   slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage));
+   slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage)); const counter=document.getElementById("zagInfoCounterV2");if(counter)counter.textContent=`TIP ${zagInfoPage+1} / ${slides.length}`;
    const prev=overlay.querySelector(".zagInfoPrevHit"), next=overlay.querySelector(".zagInfoNextHit");
    const follow=overlay.querySelector("#zagInfoPage2FollowPlan"), jump=overlay.querySelector("#zagInfoPage2TopSets"), cta=overlay.querySelector("#zagInfoLastCTA");
    if(prev) prev.style.display=zagInfoPage===0?"none":"block";
