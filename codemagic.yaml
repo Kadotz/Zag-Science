@@ -167,14 +167,30 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      - name: Build signed iPhone IPA
+      - name: Diagnose and build signed iPhone IPA
         script: |
+          set -o pipefail
+          mkdir -p build/diagnostics
+          echo "=== Xcode archive with full diagnostic output ==="
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$PWD/build/diagnostics/ZagScience.xcarchive" \
+            DEVELOPMENT_TEAM=9K24Y4XY22 \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY='Apple Distribution' \
+            2>&1 | tee build/diagnostics/xcodebuild-archive.log
+          echo "=== Archive succeeded; export IPA through Codemagic ==="
           xcode-project build-ipa \
             --project ios/App/App.xcodeproj \
-            --scheme App
+            --scheme App \
+            2>&1 | tee build/diagnostics/codemagic-export.log
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/diagnostics/*.log
 
     publishing:
       app_store_connect:
