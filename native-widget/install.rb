@@ -60,10 +60,29 @@ embed.dst_subfolder_spec = '13'
 build_file = embed.add_file_reference(widget.product_reference)
 build_file.settings = {'ATTRIBUTES'=>['RemoveHeadersOnCopy']}
 app.add_dependency(widget)
+# App Intents metadata extraction requires a complete extension Info.plist.
+# The previous NSExtension-only plist could compile but fail at
+# AppIntentsSSUTraining with "Unable to parse Info.plist".
 File.write(File.join(widget_dir,'Info.plist'), <<~PLIST)
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict><key>NSExtension</key><dict><key>NSExtensionPointIdentifier</key><string>com.apple.widgetkit-extension</string></dict></dict></plist>
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key><string>$(DEVELOPMENT_LANGUAGE)</string>
+  <key>CFBundleDisplayName</key><string>Zag Science Strength</string>
+  <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
+  <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleName</key><string>$(PRODUCT_NAME)</string>
+  <key>CFBundlePackageType</key><string>XPC!</string>
+  <key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
+  <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
+  <key>NSExtension</key>
+  <dict>
+    <key>NSExtensionPointIdentifier</key><string>com.apple.widgetkit-extension</string>
+  </dict>
+</dict>
+</plist>
 PLIST
 File.write(File.join(widget_dir,'ZagStrengthWidget.entitlements'), <<~PLIST)
 <?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>com.apple.security.application-groups</key><array><string>#{app_group}</string></array></dict></plist>
