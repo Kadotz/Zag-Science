@@ -94,7 +94,20 @@ storyboard = File.join(base,'App/Base.lproj/Main.storyboard')
 abort "Missing storyboard: #{storyboard}" unless File.exist?(storyboard)
 s = File.read(storyboard)
 abort 'Cannot locate CAPBridgeViewController storyboard class' unless s.include?('CAPBridgeViewController')
-s = s.gsub('customClass="CAPBridgeViewController"', 'customClass="ZagBridgeViewController" customModule="App" customModuleProvider="target"')
+# Update the view-controller element without introducing duplicate XML attributes.
+# Capacitor's storyboard already declares customModule/customModuleProvider.
+replaced = false
+s = s.gsub(/<viewController\b[^>]*\bcustomClass="CAPBridgeViewController"[^>]*>/) do |tag|
+  replaced = true
+  tag = tag.sub('customClass="CAPBridgeViewController"', 'customClass="ZagBridgeViewController"')
+  tag = tag.gsub(/\s+customModule="[^"]*"/, '')
+  tag = tag.gsub(/\s+customModuleProvider="[^"]*"/, '')
+  tag.sub(/\s*\/>\z|>\z/) do |ending|
+    %( customModule="App" customModuleProvider="target"#{ending})
+  end
+end
+abort 'Could not patch CAPBridgeViewController storyboard element' unless replaced
+REXML::Document.new(s) # Validate storyboard XML before saving it.
 File.write(storyboard,s)
 project.save
 puts 'Widget extension, shared entitlements, bridge and embed phase installed.'
