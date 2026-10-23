@@ -39,7 +39,11 @@ struct StrengthExercise: AppEntity, Identifiable {
     static var defaultQuery = StrengthExerciseQuery()
 }
 
-struct StrengthExerciseQuery: EntityQuery {
+struct StrengthExerciseQuery: EntityStringQuery {
+    func entities(matching string: String) async throws -> [StrengthExercise] {
+        let options = try await suggestedEntities()
+        return options.filter { string.isEmpty || $0.name.localizedCaseInsensitiveContains(string) }
+    }
     func entities(for identifiers: [String]) async throws -> [StrengthExercise] {
         let options = try await suggestedEntities()
         return options.filter { identifiers.contains($0.id) }

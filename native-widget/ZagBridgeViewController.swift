@@ -18,7 +18,15 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
         defaults?.set(data, forKey: "zag_widget_workouts")
         // This is only a TestFlight development toggle, NOT purchase validation.
         defaults?.set(payload["pro"] as? Bool ?? false, forKey: "zag_widget_is_pro")
-        let exercises = Set(records.flatMap { ($0["by"] as? [String: Double] ?? [:]).keys })
+        // WKWebView bridges JSON numbers as NSNumber. Read the dictionary as
+        // [String: Any] so the exercise list isn't silently emptied by a cast.
+        let exercises = Set(records.flatMap { record -> [String] in
+            guard let values = record["by"] as? [String: Any] else { return [] }
+            return values.compactMap { name, raw in
+                guard let number = raw as? NSNumber, number.doubleValue > 0 else { return nil }
+                return name
+            }
+        })
         defaults?.set(exercises.sorted(), forKey: "zag_widget_exercises")
         WidgetCenter.shared.reloadTimelines(ofKind: "ZagStrengthWidget")
     }
