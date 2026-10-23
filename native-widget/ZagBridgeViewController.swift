@@ -11,7 +11,9 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
         // it exists and request a fresh payload when the app becomes active.
         registerWidgetHandler()
         NotificationCenter.default.addObserver(self, selector: #selector(refreshWidgetData), name: UIApplication.didBecomeActiveNotification, object: nil)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.refreshWidgetData() }
+        for delay in [0.5, 1.5, 3.0, 6.0, 10.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in self?.refreshWidgetData() }
+        }
     }
 
     private var widgetHandlerRegistered = false
