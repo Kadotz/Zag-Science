@@ -1253,7 +1253,7 @@ ${streakRestSelector()}
 ${streakReminderTimeSetting()}
 <div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${zagNativeNotifications()?"Enable / Check":(("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable")}</button></div>
 <div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are scheduled for two weeks after your last saved weigh-in.</div>
-</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">Testing only — remove before public release.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
+</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">Testing only — remove before public release.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><small id="zag-widget-diagnostics" style="display:block;margin-top:6px;color:#dca6ff">Widget bridge: checking…</small><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
 processStreakCalendar();save();
@@ -4364,6 +4364,13 @@ function zagStrengthSVG(records,selected,period,interval){
   +'<text x="'+px+'" y="174" fill="#dda5ff" font-size="9">'+label(points[0].date)+'</text>'
   +'<text x="'+right+'" y="174" text-anchor="end" fill="#dda5ff" font-size="9">'+label(points[points.length-1].date)+'</text></svg>';
 }
+</script>
+<script id="zag-widget-debug-display">
+(function(){setInterval(function(){
+ const el=document.getElementById('zag-widget-diagnostics');if(!el)return;
+ const s=window.zagNativeWidgetStatus;
+ el.textContent=s?'Widget shared data: '+(s.pro?'PRO':'FREE')+' · '+s.exercises+' exercises · '+s.records+' workouts':'Widget bridge: no native confirmation yet';
+},1000)})();
 </script>
 <script id="zag-native-widget-sync">
 // Share exactly the workout-based strength series used by the History graph.

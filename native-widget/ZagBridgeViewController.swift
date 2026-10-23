@@ -17,10 +17,30 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
     }
 
     private var widgetHandlerRegistered = false
+    private var widgetPoller: Timer?
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        refreshWidgetData()
+        if widgetPoller == nil {
+            widgetPoller = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+                self?.refreshWidgetData()
+            }
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        widgetPoller?.invalidate()
+        widgetPoller = nil
+    }
+
 
     private func registerWidgetHandler() {
         guard !widgetHandlerRegistered, let webView = webView else { return }
-        webView.configuration.userContentController.add(self, name: "zagWidgetSync")
+        let controller = webView.configuration.userContentController
+        controller.removeScriptMessageHandler(forName: "zagWidgetSync")
+        controller.add(self, name: "zagWidgetSync")
         widgetHandlerRegistered = true
     }
 
@@ -66,6 +86,16 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
             }
         })
         defaults?.set(exercises.sorted(), forKey: "zag_widget_exercises")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ZagStrengthWidget")
+        defaults?.synchronize()
+        WidgetCenter.shared.reloadAllTimelines()
+        let status: [String: Any] = [
+            "pro": defaults?.bool(forKey: "zag_widget_is_pro") ?? false,
+            "exercises": exercises.count,
+            "records": records.count
+        ]
+        if let json = try? JSONSerialization.data(withJSONObject: status),
+           let string = String(data: json, encoding: .utf8) {
+            webView?.evaluateJavaScript("window.zagNativeWidgetStatus = \(string);", completionHandler: nil)
+        }
     }
 }
