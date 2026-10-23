@@ -7,6 +7,7 @@ import WidgetKit
 class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
     override func viewDidLoad() {
         super.viewDidLoad()
+        NSLog("[ZagWidget] ZagBridgeViewController did load")
         // Capacitor may create the WKWebView after viewDidLoad. Register once
         // it exists and request a fresh payload when the app becomes active.
         registerWidgetHandler()
@@ -39,7 +40,11 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
 
     private func registerWidgetHandler() {
         guard let webView = webView else { return }
-        if widgetHandlerRegistered && registeredWebView === webView { return }
+        if widgetHandlerRegistered && registeredWebView === webView {
+            // Web content can reload without replacing WKWebView.
+            webView.evaluateJavaScript("window.zagNativeBridgeLoaded = true;", completionHandler: nil)
+            return
+        }
         let controller = webView.configuration.userContentController
         controller.removeScriptMessageHandler(forName: "zagWidgetSync")
         controller.add(self, name: "zagWidgetSync")
@@ -101,7 +106,7 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
         defaults.synchronize()
         WidgetCenter.shared.reloadAllTimelines()
         let status: [String: Any] = [
-            "pro": defaults.bool(forKey: "zag_widget_is_pro") ?? false,
+            "pro": defaults.bool(forKey: "zag_widget_is_pro"),
             "exercises": exercises.count,
             "records": records.count
         ]

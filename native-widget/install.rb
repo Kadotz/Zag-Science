@@ -14,6 +14,8 @@ FileUtils.cp('native-widget/ZagBridgeViewController.swift', File.join(base,'App/
 app_group_ref = project.main_group.find_subpath('App', true)
 bridge_ref = app_group_ref.new_file('ZagBridgeViewController.swift')
 app.source_build_phase.add_file_reference(bridge_ref)
+# Verify the Swift file is a compiled source of the app, not just a project reference.
+abort 'Bridge Swift file missing from App Compile Sources' unless app.source_build_phase.files_references.include?(bridge_ref)
 widget_group = project.main_group.find_subpath('ZagStrengthWidget', true)
 widget_file = widget_group.new_file('ZagStrengthWidget/ZagStrengthWidget.swift')
 widget = project.new_target(:app_extension, 'ZagStrengthWidget', :ios, '17.0')
@@ -110,4 +112,9 @@ abort 'Could not patch CAPBridgeViewController storyboard element' unless replac
 REXML::Document.new(s) # Validate storyboard XML before saving it.
 File.write(storyboard,s)
 project.save
+# Fail the CI build if the generated storyboard or Xcode project does not
+# actually reference the native view controller.
+abort 'Bridge storyboard class missing after patch' unless File.read(storyboard).include?('customClass="ZagBridgeViewController"')
+abort 'Bridge implementation missing after copy' unless File.read(File.join(base,'App/ZagBridgeViewController.swift')).include?('class ZagBridgeViewController: CAPBridgeViewController')
+puts '[ZagWidget] Verified custom bridge storyboard class and compiled Swift source.'
 puts 'Widget extension, shared entitlements, bridge and embed phase installed.'
