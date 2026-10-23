@@ -7,7 +7,24 @@ import WidgetKit
 class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
     override func viewDidLoad() {
         super.viewDidLoad()
-        webView?.configuration.userContentController.add(self, name: "zagWidgetSync")
+        // Capacitor may create the WKWebView after viewDidLoad. Register once
+        // it exists and request a fresh payload when the app becomes active.
+        registerWidgetHandler()
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshWidgetData), name: UIApplication.didBecomeActiveNotification, object: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.refreshWidgetData() }
+    }
+
+    private var widgetHandlerRegistered = false
+
+    private func registerWidgetHandler() {
+        guard !widgetHandlerRegistered, let webView = webView else { return }
+        webView.configuration.userContentController.add(self, name: "zagWidgetSync")
+        widgetHandlerRegistered = true
+    }
+
+    @objc private func refreshWidgetData() {
+        registerWidgetHandler()
+        webView?.evaluateJavaScript("window.zagWidgetSync && window.zagWidgetSync();", completionHandler: nil)
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
