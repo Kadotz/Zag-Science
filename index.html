@@ -4369,7 +4369,7 @@ function zagStrengthSVG(records,selected,period,interval){
 (function(){setInterval(function(){
  const el=document.getElementById('zag-widget-diagnostics');if(!el)return;
  const s=window.zagNativeWidgetStatus;
- el.textContent=s?'Widget shared data: '+(s.pro?'PRO':'FREE')+' · '+s.exercises+' exercises · '+s.records+' workouts':'Widget bridge: no native confirmation yet';
+ el.textContent=s?'Widget shared data: '+(s.pro?'PRO':'FREE')+' · '+s.exercises+' exercises · '+s.records+' workouts':(window.zagNativeWidgetError ? 'Widget error: '+window.zagNativeWidgetError : (window.zagNativeBridgeLoaded ? 'Widget bridge loaded · waiting for shared data' : 'Widget bridge not loaded'));
 },1000)})();
 </script>
 <script id="zag-native-widget-sync">
@@ -4382,7 +4382,7 @@ function zagStrengthSVG(records,selected,period,interval){
   try{
    if(!window.webkit?.messageHandlers?.zagWidgetSync)return;
    const records=(typeof zagStrengthRecords==='function' ? zagStrengthRecords() : []).map((r,i)=>({date:r.date,by:r.by,order:i}));
-   window.webkit.messageHandlers.zagWidgetSync.postMessage({records,pro:window.zagProEntitled===true});
+   window.webkit.messageHandlers.zagWidgetSync.postMessage({records,pro:(window.zagProEntitled===true || localStorage.getItem('zag_dev_pro_test_only')==='1')});
   }catch(e){console.warn('Widget sync:',e)}
  };
  window.addEventListener('load',()=>{setTimeout(window.zagWidgetSync,1200);setTimeout(window.zagWidgetSync,4000)});

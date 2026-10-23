@@ -17,6 +17,7 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
     }
 
     private var widgetHandlerRegistered = false
+    private weak var registeredWebView: WKWebView?
     private var widgetPoller: Timer?
 
     override func viewDidAppear(_ animated: Bool) {
@@ -37,11 +38,15 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
 
 
     private func registerWidgetHandler() {
-        guard !widgetHandlerRegistered, let webView = webView else { return }
+        guard let webView = webView else { return }
+        if widgetHandlerRegistered && registeredWebView === webView { return }
         let controller = webView.configuration.userContentController
         controller.removeScriptMessageHandler(forName: "zagWidgetSync")
         controller.add(self, name: "zagWidgetSync")
         widgetHandlerRegistered = true
+        registeredWebView = webView
+        NSLog("[ZagWidget] Native bridge registered")
+        webView.evaluateJavaScript("window.zagNativeBridgeLoaded = true;", completionHandler: nil)
     }
 
     @objc private func refreshWidgetData() {
@@ -61,7 +66,8 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
                   let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
             self?.saveWidgetPayload(payload)
         }
-        webView?.evaluateJavaScript("window.zagWidgetSync && window.zagWidgetSync();", completionHandler: nil)
+        // Even when the payload fails, report that the native bridge exists.
+        webView?.evaluateJavaScript("window.zagNativeBridgeLoaded = true; window.zagWidgetSync && window.zagWidgetSync();", completionHandler: nil)
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -72,24 +78,30 @@ class ZagBridgeViewController: CAPBridgeViewController, WKScriptMessageHandler {
     private func saveWidgetPayload(_ payload: [String: Any]) {
         guard let records = payload["records"] as? [[String: Any]],
               let data = try? JSONSerialization.data(withJSONObject: records) else { return }
-        let defaults = UserDefaults(suiteName: "group.com.zagscience.app")
-        defaults?.set(data, forKey: "zag_widget_workouts")
+        guard let defaults = UserDefaults(suiteName: "group.com.zagscience.app") else {
+            webView?.evaluateJavaScript("window.zagNativeWidgetError = 'App Group unavailable';", completionHandler: nil)
+            return
+        }
+        defaults.set(data, forKey: "zag_widget_workouts")
         // This is only a TestFlight development toggle, NOT purchase validation.
-        defaults?.set(payload["pro"] as? Bool ?? false, forKey: "zag_widget_is_pro")
+        let pro = payload["pro"] as? Bool ?? false
+        defaults.set(pro, forKey: "zag_widget_is_pro")
         // WKWebView bridges JSON numbers as NSNumber. Read the dictionary as
         // [String: Any] so the exercise list isn't silently emptied by a cast.
         let exercises = Set(records.flatMap { record -> [String] in
             guard let values = record["by"] as? [String: Any] else { return [] }
             return values.compactMap { name, raw in
-                guard let number = raw as? NSNumber, number.doubleValue > 0 else { return nil }
-                return name
+                if let number = raw as? NSNumber, number.doubleValue > 0 { return name }
+                if let text = raw as? String, let number = Double(text), number > 0 { return name }
+                return nil
             }
         })
-        defaults?.set(exercises.sorted(), forKey: "zag_widget_exercises")
-        defaults?.synchronize()
+        defaults.set(exercises.sorted(), forKey: "zag_widget_exercises")
+        NSLog("[ZagWidget] Shared sync: pro=%@ exercises=%ld workouts=%ld", pro ? "YES" : "NO", exercises.count, records.count)
+        defaults.synchronize()
         WidgetCenter.shared.reloadAllTimelines()
         let status: [String: Any] = [
-            "pro": defaults?.bool(forKey: "zag_widget_is_pro") ?? false,
+            "pro": defaults.bool(forKey: "zag_widget_is_pro") ?? false,
             "exercises": exercises.count,
             "records": records.count
         ]
