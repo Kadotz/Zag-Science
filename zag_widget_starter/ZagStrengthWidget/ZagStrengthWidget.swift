@@ -254,7 +254,7 @@ struct ZagStreakArt: View {
                 .scaledToFit()
                 .frame(width: size, height: size)
                 .shadow(color: state == "active" ? zagPurple.opacity(0.65) : .clear, radius: 11)
-            Text("\\(count)")
+            Text("\(count)")
                 .font(.system(size: size * 0.31, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .shadow(color: .black, radius: 4)
@@ -262,7 +262,7 @@ struct ZagStreakArt: View {
                 .offset(y: -size * 0.035)
         }
         .frame(width: size, height: size)
-        .accessibilityLabel("\\(count) day streak, \\(state)")
+        .accessibilityLabel("\(count) day streak, \(state)")
     }
 }
 
@@ -310,7 +310,7 @@ struct ZagStrengthGraph: View {
 }
 
 struct StrengthWidgetView: View {
-    @Environment(\\.widgetFamily) private var family
+    @Environment(\.widgetFamily) private var family
     var entry: StrengthEntry
 
     var body: some View {
