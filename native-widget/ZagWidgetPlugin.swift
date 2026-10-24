@@ -23,6 +23,9 @@ public class ZagWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve([
             "bridge": "capacitor-plugin",
             "pro": store.bool(forKey: "zag_widget_is_pro"),
+            "widgetAccessFilePro": (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suite)
+                .flatMap { try? Data(contentsOf: $0.appendingPathComponent("zag-widget-access.json")) }
+                .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] })?["pro"] as? Bool ?? false,
             "exercises": store.stringArray(forKey: "zag_widget_exercises")?.count ?? 0,
             "records": storedRows?.count ?? 0,
             "widgetDiagnostic": store.string(forKey: "zag_widget_diagnostic") ?? "Widget has not reported yet"
@@ -58,6 +61,16 @@ public class ZagWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
         store.set(data, forKey: "zag_widget_workouts")
         let wasPro = store.bool(forKey: "zag_widget_is_pro")
         store.set(pro, forKey: "zag_widget_is_pro")
+        // Commit entitlement to shared disk before notifying WidgetKit.
+        if let folder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suite) {
+            let accessFile = folder.appendingPathComponent("zag-widget-access.json")
+            let accessPayload: [String: Any] = ["pro": pro, "updatedAt": Date().timeIntervalSince1970]
+            if let accessData = try? JSONSerialization.data(withJSONObject: accessPayload) {
+                do { try accessData.write(to: accessFile, options: .atomic) }
+                catch { NSLog("[ZagWidgetPlugin] access snapshot write failed: %@", String(describing: error)) }
+            }
+        }
+
         if !pro {
             store.set("FREE: widget locked by Zag Pro entitlement", forKey: "zag_widget_diagnostic")
         } else if !wasPro {
