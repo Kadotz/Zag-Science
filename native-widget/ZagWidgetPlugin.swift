@@ -54,9 +54,14 @@ public class ZagWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
             }
         }
         let exercises = names.sorted()
-        store.set(data, forKey: "zag_widget_workouts")
+        // Do not erase a populated widget history during an early app-load sync.
+        // The web app can briefly report zero rows before its state is hydrated.
+        let previous = store.data(forKey: "zag_widget_workouts")
+        let previousRows = previous.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [Any] }
+        let keepPrevious = rows.isEmpty && (previousRows?.isEmpty == false)
+        if !keepPrevious { store.set(data, forKey: "zag_widget_workouts") }
         store.set(pro, forKey: "zag_widget_is_pro")
-        store.set(exercises, forKey: "zag_widget_exercises")
+        if !keepPrevious { store.set(exercises, forKey: "zag_widget_exercises") }
         store.synchronize()
         WidgetCenter.shared.reloadAllTimelines()
         NSLog("[ZagWidgetPlugin] sync pro=%@ exercises=%ld workouts=%ld", pro ? "YES" : "NO", exercises.count, rows.count)

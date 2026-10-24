@@ -62,8 +62,8 @@ struct StrengthWidgetConfiguration: WidgetConfigurationIntent {
     static var description = IntentDescription("Choose which strength data this widget displays.")
 
     @Parameter(title: "Exercise") var exercise: StrengthExercise?
-    @Parameter(title: "Time period", default: .month3) var period: StrengthPeriod
-    @Parameter(title: "Graph interval", default: .weekly) var interval: StrengthInterval
+    @Parameter(title: "Time period", default: .all) var period: StrengthPeriod
+    @Parameter(title: "Graph interval", default: .workout) var interval: StrengthInterval
 }
 
 // Shared payload contract (written by native Capacitor bridge):
@@ -207,7 +207,10 @@ struct StrengthProvider: AppIntentTimelineProvider {
             }
             plotted = buckets.map { ($0.key, $0.value) }.sorted { $0.0 < $1.0 }
         }
-        let points = plotted.map { $0.1 }
+        var points = plotted.map { $0.1 }
+        // A single workout is still real history. Draw a flat line instead of
+        // showing the misleading "Complete workouts" empty-state message.
+        if points.count == 1 { points.append(points[0]) }
         let change = points.count >= 2 && points[0] > 0 ? (points[points.count - 1] / points[0] - 1) * 100 : nil
         return StrengthEntry(date: now, isPro: true, points: points, change: change,
                              exerciseLabel: label, periodLabel: configuration.period.label)
@@ -232,7 +235,7 @@ struct StrengthWidgetView: View {
             } else if entry.points.count < 2 {
                 Spacer()
                 Text(entry.exerciseLabel).font(.headline).lineLimit(1)
-                Text("Complete workouts to build your graph").font(.caption).foregroundStyle(.white.opacity(0.7))
+                Text("No strength readings in this range — try All time / Every workout").font(.caption).foregroundStyle(.white.opacity(0.7))
                 Spacer()
             } else {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
