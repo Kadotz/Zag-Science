@@ -149,7 +149,13 @@ struct StrengthProvider: AppIntentTimelineProvider {
         let iso = ISO8601DateFormatter()
         let isoFractional = ISO8601DateFormatter()
         isoFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let otherFormats = ["yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "dd/MM/yyyy HH:mm", "dd/MM/yyyy, HH:mm", "MM/dd/yyyy"]
+        let otherFormats = [
+            "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss",
+            "d/M/yyyy, HH:mm:ss", "d/M/yyyy, H:mm:ss",
+            "d/M/yyyy HH:mm:ss", "d/M/yyyy, HH:mm",
+            "d/M/yyyy", "M/d/yyyy, h:mm:ss a",
+            "M/d/yyyy, h:mm a", "M/d/yyyy"
+        ]
         func parseDate(_ raw: String) -> Date? {
             let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
             if let date = formatter.date(from: value) ?? iso.date(from: value) ?? isoFractional.date(from: value) {

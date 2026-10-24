@@ -4388,7 +4388,13 @@ function zagStrengthSVG(records,selected,period,interval){
    inFlight=true;
    try{
      const records=(typeof zagStrengthRecords==='function'?zagStrengthRecords():[])
-       .map((r,i)=>({date:r.date,by:r.by,order:i}));
+       .map((r,i)=>{
+         // Workout history uses new Date().toLocaleString(), which can include
+         // a clock time. Send an unambiguous ISO date to the Swift widget.
+         const parsed=(typeof zagStrengthDate==='function')?zagStrengthDate(r.date):new Date(r.date);
+         return {date:parsed instanceof Date && Number.isFinite(parsed.getTime())
+                   ? parsed.toISOString() : String(r.date||''),by:r.by,order:i};
+       });
      const pro=window.zagProEntitled===true || localStorage.getItem('zag_dev_pro_test_only')==='1';
      const result=await native.sync({records,pro});
      window.zagNativeBridgeLoaded=true;
