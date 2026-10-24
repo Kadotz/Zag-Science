@@ -113,7 +113,26 @@ struct StrengthProvider: AppIntentTimelineProvider {
         let empty = StrengthEntry(date: .now, isPro: isPro, points: [], change: nil,
                                   exerciseLabel: label, periodLabel: configuration.period.label)
         guard isPro, let json = defaults?.data(forKey: "zag_widget_workouts"),
-              let records = try? JSONDecoder().decode([WorkoutRecord].self, from: json) else { return empty }
+              let objects = (try? JSONSerialization.jsonObject(with: json)) as? [[String: Any]] else { return empty }
+        // Decode each row independently. One malformed date or legacy record must
+        // never make the entire widget history disappear.
+        let records: [WorkoutRecord] = objects.enumerated().compactMap { index, object in
+            let date: String
+            if let text = object["date"] as? String { date = text }
+            else if let number = object["date"] as? NSNumber { date = number.stringValue }
+            else { return nil }
+            guard let raw = object["by"] as? [String: Any] else { return nil }
+            var by: [String: Double] = [:]
+            for (name, value) in raw {
+                let number: Double?
+                if let n = value as? NSNumber { number = n.doubleValue }
+                else if let text = value as? String { number = Double(text) }
+                else { number = nil }
+                if let n = number, n.isFinite && n > 0 { by[name] = n }
+            }
+            guard !by.isEmpty else { return nil }
+            return WorkoutRecord(date: date, by: by, order: (object["order"] as? NSNumber)?.intValue ?? index)
+        }
         let calendar = Calendar.current
         let now = Date()
         let start: Date?
@@ -128,8 +147,28 @@ struct StrengthProvider: AppIntentTimelineProvider {
         formatter.dateFormat = "dd/MM/yyyy"
         formatter.locale = Locale(identifier: "en_GB")
         let iso = ISO8601DateFormatter()
+        let isoFractional = ISO8601DateFormatter()
+        isoFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let otherFormats = ["yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "dd/MM/yyyy HH:mm", "dd/MM/yyyy, HH:mm", "MM/dd/yyyy"]
+        func parseDate(_ raw: String) -> Date? {
+            let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let date = formatter.date(from: value) ?? iso.date(from: value) ?? isoFractional.date(from: value) {
+                return date
+            }
+            for pattern in otherFormats {
+                let parser = DateFormatter()
+                parser.locale = Locale(identifier: "en_GB")
+                parser.dateFormat = pattern
+                parser.isLenient = true
+                if let date = parser.date(from: value) { return date }
+            }
+            if let numeric = Double(value), numeric > 100_000_000 {
+                return Date(timeIntervalSince1970: numeric > 10_000_000_000 ? numeric / 1000 : numeric)
+            }
+            return nil
+        }
         let dated = records.compactMap { record -> (Date, WorkoutRecord)? in
-            guard let date = formatter.date(from: record.date) ?? iso.date(from: record.date), date <= now else { return nil }
+            guard let date = parseDate(record.date), date <= now.addingTimeInterval(86400) else { return nil }
             return (date, record)
         }.sorted { $0.0 < $1.0 || ($0.0 == $1.0 && $0.1.order < $1.1.order) }
         var baseline: [String: Double] = [:]
