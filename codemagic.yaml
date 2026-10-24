@@ -26,7 +26,8 @@ workflows:
           set -e
           cat > zag-native-entry.js <<'EOF'
           import { LocalNotifications } from '@capacitor/local-notifications';
-          import { PushNotifications } from '@capacitor/push-notifications';\n          import { registerPlugin } from '@capacitor/core';
+          import { PushNotifications } from '@capacitor/push-notifications';
+          import { registerPlugin } from '@capacitor/core';
           window.ZagNativePlugins = { LocalNotifications, PushNotifications, ZagWidget: registerPlugin('ZagWidget') };
           EOF
           npx esbuild zag-native-entry.js --bundle --platform=browser --format=iife --target=es2020 --outfile=www/zag-native-bridge.js
@@ -98,7 +99,8 @@ workflows:
           set -e
           cat > zag-native-entry.js <<'EOF'
           import { LocalNotifications } from '@capacitor/local-notifications';
-          import { PushNotifications } from '@capacitor/push-notifications';\n          import { registerPlugin } from '@capacitor/core';
+          import { PushNotifications } from '@capacitor/push-notifications';
+          import { registerPlugin } from '@capacitor/core';
           window.ZagNativePlugins = { LocalNotifications, PushNotifications, ZagWidget: registerPlugin('ZagWidget') };
           EOF
           npx esbuild zag-native-entry.js --bundle --platform=browser --format=iife --target=es2020 --outfile=www/zag-native-bridge.js
