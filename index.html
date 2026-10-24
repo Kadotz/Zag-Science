@@ -4613,3 +4613,27 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOver
 .zagHomeCards .zagTipsSkateIcon{width:100px!important;height:66px!important;max-width:100%!important;object-fit:contain!important;object-position:center!important}
 .zagTipsPanel img.zagTipTrimEdge{width:110%!important;height:110%!important;left:-5%!important;top:-5%!important;object-fit:fill!important}
 </style>
+
+<style id="zag-final-two-tips-balanced-zoom-v2">
+/* 104% is between the full-frame 100% and the clipped 110% zoom.
+   Apply only to the last two tip images; preserve all earlier slides. */
+.zagTipsPanel #zagTipImage.zagLastTwoBalanced {
+  position:absolute!important;
+  width:104%!important; height:104%!important;
+  max-width:none!important; max-height:none!important;
+  left:-2%!important; top:-2%!important;
+  object-fit:fill!important; object-position:center!important;
+  transform:none!important; clip-path:none!important; margin:0!important;
+}
+</style>
+<script id="zag-final-two-tips-balanced-zoom-toggle">
+(function(){
+  const old=window.zagRenderTip;
+  if(typeof old!=='function')return;
+  window.zagRenderTip=function(){
+    old.apply(this,arguments);
+    const image=document.getElementById('zagTipImage');
+    if(image)image.classList.toggle('zagLastTwoBalanced', zagTipIndex >= zagTipImages.length-2);
+  };
+})();
+</script>
