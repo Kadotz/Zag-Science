@@ -10,12 +10,10 @@ base = 'ios/App'
 widget_dir = File.join(base, 'ZagStrengthWidget')
 FileUtils.mkdir_p(widget_dir)
 FileUtils.cp('zag_widget_starter/ZagStrengthWidget/ZagStrengthWidget.swift', widget_dir)
-FileUtils.cp('native-widget/ZagBridgeViewController.swift', File.join(base,'App/ZagBridgeViewController.swift'))
+FileUtils.cp('native-widget/ZagWidgetPlugin.swift', File.join(base,'App/ZagWidgetPlugin.swift'))
 app_group_ref = project.main_group.find_subpath('App', true)
-bridge_ref = app_group_ref.new_file('ZagBridgeViewController.swift')
+bridge_ref = app_group_ref.new_file('ZagWidgetPlugin.swift')
 app.source_build_phase.add_file_reference(bridge_ref)
-# Verify the Swift file is a compiled source of the app, not just a project reference.
-abort 'Bridge Swift file missing from App Compile Sources' unless app.source_build_phase.files_references.include?(bridge_ref)
 widget_group = project.main_group.find_subpath('ZagStrengthWidget', true)
 widget_file = widget_group.new_file('ZagStrengthWidget/ZagStrengthWidget.swift')
 widget = project.new_target(:app_extension, 'ZagStrengthWidget', :ios, '17.0')
@@ -92,29 +90,17 @@ PLIST
 File.write(File.join(base,'App/App.entitlements'), <<~PLIST)
 <?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>aps-environment</key><string>production</string><key>com.apple.security.application-groups</key><array><string>#{app_group}</string></array></dict></plist>
 PLIST
-storyboard = File.join(base,'App/Base.lproj/Main.storyboard')
-abort "Missing storyboard: #{storyboard}" unless File.exist?(storyboard)
-s = File.read(storyboard)
-abort 'Cannot locate CAPBridgeViewController storyboard class' unless s.include?('CAPBridgeViewController')
-# Update the view-controller element without introducing duplicate XML attributes.
-# Capacitor's storyboard already declares customModule/customModuleProvider.
-replaced = false
-s = s.gsub(/<viewController\b[^>]*\bcustomClass="CAPBridgeViewController"[^>]*>/) do |tag|
-  replaced = true
-  tag = tag.sub('customClass="CAPBridgeViewController"', 'customClass="ZagBridgeViewController"')
-  tag = tag.gsub(/\s+customModule="[^"]*"/, '')
-  tag = tag.gsub(/\s+customModuleProvider="[^"]*"/, '')
-  tag.sub(/\s*\/>\z|>\z/) do |ending|
-    %( customModule="App" customModuleProvider="target"#{ending})
-  end
-end
-abort 'Could not patch CAPBridgeViewController storyboard element' unless replaced
-REXML::Document.new(s) # Validate storyboard XML before saving it.
-File.write(storyboard,s)
+# Capacitor 8 automatically registers plugin classes named in packageClassList.
+# This avoids overriding the stock CAPBridgeViewController.
+config_path = File.join(base, 'App/capacitor.config.json')
+abort "Missing Capacitor configuration: #{config_path}" unless File.exist?(config_path)
+require 'json'
+config = JSON.parse(File.read(config_path))
+config['packageClassList'] ||= []
+config['packageClassList'] |= ['ZagWidgetPlugin']
+File.write(config_path, JSON.pretty_generate(config) + "\n")
 project.save
-# Fail the CI build if the generated storyboard or Xcode project does not
-# actually reference the native view controller.
-abort 'Bridge storyboard class missing after patch' unless File.read(storyboard).include?('customClass="ZagBridgeViewController"')
-abort 'Bridge implementation missing after copy' unless File.read(File.join(base,'App/ZagBridgeViewController.swift')).include?('class ZagBridgeViewController: CAPBridgeViewController')
-puts '[ZagWidget] Verified custom bridge storyboard class and compiled Swift source.'
-puts 'Widget extension, shared entitlements, bridge and embed phase installed.'
+abort 'Widget plugin source not compiled' unless app.source_build_phase.files_references.include?(bridge_ref)
+abort 'Widget plugin not registered' unless JSON.parse(File.read(config_path)).fetch('packageClassList').include?('ZagWidgetPlugin')
+puts '[ZagWidget] Verified Capacitor plugin compile source and packageClassList registration.'
+puts 'Widget extension, shared entitlements and plugin installed without storyboard replacement.'
