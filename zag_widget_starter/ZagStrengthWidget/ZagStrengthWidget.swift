@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import UIKit
 
 private let sharedSuite = "group.com.zagscience.app"
 
@@ -243,13 +244,24 @@ struct StrengthProvider: AppIntentTimelineProvider {
 private let zagPurple = Color(red: 0.89, green: 0.24, blue: 1)
 private let zagDark = Color(red: 0.035, green: 0.02, blue: 0.075)
 
+// PNGs are copied into the widget extension as bundle resources, not into
+// Assets.xcassets. SwiftUI Image("name") cannot reliably locate loose PNGs.
+private func zagBundledImage(_ name: String) -> Image {
+    if let path = Bundle.main.path(forResource: name, ofType: "png"),
+       let bitmap = UIImage(contentsOfFile: path) {
+        return Image(uiImage: bitmap)
+    }
+    // Visible fallback rather than a silent, empty space.
+    return Image(systemName: "photo")
+}
+
 struct ZagStreakArt: View {
     let count: Int
     let state: String
     let size: CGFloat
     var body: some View {
         ZStack(alignment: .bottom) {
-            Image(state == "active" ? "ZagStreakActive" : (state == "lost" ? "ZagStreakLost" : "ZagStreakRest"))
+            zagBundledImage(state == "active" ? "ZagStreakActive" : (state == "lost" ? "ZagStreakLost" : "ZagStreakRest"))
                 .resizable()
                 .scaledToFit()
                 .frame(width: size, height: size)
@@ -339,7 +351,7 @@ struct StrengthWidgetView: View {
                             .padding(.top, 30)
                         }
                         Spacer(minLength: 5)
-                        Image("ZagScienceLogo")
+                        zagBundledImage("ZagScienceLogo")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 100, height: 100)
