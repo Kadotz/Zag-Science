@@ -4401,7 +4401,12 @@ function zagStrengthSVG(records,selected,period,interval){
                    ? parsed.toISOString() : String(r.date||''),by:r.by,order:i};
        });
      const pro=window.zagProEntitled===true || localStorage.getItem('zag_dev_pro_test_only')==='1';
-     const result=await native.sync({records,pro});
+     const streak=typeof st!=='undefined' && st && st.streak ? st.streak : {};
+     const day=new Date();
+     const today=day.getFullYear()+'-'+String(day.getMonth()+1).padStart(2,'0')+'-'+String(day.getDate()).padStart(2,'0');
+     const streakCount=Math.max(0,Math.floor(Number(streak.count)||0));
+     const streakState=streak.justLost?'lost':(streak.lastWorkout===today?'active':'rest');
+     const result=await native.sync({records,pro,streakCount,streakState});
      window.zagNativeBridgeLoaded=true;
      window.zagNativeWidgetStatus=result;
      window.zagNativeWidgetError=null;

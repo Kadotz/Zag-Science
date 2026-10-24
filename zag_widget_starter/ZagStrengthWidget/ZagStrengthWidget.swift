@@ -91,12 +91,15 @@ struct StrengthEntry: TimelineEntry {
     let change: Double?
     let exerciseLabel: String
     let periodLabel: String
+    let streakCount: Int
+    let streakState: String
 }
 
 struct StrengthProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> StrengthEntry {
         StrengthEntry(date: .now, isPro: true, points: [45,48,47,54,60,62,68], change: 12.8,
-                      exerciseLabel: "Overall strength", periodLabel: "Last 3 months")
+                      exerciseLabel: "Overall strength", periodLabel: "Last 3 months",
+                      streakCount: 7, streakState: "active")
     }
     func snapshot(for configuration: StrengthWidgetConfiguration, in context: Context) async -> StrengthEntry {
         load(configuration)
@@ -108,10 +111,13 @@ struct StrengthProvider: AppIntentTimelineProvider {
     private func load(_ configuration: StrengthWidgetConfiguration) -> StrengthEntry {
         let defaults = UserDefaults(suiteName: sharedSuite)
         let isPro = defaults?.bool(forKey: "zag_widget_is_pro") ?? false
+        let streakCount = max(0, defaults?.integer(forKey: "zag_widget_streak_count") ?? 0)
+        let streakState = defaults?.string(forKey: "zag_widget_streak_state") ?? "rest"
         let selected = configuration.exercise?.id ?? "all"
         let label = configuration.exercise?.name ?? "Overall strength"
         let empty = StrengthEntry(date: .now, isPro: isPro, points: [], change: nil,
-                                  exerciseLabel: label, periodLabel: configuration.period.label)
+                                  exerciseLabel: label, periodLabel: configuration.period.label,
+                                  streakCount: streakCount, streakState: streakState)
         guard isPro, let json = defaults?.data(forKey: "zag_widget_workouts"),
               let objects = (try? JSONSerialization.jsonObject(with: json)) as? [[String: Any]] else {
             defaults?.set("Cannot decode shared workout JSON or Pro not enabled", forKey: "zag_widget_diagnostic")
@@ -229,34 +235,56 @@ struct StrengthProvider: AppIntentTimelineProvider {
         defaults?.set("Stored: \(sourceCount) | valid values: \(validValueCount) | readable dates: \(readableDates) | selected: \(selected) | raw: \(raw.count) | graph points: \(points.count)", forKey: "zag_widget_diagnostic")
         let change = points.count >= 2 && points[0] > 0 ? (points[points.count - 1] / points[0] - 1) * 100 : nil
         return StrengthEntry(date: now, isPro: true, points: points, change: change,
-                             exerciseLabel: label, periodLabel: configuration.period.label)
+                             exerciseLabel: label, periodLabel: configuration.period.label,
+                             streakCount: streakCount, streakState: streakState)
     }
 }
 
-struct StrengthWidgetView: View {
-    var entry: StrengthEntry
+private let zagPurple = Color(red: 0.89, green: 0.24, blue: 1)
+private let zagDark = Color(red: 0.035, green: 0.02, blue: 0.075)
+
+struct ZagStreakArt: View {
+    let count: Int
+    let state: String
+    let size: CGFloat
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            HStack {
-                Text("ZAG SCIENCE").font(.system(size: 12, weight: .black))
-                    .foregroundStyle(Color(red: 0.93, green: 0.44, blue: 1))
-                Spacer()
-                Text("ZAG PRO").font(.system(size: 9, weight: .bold)).foregroundStyle(.white.opacity(0.65))
-            }
-            if !entry.isPro {
-                Spacer()
-                Text("🔒 Strength Progress").font(.system(size: 18, weight: .bold))
+        ZStack(alignment: .bottom) {
+            Image(state == "active" ? "ZagStreakActive" : (state == "lost" ? "ZagStreakLost" : "ZagStreakRest"))
+                .resizable()
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .shadow(color: state == "active" ? zagPurple.opacity(0.65) : .clear, radius: 11)
+            Text("\\(count)")
+                .font(.system(size: size * 0.31, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .shadow(color: .black, radius: 4)
+                .shadow(color: zagPurple, radius: 5)
+                .offset(y: -size * 0.035)
+        }
+        .frame(width: size, height: size)
+        .accessibilityLabel("\\(count) day streak, \\(state)")
+    }
+}
+
+struct ZagStrengthGraph: View {
+    let entry: StrengthEntry
+    var body: some View {
+        if !entry.isPro {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("🔒 Strength Progress").font(.headline)
                 Text("Unlock with Zag Pro").font(.caption).foregroundStyle(.white.opacity(0.7))
-                Spacer()
-            } else if entry.points.count < 2 {
-                Spacer()
+            }
+        } else if entry.points.count < 2 {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(entry.exerciseLabel).font(.headline).lineLimit(1)
-                Text("No strength readings in this range — try All time / Every workout").font(.caption).foregroundStyle(.white.opacity(0.7))
-                Spacer()
-            } else {
+                Text("No readings in selected range").font(.caption).foregroundStyle(.white.opacity(0.7))
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     if let change = entry.change {
-                        Text(String(format: "%+.1f%%", change)).font(.system(size: 26, weight: .heavy))
+                        Text(String(format: "%+.1f%%", change))
+                            .font(.system(size: 25, weight: .heavy))
                     }
                     Text(entry.periodLabel).font(.caption2).foregroundStyle(.white.opacity(0.7))
                 }
@@ -273,14 +301,82 @@ struct StrengthWidgetView: View {
                             if index == 0 { path.move(to: CGPoint(x: x, y: y)) }
                             else { path.addLine(to: CGPoint(x: x, y: y)) }
                         }
-                    }.stroke(Color(red: 0.89, green: 0.24, blue: 1),
-                             style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                    }
+                    .stroke(zagPurple, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
                 }
             }
         }
+    }
+}
+
+struct StrengthWidgetView: View {
+    @Environment(\\.widgetFamily) private var family
+    var entry: StrengthEntry
+
+    var body: some View {
+        Group {
+            switch family {
+            case .systemSmall:
+                VStack(spacing: 0) {
+                    ZagStreakArt(count: entry.streakCount, state: entry.streakState, size: 112)
+                    Text("DAY STREAK")
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundStyle(zagPurple)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(8)
+            case .systemLarge:
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .top) {
+                        HStack(spacing: 5) {
+                            ZagStreakArt(count: entry.streakCount, state: entry.streakState, size: 110)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("DAY").font(.system(size: 12, weight: .black))
+                                Text("STREAK").font(.system(size: 12, weight: .black))
+                                    .foregroundStyle(zagPurple)
+                            }
+                            .padding(.top, 30)
+                        }
+                        Spacer(minLength: 5)
+                        Image("ZagScienceLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                    }
+                    Rectangle().fill(zagPurple.opacity(0.35)).frame(height: 1)
+                    HStack {
+                        Text("STRENGTH PROGRESS")
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(zagPurple)
+                        Spacer()
+                        Text("ZAG PRO")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.65))
+                    }
+                    ZagStrengthGraph(entry: entry)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    Text("EDIT WIDGET TO CHANGE GRAPH")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.55))
+                }
+                .padding(17)
+            default:
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack {
+                        Text("ZAG SCIENCE").font(.system(size: 12, weight: .black))
+                            .foregroundStyle(zagPurple)
+                        Spacer()
+                        Text("ZAG PRO").font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.65))
+                    }
+                    ZagStrengthGraph(entry: entry)
+                }
+                .padding(14)
+            }
+        }
         .foregroundStyle(.white)
-        .padding(14)
-        .containerBackground(for: .widget) { Color(red: 0.035, green: 0.02, blue: 0.075) }
+        .containerBackground(for: .widget) { zagDark }
         .widgetURL(URL(string: "zagscience://history"))
     }
 }
@@ -293,7 +389,7 @@ struct ZagStrengthWidget: Widget {
         }
         .configurationDisplayName("Zag Strength Progress")
         .description("Customise your Zag Pro strength graph by exercise, period and interval.")
-        .supportedFamilies([.systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 

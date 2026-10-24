@@ -57,6 +57,10 @@ public class ZagWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
         let exercises = names.sorted()
         store.set(data, forKey: "zag_widget_workouts")
         store.set(pro, forKey: "zag_widget_is_pro")
+        store.set(max(0, call.getInt("streakCount") ?? 0), forKey: "zag_widget_streak_count")
+        let streakState = call.getString("streakState") ?? "rest"
+        store.set(["active", "rest", "lost"].contains(streakState) ? streakState : "rest",
+                  forKey: "zag_widget_streak_state")
         store.set(exercises, forKey: "zag_widget_exercises")
         store.synchronize()
         WidgetCenter.shared.reloadAllTimelines()

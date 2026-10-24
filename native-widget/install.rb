@@ -10,6 +10,9 @@ base = 'ios/App'
 widget_dir = File.join(base, 'ZagStrengthWidget')
 FileUtils.mkdir_p(widget_dir)
 FileUtils.cp('zag_widget_starter/ZagStrengthWidget/ZagStrengthWidget.swift', widget_dir)
+%w[ZagStreakActive.png ZagStreakRest.png ZagStreakLost.png ZagScienceLogo.png].each do |name|
+  FileUtils.cp(File.join('zag_widget_starter/ZagStrengthWidget', name), File.join(widget_dir, name))
+end
 FileUtils.cp('native-widget/ZagWidgetPlugin.swift', File.join(base,'App/ZagWidgetPlugin.swift'))
 app_group_ref = project.main_group.find_subpath('App', true)
 bridge_ref = app_group_ref.new_file('ZagWidgetPlugin.swift')
@@ -18,6 +21,10 @@ widget_group = project.main_group.find_subpath('ZagStrengthWidget', true)
 widget_file = widget_group.new_file('ZagStrengthWidget/ZagStrengthWidget.swift')
 widget = project.new_target(:app_extension, 'ZagStrengthWidget', :ios, '17.0')
 widget.source_build_phase.add_file_reference(widget_file)
+%w[ZagStreakActive.png ZagStreakRest.png ZagStreakLost.png ZagScienceLogo.png].each do |name|
+  image_ref = widget_group.new_file("ZagStrengthWidget/#{name}")
+  widget.resources_build_phase.add_file_reference(image_ref)
+end
 # Xcode's output path is taken from the product reference *path*, not its
 # display name. Without this, Xcode archives the extension as `.appex`.
 widget.product_reference.name = 'ZagStrengthWidget.appex'
