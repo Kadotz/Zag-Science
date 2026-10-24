@@ -106,7 +106,7 @@ struct StrengthProvider: AppIntentTimelineProvider {
         load(configuration)
     }
     func timeline(for configuration: StrengthWidgetConfiguration, in context: Context) async -> Timeline<StrengthEntry> {
-        Timeline(entries: [load(configuration)], policy: .after(Date().addingTimeInterval(3600)))
+        Timeline(entries: [load(configuration)], policy: .after(Date().addingTimeInterval(300)))
     }
 
     private func load(_ configuration: StrengthWidgetConfiguration) -> StrengthEntry {
@@ -119,9 +119,13 @@ struct StrengthProvider: AppIntentTimelineProvider {
         let empty = StrengthEntry(date: .now, isPro: isPro, points: [], change: nil,
                                   exerciseLabel: label, periodLabel: configuration.period.label,
                                   streakCount: streakCount, streakState: streakState)
-        guard isPro, let json = defaults?.data(forKey: "zag_widget_workouts"),
+        guard isPro else {
+            defaults?.set("FREE: widget locked by Zag Pro entitlement", forKey: "zag_widget_diagnostic")
+            return empty
+        }
+        guard let json = defaults?.data(forKey: "zag_widget_workouts"),
               let objects = (try? JSONSerialization.jsonObject(with: json)) as? [[String: Any]] else {
-            defaults?.set("Cannot decode shared workout JSON or Pro not enabled", forKey: "zag_widget_diagnostic")
+            defaults?.set("PRO: workout JSON missing or unreadable", forKey: "zag_widget_diagnostic")
             return empty
         }
         // Decode each row independently. One malformed date or legacy record must
@@ -244,15 +248,14 @@ struct StrengthProvider: AppIntentTimelineProvider {
 private let zagPurple = Color(red: 0.89, green: 0.24, blue: 1)
 private let zagDark = Color(red: 0.035, green: 0.02, blue: 0.075)
 
-// PNGs are copied into the widget extension as bundle resources, not into
-// Assets.xcassets. SwiftUI Image("name") cannot reliably locate loose PNGs.
-private func zagBundledImage(_ name: String) -> Image {
+// Prefer the original PNG explicitly copied into the widget extension's bundle.
+// Asset catalog lookup remains a fallback if iOS stores the image in Assets.car.
+private func zagWidgetArtwork(_ name: String) -> Image {
     if let path = Bundle.main.path(forResource: name, ofType: "png"),
-       let bitmap = UIImage(contentsOfFile: path) {
-        return Image(uiImage: bitmap)
+       let artwork = UIImage(contentsOfFile: path) {
+        return Image(uiImage: artwork)
     }
-    // Visible fallback rather than a silent, empty space.
-    return Image(systemName: "photo")
+    return Image(name, bundle: .main)
 }
 
 struct ZagStreakArt: View {
@@ -261,7 +264,7 @@ struct ZagStreakArt: View {
     let size: CGFloat
     var body: some View {
         ZStack(alignment: .bottom) {
-            zagBundledImage(state == "active" ? "ZagStreakActive" : (state == "lost" ? "ZagStreakLost" : "ZagStreakRest"))
+            zagWidgetArtwork(state == "active" ? "ZagStreakActive" : (state == "lost" ? "ZagStreakLost" : "ZagStreakRest"))
                 .resizable()
                 .scaledToFit()
                 .frame(width: size, height: size)
@@ -327,7 +330,27 @@ struct StrengthWidgetView: View {
 
     var body: some View {
         Group {
-            switch family {
+            if !entry.isPro {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("ZAG SCIENCE")
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(zagPurple)
+                        Spacer()
+                        Image(systemName: "lock.fill")
+                            .foregroundStyle(zagPurple)
+                    }
+                    Spacer(minLength: 0)
+                    Text("ZAG PRO")
+                        .font(.system(size: family == .systemSmall ? 19 : 24, weight: .black))
+                    Text("Unlock widgets with Zag Pro")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.white.opacity(0.72))
+                    Spacer(minLength: 0)
+                }
+                .padding(17)
+            } else {
+                switch family {
             case .systemSmall:
                 VStack(spacing: 0) {
                     ZagStreakArt(count: entry.streakCount, state: entry.streakState, size: 112)
@@ -351,7 +374,7 @@ struct StrengthWidgetView: View {
                             .padding(.top, 30)
                         }
                         Spacer(minLength: 5)
-                        zagBundledImage("ZagScienceLogo")
+                        zagWidgetArtwork("ZagScienceLogo")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 100, height: 100)
@@ -385,6 +408,7 @@ struct StrengthWidgetView: View {
                     ZagStrengthGraph(entry: entry)
                 }
                 .padding(14)
+                }
             }
         }
         .foregroundStyle(.white)

@@ -1,6 +1,7 @@
 require 'xcodeproj'
 require 'fileutils'
 require 'rexml/document'
+require 'json'
 project_path = 'ios/App/App.xcodeproj'
 project = Xcodeproj::Project.open(project_path)
 app = project.targets.find { |t| t.name == 'App' }
@@ -10,9 +11,20 @@ base = 'ios/App'
 widget_dir = File.join(base, 'ZagStrengthWidget')
 FileUtils.mkdir_p(widget_dir)
 FileUtils.cp('zag_widget_starter/ZagStrengthWidget/ZagStrengthWidget.swift', widget_dir)
-%w[ZagStreakActive.png ZagStreakRest.png ZagStreakLost.png ZagScienceLogo.png].each do |name|
-  FileUtils.cp(File.join('zag_widget_starter/ZagStrengthWidget', name), File.join(widget_dir, name))
+# Compile artwork as a real Xcode asset catalog. Loose PNG references were not
+# resolving in the WidgetKit extension even though the widget itself built.
+assets_dir = File.join(widget_dir, 'ZagWidgetAssets.xcassets')
+FileUtils.mkdir_p(assets_dir)
+%w[ZagStreakActive ZagStreakRest ZagStreakLost ZagScienceLogo].each do |name|
+  set_dir = File.join(assets_dir, "#{name}.imageset")
+  FileUtils.mkdir_p(set_dir)
+  FileUtils.cp(File.join('zag_widget_starter/ZagStrengthWidget', "#{name}.png"), File.join(set_dir, "#{name}.png"))
+  File.write(File.join(set_dir, 'Contents.json'),
+    JSON.pretty_generate({'images' => [{'filename' => "#{name}.png", 'idiom' => 'universal'}],
+                          'info' => {'author' => 'xcode', 'version' => 1}}))
 end
+File.write(File.join(assets_dir, 'Contents.json'),
+  JSON.pretty_generate({'info' => {'author' => 'xcode', 'version' => 1}}))
 FileUtils.cp('native-widget/ZagWidgetPlugin.swift', File.join(base,'App/ZagWidgetPlugin.swift'))
 app_group_ref = project.main_group.find_subpath('App', true)
 bridge_ref = app_group_ref.new_file('ZagWidgetPlugin.swift')
@@ -21,10 +33,17 @@ widget_group = project.main_group.find_subpath('ZagStrengthWidget', true)
 widget_file = widget_group.new_file('ZagStrengthWidget/ZagStrengthWidget.swift')
 widget = project.new_target(:app_extension, 'ZagStrengthWidget', :ios, '17.0')
 widget.source_build_phase.add_file_reference(widget_file)
-%w[ZagStreakActive.png ZagStreakRest.png ZagStreakLost.png ZagScienceLogo.png].each do |name|
-  image_ref = widget_group.new_file("ZagStrengthWidget/#{name}")
-  widget.resources_build_phase.add_file_reference(image_ref)
+asset_ref = widget_group.new_file('ZagStrengthWidget/ZagWidgetAssets.xcassets')
+widget.resources_build_phase.add_file_reference(asset_ref)
+# Also embed original PNGs as individual bundle resources. UIImage(contentsOfFile:)
+# loads these directly, avoiding the widget asset-catalog lookup issue.
+%w[ZagStreakActive ZagStreakRest ZagStreakLost ZagScienceLogo].each do |name|
+  filename = "#{name}.png"
+  FileUtils.cp(File.join('zag_widget_starter/ZagStrengthWidget', filename), File.join(widget_dir, filename))
+  png_ref = widget_group.new_file("ZagStrengthWidget/#{filename}")
+  widget.resources_build_phase.add_file_reference(png_ref)
 end
+
 # Xcode's output path is taken from the product reference *path*, not its
 # display name. Without this, Xcode archives the extension as `.appex`.
 widget.product_reference.name = 'ZagStrengthWidget.appex'

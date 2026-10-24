@@ -56,13 +56,20 @@ public class ZagWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         let exercises = names.sorted()
         store.set(data, forKey: "zag_widget_workouts")
+        let wasPro = store.bool(forKey: "zag_widget_is_pro")
         store.set(pro, forKey: "zag_widget_is_pro")
+        if !pro {
+            store.set("FREE: widget locked by Zag Pro entitlement", forKey: "zag_widget_diagnostic")
+        } else if !wasPro {
+            store.set("PRO: refreshing widget graph", forKey: "zag_widget_diagnostic")
+        }
         store.set(max(0, call.getInt("streakCount") ?? 0), forKey: "zag_widget_streak_count")
         let streakState = call.getString("streakState") ?? "rest"
         store.set(["active", "rest", "lost"].contains(streakState) ? streakState : "rest",
                   forKey: "zag_widget_streak_state")
         store.set(exercises, forKey: "zag_widget_exercises")
         store.synchronize()
+        WidgetCenter.shared.reloadTimelines(ofKind: "ZagStrengthWidget")
         WidgetCenter.shared.reloadAllTimelines()
         NSLog("[ZagWidgetPlugin] sync pro=%@ exercises=%ld workouts=%ld", pro ? "YES" : "NO", exercises.count, rows.count)
         call.resolve(["bridge": "capacitor-plugin", "pro": pro, "exercises": exercises.count, "records": rows.count])

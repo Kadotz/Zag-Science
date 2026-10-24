@@ -4379,12 +4379,12 @@ function zagStrengthSVG(records,selected,period,interval){
 </script>
 <script id="zag-native-widget-sync">
 (function(){
- let timer, inFlight=false;
+ let timer, inFlight=false, pending=false;
  function plugin(){
    return window.ZagNativePlugins?.ZagWidget || window.Capacitor?.Plugins?.ZagWidget || null;
  }
  window.zagWidgetSync=async function(){
-   if(inFlight)return;
+   if(inFlight){pending=true;return;}
    const native=plugin();
    if(!native || typeof native.sync!=='function'){
      window.zagNativeWidgetError='Capacitor ZagWidget plugin unavailable';
@@ -4412,7 +4412,10 @@ function zagStrengthSVG(records,selected,period,interval){
      window.zagNativeWidgetError=null;
    }catch(e){
      window.zagNativeWidgetError='Plugin sync failed: '+String(e?.message||e);
-   }finally{inFlight=false;}
+   }finally{
+     inFlight=false;
+     if(pending){pending=false;setTimeout(window.zagWidgetSync,100);}
+   }
  };
  window.zagWidgetScheduleSync=function(){clearTimeout(timer);timer=setTimeout(window.zagWidgetSync,600)};
  window.addEventListener('load',()=>{setTimeout(window.zagWidgetSync,1200);setTimeout(window.zagWidgetSync,4000)});
