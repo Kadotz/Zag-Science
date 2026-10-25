@@ -741,9 +741,30 @@ function showStreakPopup(force=false){
 }
 function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el){el.classList.toggle('collapsed');let b=el.querySelector('.exerciseExpand');if(b)b.textContent=el.classList.contains('collapsed')?'EXPAND':'COLLAPSE'}}
 function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
+// Point 4: Previous-session values are suggestions only, never completed sets.
+function zagPreviousSets(ex){
+ const hist=Array.isArray(st.history)?st.history:[];
+ const last=hist.find(h=>Array.isArray(h.sets)&&h.sets.some(v=>v.exercise===ex));
+ return last?last.sets.filter(v=>v.exercise===ex):[];
+}
+function zagQuickPrevious(input){
+ if(!input||!input.dataset.zagPrevious||input.value!=='')return;
+ const raw=Number(input.dataset.zagPrevious);
+ if(!Number.isFinite(raw))return;
+ input.value=String(raw);
+ input.dispatchEvent(new Event('change',{bubbles:true}));
+ input.classList.add('zagPreviousFilled');
+}
+function zagPreviousTouch(event,input){
+ if(!input||input.value!==''||!input.dataset.zagPrevious)return;
+ const now=Date.now();
+ if(input._zagLastTouch&&now-input._zagLastTouch<390){
+   event.preventDefault();input._zagLastTouch=0;zagQuickPrevious(input);
+ }else{input._zagLastTouch=now;}
+}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><div class="zagGuideTitle"><h1>${esc(d[0])}</h1><button type="button" class="zagGuideLaunch" onclick="zagOpenWorkoutGuide()" aria-label="Workout guide"><img src="assets/images/workout-guide-info-icon.png" alt=""></button></div><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
-d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=decimal min="0.5" step="0.5" value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
+d[1].forEach((ex,e)=>{let ts=sets(ex),previousSets=zagPreviousSets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},prev=previousSets[i]||{},prevKg=Number.isFinite(Number(prev.kg))&&prev.kg!==undefined?String(kgToDisplay(prev.kg)):"",prevReps=Number.isFinite(Number(prev.reps))&&prev.reps!==undefined?String(prev.reps):"",stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class="cell zagPreviousInput" type=number inputmode=decimal aria-label="Actual weight; double tap to use previous session weight" placeholder="${prevKg}" data-zag-previous="${prevKg}" ondblclick="zagQuickPrevious(this)" ontouchend="zagPreviousTouch(event,this)" value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class="cell zagPreviousInput" type=number inputmode=decimal min="0.5" step="0.5" aria-label="Actual reps; double tap to use previous session reps" placeholder="${prevReps}" data-zag-previous="${prevReps}" ondblclick="zagQuickPrevious(this)" ontouchend="zagPreviousTouch(event,this)" value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
@@ -4765,7 +4786,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.jpg','assets/images/tip-08-widget.jpg'];
+const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-01b-previous-values.png','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.jpg','assets/images/tip-08-widget.jpg'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -4796,6 +4817,11 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOver
 .zagTipsPanel img.zagTipTrimEdge{width:110%!important;height:110%!important;left:-5%!important;top:-5%!important;object-fit:fill!important}
 </style>
 
+<style id="zag-point4-previous-session-inputs">
+.zagPreviousInput::placeholder{color:rgba(198,185,209,.48)!important;opacity:1!important}
+.zagPreviousInput.zagPreviousFilled{box-shadow:inset 0 0 0 1px rgba(216,85,255,.4)}
+@media (orientation:portrait){.exerciseBody .zagPreviousInput{min-height:34px;touch-action:manipulation}}
+</style>
 <style id="zag-final-two-tips-balanced-zoom-v2">
 /* 104% is between the full-frame 100% and the clipped 110% zoom.
    Apply only to the last two tip images; preserve all earlier slides. */
