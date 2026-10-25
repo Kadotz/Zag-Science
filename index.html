@@ -4801,7 +4801,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-01b-previous-values.png','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.jpg','assets/images/tip-08-widget.jpg'];
+const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-01b-previous-values.png','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.png','assets/images/tip-08-widget.png','assets/images/tip-09-strength-graph.png'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -4856,7 +4856,7 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOver
   window.zagRenderTip=function(){
     old.apply(this,arguments);
     const image=document.getElementById('zagTipImage');
-    if(image)image.classList.toggle('zagLastTwoBalanced', zagTipIndex >= zagTipImages.length-2);
+    if(image)image.classList.toggle('zagLastTwoBalanced', ['tip-07-aim.png','tip-08-widget.png'].some(name=>zagTipImages[zagTipIndex].endsWith(name)));
   };
 })();
 </script>
