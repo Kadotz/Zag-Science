@@ -72,12 +72,15 @@ test('conversion constant and inverse stay mathematically consistent',()=>{
   assert.equal(Math.round(lb*10)/10,220.5);
   assert.ok(Math.abs(lb/2.2046226218-kg)<1e-10);
 });
-test('strength graph uses a stable cohort for all-time and selected periods',()=>{
+test('strength graph uses requested calendar window and never draws before data',()=>{
   const src=functionSource('zagStrengthSVG');
-  assert.match(src,/if\(arr\.length<2\)continue/);
-  assert.match(src,/const inRange=arr\.filter\(v=>v\.time>visibleStart\)/);
-  assert.match(src,/inRange\.length>=2/);
-  assert.match(src,/const names=selected==='all'\?eligible:\[selected\]/);
+  assert.match(src,/const today=new Date\(\)/);
+  assert.match(src,/start\.setMonth\(start\.getMonth\(\)-6\)/);
+  assert.match(src,/start\.setFullYear\(start\.getFullYear\(\)-1\)/);
+  assert.match(src,/const first=start\.getTime\(\),last=today\.getTime\(\)/);
+  assert.match(src,/if\(eligible\.length&&eligible\.every\(name=>latest\[name\]>0\)\)/);
+  assert.match(src,/label\(start\)/);
+  assert.match(src,/label\(today\)/);
 });
 test('cloud state snapshot excludes separately synced PB fields',()=>{
   const st={history:[{sets:[{kg:100,reps:8}]}],max:{Bench:100},repsAtMax:{Bench:8}};

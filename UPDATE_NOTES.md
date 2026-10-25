@@ -1,11 +1,8 @@
-Zag Science — navigation and tutorial follow-up (2026-10-25)
+# Zag Science — guide, landscape and graph follow-up
 
-Included:
-- Restores expanded workout exercise cards and Extras when switching between tabs.
-- Keeps existing Maxes expanded-state behaviour.
-- Separates Next Exercise scrolling calculations/timings for landscape and portrait; avoids competing same-tab scroll restoration.
-- Uses consistent tutorial slide sizing and reduces first-page lighting intensity while preserving its exact image text and artwork.
+- Increased only the first tutorial slide image scale by 8%; other slides untouched.
+- In landscape, Next Exercise now collapses the completed exercise before measuring and animating to the next. Portrait behaviour is unchanged.
+- Strength graph x-axis always spans the selected calendar period through today. The plot is blank until a real reading exists; the last known reading carries forward after workouts. Labels show actual selected start and today's date, even with no records.
+- Existing workout data, Groups and Developer Test Mode unchanged.
 
-Verification: 12/12 Node tests passed, all 52 inline JavaScript sections passed Node syntax checks.
-
-Not yet fully addressed: persistence of a specific opened online Group and its inner tabs. This requires careful changes to asynchronous group loading, and is not claimed as fixed. iPhone landscape scrolling and visual appearance still need TestFlight verification. Existing assets from your repository remain necessary.
+Checks: 12 Node tests passed; 52 embedded scripts passed Node syntax checks. iPhone orientation and visual appearance require TestFlight verification. Do not uninstall the app or clear data.

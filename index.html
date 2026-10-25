@@ -456,7 +456,7 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 <style id="zag-guide-slide-consistency">
 /* All tutorial slides use the same box, sizing and edge lighting. */
 #zagInfoPanelV6 .zagInfoSlide{background-size:100% 100%!important;background-position:center!important}
-#zagInfoPanelV6 .zagInfoSlide[data-i="0"]{filter:brightness(.93) saturate(.88)}
+#zagInfoPanelV6 .zagInfoSlide[data-i="0"]{filter:brightness(.93) saturate(.88);background-size:108% 108%!important}
 </style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
@@ -860,8 +860,21 @@ function completeExercise(ex,e){
      const header=document.querySelector('img.logo[alt="Zag Science"]');
      const headerH=header?header.getBoundingClientRect().height:0;
      const landscape=window.matchMedia("(orientation: landscape)").matches;
-     const y=zagNextExerciseTarget(next,landscape);
-     zagAnimateExerciseScroll(y,landscape);
+     if(landscape){
+       const current=document.getElementById("exercise-"+e);
+       if(current){current.classList.add("collapsed");const toggle=current.querySelector(".exerciseExpand");if(toggle)toggle.textContent="EXPAND";}
+       // Wait for the collapsed card's layout to settle before measuring next.
+       requestAnimationFrame(()=>requestAnimationFrame(()=>{
+         const fixed=document.querySelector('header, .stickyHeader, .appHeader');
+         const fixedBottom=fixed&&getComputedStyle(fixed).position==='fixed'?fixed.getBoundingClientRect().bottom:0;
+         const topOffset=Math.max(headerH,fixedBottom)+8;
+         const y=Math.max(0,window.scrollY+next.getBoundingClientRect().top-topOffset);
+         zagAnimateExerciseScroll(y,true);
+       }));
+     }else{
+       const y=zagNextExerciseTarget(next,false);
+       zagAnimateExerciseScroll(y,false);
+     }
    }));
  }));
 
@@ -4582,96 +4595,73 @@ function zagStrengthGraphHTML(){
  return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" aria-label="Exercise" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div class="zagStrengthControls"><label>Time period<select class="zagStrengthSelect" aria-label="Time period" onchange="window.zagStrengthPeriod=this.value;historyPage()">'+makeOpts(periodOptions,period)+'</select></label><label>Graph interval<select class="zagStrengthSelect" aria-label="Graph interval" onchange="window.zagStrengthInterval=this.value;historyPage()">'+makeOpts(intervalOptions,interval)+'</select></label></div><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected,period,interval)+'</div><p class="zagStrengthLegend">Estimated strength from completed sets (weight × [1 + reps ÷ 30]). The selected period compares a fixed group of exercises against their strength at the start of that period (100% baseline). New exercises do not dilute the comparison. Rest days never count as zero.</p></div>';
 }
 function zagStrengthSVG(records,selected,period,interval){
- const baseline=Object.create(null),latest=Object.create(null),points=[];
  const dated=records.map(r=>({...r,when:zagStrengthDate(r.date)})).filter(r=>r.when).sort((a,b)=>a.when-b.when);
- const now=dated.length?new Date(Math.max(...dated.map(r=>r.when.getTime()))):new Date(),cutoff=new Date(now);
- if(period==='1m')cutoff.setMonth(cutoff.getMonth()-1);
- else if(period==='3m')cutoff.setMonth(cutoff.getMonth()-3);
- else if(period==='6m')cutoff.setMonth(cutoff.getMonth()-6);
- else if(period==='1y')cutoff.setFullYear(cutoff.getFullYear()-1);
- const visibleStart=period==='all'?-Infinity:cutoff.getTime();
+ const today=new Date();today.setHours(0,0,0,0);
+ const start=new Date(today);
+ if(period==='1m')start.setMonth(start.getMonth()-1);
+ else if(period==='3m')start.setMonth(start.getMonth()-3);
+ else if(period==='6m')start.setMonth(start.getMonth()-6);
+ else if(period==='1y')start.setFullYear(start.getFullYear()-1);
+ else if(dated.length)start.setTime(Math.min(today.getTime(),dated[0].when.getTime()));
+ const first=start.getTime(),last=today.getTime();
+ const label=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
  const readings=Object.create(null);
- for(const r of dated)for(const [name,value] of Object.entries(r.by)){
-  if(Number.isFinite(value)&&value>0)(readings[name]||(readings[name]=[])).push({time:r.when.getTime(),value});
+ for(const r of dated)for(const [name,value] of Object.entries(r.by))if(Number.isFinite(value)&&value>0){
+  (readings[name]||(readings[name]=[])).push({time:r.when.getTime(),value});
  }
- // Fixed comparison cohort: for a selected period an exercise needs a baseline
- // from on/before the start and a reading inside the period. For All Time it
- // needs at least two distinct readings. New exercises cannot dilute the trend.
- const eligible=[];
- for(const [name,arr] of Object.entries(readings)){
-  if(period==='all'){
-   if(arr.length<2)continue;
-   baseline[name]=arr[0].value;
-  }else{
-   const before=arr.filter(v=>v.time<=visibleStart);
-   const inRange=arr.filter(v=>v.time>visibleStart);
-   if(!inRange.length)continue;
-   if(before.length)baseline[name]=before[before.length-1].value;
-   else if(inRange.length>=2)baseline[name]=inRange[0].value;
-   else continue;
-  }
+ const names=selected==='all'?Object.keys(readings):[selected];
+ const baseline=Object.create(null),latest=Object.create(null),eligible=[];
+ for(const name of names){
+  const arr=readings[name]||[];
+  const before=arr.filter(v=>v.time<=first),inside=arr.filter(v=>v.time>first&&v.time<=last);
+  if(!inside.length&&!before.length)continue;
+  baseline[name]=before.length?before[before.length-1].value:inside[0].value;
+  if(before.length)latest[name]=before[before.length-1].value;
   eligible.push(name);
  }
- if(selected!=='all'&&!eligible.includes(selected)){
-  return '<p class="note">Not enough readings to compare this exercise over the selected period. Try All Time or a longer period.</p>';
- }
- // Show the start of each period as 100% and carry forward last values on rest days.
- if(period!=='all'){
-  for(const name of eligible)latest[name]=baseline[name];
-  // Start at the first observed reading if no older baseline exists.
-  const earliest=eligible.length?Math.max(visibleStart,Math.min(...eligible.map(name=>readings[name].find(v=>v.time>=visibleStart)?.time||Infinity))):visibleStart;
-  if(Number.isFinite(earliest))points.push({time:earliest,v:100,date:new Date(earliest)});
- }
+ const points=[];
+ // An existing reading before the window gives a known starting value; otherwise
+ // leave the line blank until the first actual measurement within the window.
+ if(eligible.length&&eligible.every(name=>latest[name]>0))points.push({time:first,v:100});
  for(const r of dated){
-  if(r.when.getTime()<visibleStart)continue;
-  let changed=false;
-  for(const [name,value] of Object.entries(r.by)){
-   if(!eligible.includes(name)||!Number.isFinite(value)||value<=0)continue;
-   latest[name]=value;
-   if(selected==='all'||selected===name)changed=true;
-  }
-  if(!changed)continue;
-  const names=selected==='all'?eligible:[selected];
-  // For All Time, don't count an exercise until its first recorded reading.
-  const active=names.filter(name=>latest[name]>0&&baseline[name]>0);
+  const time=r.when.getTime();if(time<first||time>last)continue;
+  for(const name of eligible)if(r.by[name]>0)latest[name]=r.by[name];
+  const active=eligible.filter(name=>latest[name]>0&&baseline[name]>0);
   if(!active.length)continue;
   const v=active.reduce((sum,name)=>sum+100*latest[name]/baseline[name],0)/active.length;
-  if(Number.isFinite(v))points.push({time:r.when.getTime(),v,date:r.when});
+  if(Number.isFinite(v))points.push({time,v});
  }
  if(interval!=='workout'){
   const grouped=new Map();
-  for(const pt of points){
-   const d=new Date(pt.time);
-   if(interval==='week'){const wd=(d.getDay()+6)%7;d.setDate(d.getDate()-wd);}
+  for(const pt of points){const d=new Date(pt.time);
+   if(interval==='week'){d.setDate(d.getDate()-(d.getDay()+6)%7);}
    if(interval==='month')d.setDate(1);
    d.setHours(0,0,0,0);
-   const key=d.getTime();
-   // Latest workout in the period, rather than a misleading sum or zero on rest days.
-   grouped.set(key,{...pt,time:key});
+   grouped.set(d.getTime(),pt); // retain original actual measurement time
   }
   points.splice(0,points.length,...[...grouped.values()].sort((a,b)=>a.time-b.time));
  }
- if(!points.length)return '<p class="note">No completed workouts in this time period. Try a longer period.</p>';
- if(points.length===1)return '<p class="note">Only one strength reading in this period. Select a longer period to see a trend.</p>';
+ // Carry forward the last known value to today, but never invent a reading before the first workout.
+ if(points.length&&points[points.length-1].time<last)points.push({time:last,v:points[points.length-1].v});
  const w=330,h=180,px=40,right=314;
- let min=Math.min(...points.map(p=>p.v)),max=Math.max(...points.map(p=>p.v));
- {min=Math.min(min,100);max=Math.max(max,100);}
+ const values=points.map(p=>p.v);
+ let min=Math.min(100,...values),max=Math.max(100,...values);
  const pad=Math.max((max-min)*.12,selected==='all'?2:1);min-=pad;max+=pad;
- const range=max-min,first=points[0].time,last=points[points.length-1].time;
+ const range=max-min;
  const xy=points.map(pt=>[px+((pt.time-first)/Math.max(last-first,1))*(right-px),h-22-(pt.v-min)/range*(h-44)]);
  const path=xy.map((pt,i)=>(i?'L':'M')+pt[0].toFixed(1)+' '+pt[1].toFixed(1)).join(' ');
  const baselineY=h-22-(100-min)/range*(h-44);
- const label=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
- return '<svg class="zagStrengthChart" viewBox="0 0 330 180" role="img" aria-label="Strength progress chart">'
+ return '<svg class="zagStrengthChart" viewBox="0 0 330 180" role="img" aria-label="Strength progress chart from '+label(start)+' to '+label(today)+'">'
   +'<line x1="'+px+'" y1="8" x2="'+px+'" y2="158" stroke="#654075"/>'
   +'<line x1="'+px+'" y1="158" x2="'+right+'" y2="158" stroke="#654075"/>'
-  +('<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="'+right+'" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>' )
-  +'<path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'
+  +'<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="'+right+'" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>'
+  +(path?'<path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>':'')
   +xy.map(pt=>'<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="2.8" fill="#fff"/>').join('')
   +'<text x="2" y="17" fill="#dda5ff" font-size="10">'+max.toFixed(1)+'</text>'
   +'<text x="2" y="157" fill="#dda5ff" font-size="10">'+min.toFixed(1)+'</text>'
-  +'<text x="'+px+'" y="174" fill="#dda5ff" font-size="9">'+label(points[0].date)+'</text>'
-  +'<text x="'+right+'" y="174" text-anchor="end" fill="#dda5ff" font-size="9">'+label(points[points.length-1].date)+'</text></svg>';
+  +'<text x="'+px+'" y="174" fill="#dda5ff" font-size="9">'+label(start)+'</text>'
+  +'<text x="'+right+'" y="174" text-anchor="end" fill="#dda5ff" font-size="9">'+label(today)+'</text></svg>'
+  +(!points.length?'<p class="note">No recorded strength data in this period yet.</p>':'');
 }
 </script>
 <script id="zag-widget-debug-display">
