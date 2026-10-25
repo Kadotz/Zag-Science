@@ -75,7 +75,8 @@ test('conversion constant and inverse stay mathematically consistent',()=>{
 test('strength graph uses a stable cohort for all-time and selected periods',()=>{
   const src=functionSource('zagStrengthSVG');
   assert.match(src,/if\(arr\.length<2\)continue/);
-  assert.match(src,/if\(!before\.length\|\|!arr\.some\(v=>v\.time>visibleStart\)\)continue/);
+  assert.match(src,/const inRange=arr\.filter\(v=>v\.time>visibleStart\)/);
+  assert.match(src,/inRange\.length>=2/);
   assert.match(src,/const names=selected==='all'\?eligible:\[selected\]/);
 });
 test('cloud state snapshot excludes separately synced PB fields',()=>{
