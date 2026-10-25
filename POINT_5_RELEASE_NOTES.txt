@@ -1,0 +1,12 @@
+ZAG SCIENCE — POINT 5 (TESTFLIGHT SCAFFOLD ONLY)
+
+This build intentionally RETAINS the Developer Test Mode. No Apple purchases are active.
+Do NOT submit this build to the public App Store.
+
+Changed: TestFlight-only gating, a verified-entitlement integration callback, and fail-closed behaviour for non-test build channels. The widget Pro flag now respects the same test-only condition. Existing workout and tip files retained.
+
+CRITICAL: JavaScript flags/callbacks can be spoofed. This is NOT a secure production purchase system. Before public release, implement native StoreKit 2 purchase and restore, server-side App Store transaction verification and entitlement persistence; remove developer override from the distributed bundle using build configuration; enforce entitlements on server-controlled Pro operations; and verify widget entitlements natively.
+
+The source is explicitly tagged testflight. Changing this string is NOT a secure release procedure. A separate release target/build step is needed.
+
+Do not claim subscription, renewal, lifetime or offline verification is operational yet.

@@ -1350,7 +1350,7 @@ ${streakRestSelector()}
 ${streakReminderTimeSetting()}
 <div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${zagNativeNotifications()?"Enable / Check":(("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable")}</button></div>
 <div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are scheduled for two weeks after your last saved weigh-in.</div>
-</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">Testing only — remove before public release.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><small id="zag-widget-diagnostics" style="display:block;margin-top:6px;color:#dca6ff">Widget bridge: checking…</small><pre id="zag-widget-graph-debug" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#e7b7ff;line-height:1.5;margin-top:8px">Graph diagnostics: checking…</pre><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
+</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff;display:${window.zagBuildChannel==='testflight'?'block':'none'}"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">TestFlight only — unavailable in production builds.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><small id="zag-widget-diagnostics" style="display:block;margin-top:6px;color:#dca6ff">Widget bridge: checking…</small><pre id="zag-widget-graph-debug" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#e7b7ff;line-height:1.5;margin-top:8px">Graph diagnostics: checking…</pre><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="zag-science-backup.json";a.click()}
 function restore(x){let r=new FileReader();r.onload=()=>{try{st=JSON.parse(r.result);save();alert("Backup imported");location.reload()}catch(e){alert("Invalid backup file")}};r.readAsText(x.files[0])}
 processStreakCalendar();save();
@@ -1658,7 +1658,7 @@ document.addEventListener("visibilitychange",()=>{
 <script>
 function openZagPro(e){if(e){e.preventDefault();e.stopPropagation()}const o=document.getElementById('zagProOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false')}
 function closeZagPro(e){if(e){e.preventDefault();e.stopPropagation()}const o=document.getElementById('zagProOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true')}
-function zagPurchase(plan){alert("Apple payments are not enabled in this test build yet. Do not submit for App Store review until purchase verification and restoration are implemented.")}
+function zagPurchase(plan){alert("Apple purchases are not connected yet. This test build supports Developer Test Mode only. StoreKit purchase verification and Restore Purchases must be implemented and tested before public release.")}
 document.getElementById('zagProOverlay').addEventListener('click',function(e){if(e.target===this)closeZagPro(e)});
 </script>
 
@@ -4402,10 +4402,25 @@ const overlay=document.getElementById('zagWorkoutGuide');overlay.addEventListene
 /* Phase 1: UI gates only. The native entitlement verification service is not yet connected.
    Do not replace this with a localStorage flag: users could grant themselves Pro. */
 // TESTFLIGHT-ONLY developer override. NEVER ship this file to the public App Store.
-window.zagProEntitled = localStorage.getItem('zag_dev_pro_test_only') === '1';
+// This source is a TESTFLIGHT BUILD. The release packaging step MUST remove
+// the developer switch and replace the gate with a verified native entitlement.
+// Fail closed by default: a local flag is never a verified purchase.
+window.zagBuildChannel = 'testflight';
+window.zagVerifiedProEntitled = false;
+window.zagProEntitled = window.zagBuildChannel === 'testflight' && localStorage.getItem('zag_dev_pro_test_only') === '1';
+window.zagApplyVerifiedEntitlement = function(result){
+  // Only the trusted native purchase bridge should invoke this callback.
+  // JavaScript-only checks are NOT sufficient for a production entitlement.
+  const active = result && result.verified === true && result.active === true;
+  window.zagVerifiedProEntitled = !!active;
+  window.zagProEntitled = !!active || (window.zagBuildChannel === 'testflight' && localStorage.getItem('zag_dev_pro_test_only') === '1');
+  if(typeof window.zagWidgetScheduleSync === 'function') window.zagWidgetScheduleSync();
+  return window.zagProEntitled;
+};
 window.zagSetDevPro = function(enabled){
-  window.zagProEntitled = !!enabled;
+  if(window.zagBuildChannel !== 'testflight') return false;
   localStorage.setItem('zag_dev_pro_test_only', enabled ? '1' : '0');
+  window.zagProEntitled = window.zagVerifiedProEntitled === true || !!enabled;
   if(typeof window.zagWidgetSync==='function') window.zagWidgetSync();
   if(typeof window.zagWidgetScheduleSync==='function') window.zagWidgetScheduleSync();
   setTimeout(()=>window.zagWidgetSync?.(),1500);
@@ -4413,7 +4428,7 @@ window.zagSetDevPro = function(enabled){
   if(typeof settings === 'function') settings();
 };
 window.zagRequirePro = function(){
-  if(window.zagProEntitled === true) return true;
+  if(window.zagVerifiedProEntitled === true || (window.zagBuildChannel === 'testflight' && window.zagProEntitled === true)) return true;
   if(typeof closeModal === 'function') closeModal();
   if(typeof openZagPro === 'function') openZagPro();
   return false;
@@ -4603,7 +4618,7 @@ function zagStrengthSVG(records,selected,period,interval){
          return {date:parsed instanceof Date && Number.isFinite(parsed.getTime())
                    ? parsed.toISOString() : String(r.date||''),by:r.by,order:i};
        });
-     const pro=window.zagProEntitled===true || localStorage.getItem('zag_dev_pro_test_only')==='1';
+     const pro=window.zagVerifiedProEntitled===true || (window.zagBuildChannel==='testflight' && window.zagProEntitled===true);
      const streak=typeof st!=='undefined' && st && st.streak ? st.streak : {};
      const day=new Date();
      const today=day.getFullYear()+'-'+String(day.getMonth()+1).padStart(2,'0')+'-'+String(day.getDate()).padStart(2,'0');
