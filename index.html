@@ -447,7 +447,13 @@ body.zagGroupsBooting #screen{visibility:hidden!important}
 .zagRealGroupOverlay p{max-width:250px;font-size:13px;color:#e9d5f5}
 .zagRealGroupOverlay .btn{font-size:16px;padding:13px 22px;border:2px solid #e43aff;box-shadow:0 0 19px #b42aff77}
 </style>
-</head>
+<style id="zag-point2-max-reps-layout">
+.maxrow .zagMaxEditField{display:flex;flex-direction:column;gap:2px;min-width:0}
+.maxrow .zagMaxEditField small{font-size:10px;opacity:.8;white-space:nowrap}
+.maxrow .zagMaxEditField input{width:100%;min-width:0;box-sizing:border-box}
+.maxrow{gap:5px}.maxrow .zagMaxEditField:first-of-type{max-width:90px}.maxrow .zagMaxEditField:nth-of-type(2){max-width:60px}
+@media(max-width:380px){.maxrow .zagMaxEditField:first-of-type{max-width:75px}.maxrow .zagMaxEditField:nth-of-type(2){max-width:48px}.maxrow .zagMaxEditField small{font-size:9px}}
+</style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
 <main id="screen"></main></div>
@@ -737,7 +743,7 @@ function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(
 function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><div class="zagGuideTitle"><h1>${esc(d[0])}</h1><button type="button" class="zagGuideLaunch" onclick="zagOpenWorkoutGuide()" aria-label="Workout guide"><img src="assets/images/workout-guide-info-icon.png" alt=""></button></div><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
 d[1].forEach((ex,e)=>{let ts=sets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=numeric value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class=cell type=number inputmode=decimal value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class=cell type=number inputmode=decimal min="0.5" step="0.5" value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
@@ -745,10 +751,17 @@ function compactWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.opti
 function setExerciseWeek(ex,w){if(st.stickWeek)return;zagRestoreManualPBs();st.weeks[ex]=+w||1;save();workout()}
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
-function one(ex,i,btn){let key=k(ex,i),t=sets(ex)[i],row=btn?.closest("tr");if(st.draft[key]?.done){delete st.draft[key];btn?.classList.remove("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value="";if(ins[1])ins[1].value=""}}else{st.draft[key]={kg:t.kg,r:t.r,done:true};btn?.classList.add("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value=kgToDisplay(t.kg);if(ins[1])ins[1].value=t.r}}clickSound();save()}
+function one(ex,i,btn){let key=k(ex,i),t=sets(ex)[i],row=btn?.closest("tr");if(st.draft[key]?.done){delete st.draft[key];btn?.classList.remove("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value="";if(ins[1])ins[1].value=""}}else{if(!zagValidLoggedSet(ex,t.kg,t.r)){alert(zagSetValidationMessage());return;}st.draft[key]={kg:t.kg,r:t.r,done:true};btn?.classList.add("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value=kgToDisplay(t.kg);if(ins[1])ins[1].value=t.r}}clickSound();save()}
+function zagIsBodyweightExercise(ex){return /(?:^|\b)(?:pull[ -]?ups?|chin[ -]?ups?|push[ -]?ups?|dips?)(?:\b|$)/i.test(String(ex||''))&&!/lat[ -]?pull[ -]?up/i.test(String(ex||''))}
+function zagValidLoggedSet(ex,kg,reps){
+ if(kg===''||kg==null||reps===''||reps==null)return false;
+ const w=Number(kg),r=Number(reps);
+ return Number.isFinite(w)&&Number.isFinite(r)&&w>=0&&w<=9999&&Number.isInteger(r*2)&&r>=0.5&&r<=1000&&(w>0||zagIsBodyweightExercise(ex));
+}
+function zagSetValidationMessage(){return 'Enter at least 0.5 reps (in half-rep steps) and a valid weight for each completed set. Zero weight is allowed for bodyweight exercises only.'}
 function zagRecordPB(ex,kg,reps){
  kg=Number(kg);reps=Number(reps);
- if(!Number.isFinite(kg)||!Number.isFinite(reps)||kg<=Number(st.max[ex]||0))return false;
+ if(!zagValidLoggedSet(ex,kg,reps)||kg<=0||kg<=Number(st.max[ex]||0))return false;
  const old=Number(st.max[ex]||0);
  st.prHistory[ex]=st.prHistory[ex]||[];
  st.prHistory[ex].unshift({date:new Date().toLocaleDateString(),from:old,to:kg,reps});
@@ -758,12 +771,15 @@ function zagRecordPB(ex,kg,reps){
 }
 function completeExercise(ex,e){
  const ts=sets(ex);let pbChanged=false;
+ const invalid=ts.some((t,i)=>{const v=st.draft[k(ex,i)];return v&&(v.done||v.kg!==undefined&&v.kg!==''||v.r!==undefined&&v.r!=='')&&!zagValidLoggedSet(ex,v.kg,v.r)});
+ if(invalid){alert(zagSetValidationMessage());return;}
+
  // Any completed, user-entered set can establish a PB on any week.
  ts.forEach((t,i)=>{
    const v=st.draft[k(ex,i)];
    if(!v||v.kg===""||v.kg==null||v.r===""||v.r==null)return;
    const kg=Number(v.kg),reps=Number(v.r);
-   if(!Number.isFinite(kg)||!Number.isFinite(reps))return;
+   if(!zagValidLoggedSet(ex,kg,reps))return;
    v.done=true;
    if(zagRecordPB(ex,kg,reps))pbChanged=true;
  });
@@ -801,7 +817,20 @@ function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`
 function doSwap(extra,i){if(!window.zagRequirePro())return;let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
 function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
 function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
-function finish(){let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];d[1].forEach(ex=>sets(ex).forEach((t,i)=>{let v=st.draft[k(ex,i)];if(v&&v.kg!==""&&v.r!==""){rec.sets.push({exercise:ex,kg:+v.kg,reps:+v.r});if(zagRecordPB(ex,+v.kg,+v.r)){prs.push(ex+" "+weightText(v.kg))}}}));st.history.unshift(rec);
+function finish(){
+ let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];
+ const entries=[];let invalid=false;
+ d[1].forEach(ex=>sets(ex).forEach((t,i)=>{
+  const v=st.draft[k(ex,i)];if(!v)return;
+  const entered=(v.done||v.kg!==undefined&&v.kg!==''||v.r!==undefined&&v.r!=='');
+  if(!entered)return;
+  if(!zagValidLoggedSet(ex,v.kg,v.r)){invalid=true;return;}
+  entries.push({exercise:ex,kg:Number(v.kg),reps:Number(v.r)});
+ }));
+ if(invalid){alert(zagSetValidationMessage());return;}
+ if(!entries.length){alert('Log at least one valid set before finishing your workout.');return;}
+ entries.forEach(v=>{rec.sets.push(v);if(zagRecordPB(v.exercise,v.kg,v.reps))prs.push(v.exercise+' '+weightText(v.kg))});
+ st.history.unshift(rec);
 st.recommendedDay=(st.day+1)%st.days.length;
  if(typeof zagRescheduleNative==="function")setTimeout(()=>zagRescheduleNative().catch(console.warn),0);
 d[1].forEach(ex=>{
@@ -920,16 +949,25 @@ async function zagPushOnePB(ex){
 // Explicit Maxes edits take precedence over older asynchronous cloud PB snapshots.
 const zagManualPBKey='zagManualPBOverridesV288';
 function zagManualPBOverrides(){try{return JSON.parse(localStorage.getItem(zagManualPBKey)||'{}')||{}}catch(_){return {}}}
-function zagRememberManualPB(ex,kg){const data=zagManualPBOverrides();data[ex]={kg:Number(kg),at:Date.now()};localStorage.setItem(zagManualPBKey,JSON.stringify(data));}
-function zagRestoreManualPBs(){const data=zagManualPBOverrides();for(const [ex,v] of Object.entries(data)){if(Number.isFinite(Number(v.kg)))st.max[ex]=Number(v.kg)}}
-function zagSetMax(ex,v){
- const kg=+displayToKg(v);if(!Number.isFinite(kg)||kg<0)return;st.max[ex]=kg;
- zagRememberManualPB(ex,kg);
- // Keep every visible copy of the same exercise PB in sync immediately.
- document.querySelectorAll('input[data-zag-max-ex]').forEach(inp=>{if(inp.dataset.zagMaxEx===ex&&inp!==document.activeElement)inp.value=kgToDisplay(kg)});
- zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save();zagPushOnePB(ex)
+function zagRememberManualPB(ex,kg,reps){const data=zagManualPBOverrides();data[ex]={kg:Number(kg),reps:Number(reps),at:Date.now()};localStorage.setItem(zagManualPBKey,JSON.stringify(data));}
+function zagRestoreManualPBs(){const data=zagManualPBOverrides();for(const [ex,v] of Object.entries(data)){if(Number.isFinite(Number(v.kg))){st.max[ex]=Number(v.kg);if(Number.isInteger(Number(v.reps)*2)&&Number(v.reps)>=0.5){st.repsAtMax=st.repsAtMax||{};st.repsAtMax[ex]=Number(v.reps)}}}}
+function zagSetMax(ex,v,repsInput){
+ const kg=Number(displayToKg(v));
+ const reps=repsInput===undefined?Number(st.repsAtMax?.[ex]||1):Number(repsInput);
+ if(!zagValidLoggedSet(ex,kg,reps)||kg<=0){alert('Enter a weight greater than 0 and at least 0.5 reps (in half-rep steps) for this maximum.');return false;}
+ st.max[ex]=kg;st.repsAtMax=st.repsAtMax||{};st.repsAtMax[ex]=reps;
+ zagRememberManualPB(ex,kg,reps);
+ document.querySelectorAll('input[data-zag-max-ex]').forEach(inp=>{if(inp.dataset.zagMaxEx===ex)inp.value=kgToDisplay(kg)});
+ document.querySelectorAll('input[data-zag-max-reps]').forEach(inp=>{if(inp.dataset.zagMaxReps===ex)inp.value=reps});
+ zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save();zagPushOnePB(ex);return true;
 }
-function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><input class=cell type=number data-zag-max-ex="${esc(x)}" value="${kgToDisplay(st.max[x]||0)}" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
+function zagSaveMaxRow(btn){
+ const row=btn.closest('.maxrow');if(!row)return;
+ const w=row.querySelector('[data-zag-max-ex]'),r=row.querySelector('[data-zag-max-reps]');
+ if(w&&r&&zagSetMax(w.dataset.zagMaxEx,w.value,r.value)){btn.textContent='Saved ✓';setTimeout(()=>{if(btn.isConnected)btn.textContent='Save'},1300)}
+}
+function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><label class="zagMaxEditField"><small>Weight (${weightUnit()})</small><input class=cell type=number min="0" step="any" data-zag-max-ex="${esc(x)}" value="${kgToDisplay(st.max[x]||0)}"></label><label class="zagMaxEditField"><small>Reps</small><input class=cell type=number min="0.5" step="0.5" data-zag-max-reps="${esc(x)}" value="${st.repsAtMax?.[x]||1}"></label><button type="button" class=btn onclick="zagSaveMaxRow(this)">Save</button><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
+
 function toggleMaxSection(i){let el=document.getElementById("maxsec-"+i);if(!el)return;el.classList.toggle("collapsed");let b=el.querySelector(".maxToggle");if(b)b.textContent=el.classList.contains("collapsed")?"EXPAND":"COLLAPSE"}
 function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach((sec,i)=>{s+=`<section id="maxsec-${i}" class="maxsection collapsed"><div class=maxSectionHead onclick="toggleMaxSection(${i})"><h2>${esc(sec.name)}</h2><button type=button class="btn maxToggle" onclick="event.stopPropagation();toggleMaxSection(${i})">EXPAND</button></div><div class=maxSectionBody>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</div></section>`});document.getElementById("screen").innerHTML=s}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
@@ -4356,7 +4394,10 @@ function zagStrengthRecords(){
    h.sets.forEach(v=>{
      const kg=Number(v.kg),reps=Number(v.reps);
      if(!v.exercise||!Number.isFinite(kg)||kg<=0||!Number.isFinite(reps)||reps<1||reps>30)return;
-     const e1rm=kg*(1+reps/30);
+     // Half reps are recorded exactly, but only full reps contribute to the Epley estimate.
+     const fullReps=Math.floor(reps);
+     if(fullReps<1) return;
+     const e1rm=kg*(1+fullReps/30);
      by[v.exercise]=Math.max(by[v.exercise]||0,e1rm);
    });
    return {date:h.date||'',by};
