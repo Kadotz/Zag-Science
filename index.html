@@ -3169,10 +3169,11 @@ function zagRenderAccount(mode='signin'){
   root.addEventListener('click',e=>{if(e.target===root)zagCloseAccount()});
   let body='';
   if(!zagSb){body='<div class=note>Cloud connection could not load. Check your internet connection and reopen Zag Science.</div>'}
-  else if(zagSession?.user){const u=zagSession.user;body=`<div class=zagAuthUser><b>${esc(u.user_metadata?.username||'Zag Science user')}</b><div class=note>${esc(u.email||'')}</div></div><div class=note style="margin-bottom:12px">Your account is connected. Your PBs are backed up to Zag Science Cloud while you are signed in.<div id="zagCloudPBStatus" class="note" style="margin-top:8px;color:#c99cff"></div></div><button type=button class="btn danger" style="width:100%" onclick="zagSignOut()">Sign Out</button>`}
+  else if(zagSession?.user){const u=zagSession.user;body=`<div class=zagAuthUser><b>${esc(u.user_metadata?.username||'Zag Science user')}</b><div class=note>${esc(u.email||'')}</div></div><div class=note style="margin-bottom:12px">Your account is connected. Your PBs and workout history are backed up to Zag Science Cloud while you are signed in.<div id="zagCloudBackupStatus" class="note" style="margin-top:8px;color:#f0c68b">Checking cloud backup…</div><div id="zagCloudPBStatus" class="note" style="margin-top:8px;color:#c99cff"></div></div><button type=button class="btn danger" style="width:100%" onclick="zagSignOut()">Sign Out</button>`}
   else body=zagAuthForm(mode);
   root.innerHTML=`<div class=zagAccountBox><button type=button class="btn zagAccountClose" onclick="zagCloseAccount()">×</button><h2>Account</h2><div id=zagAuthPanel>${body}</div></div>`;
   document.body.appendChild(root);
+  if(zagSession?.user&&typeof zagCloudBackupLastSaved==='function')zagSetCloudBackupStatus(zagCloudBackupLastSaved(),'ok');
 }
 
 async function zagChangeUsername(){
@@ -3254,20 +3255,28 @@ function zagQueuePBSync(){if(zagPBSyncSuppress||!zagSession?.user)return;clearTi
 // A new v17 cloud snapshot is created from an existing device before any restore.
 // Groups/demoGroup, history and the complete streak object are included.
 let zagStateSyncTimer=null,zagStateSyncBusy=false,zagStateSyncSuppress=false;
+let zagStateUploadPromise=null,zagStateRetryTimer=null,zagStateRetryDelay=5000;
+let zagStateChangeCounter=0;
+const ZAG_BACKUP_PREFIX='__ZAG_STATE_V17__';
 function zagCloudStatePayload(){
  const copy=JSON.parse(JSON.stringify(st));
- // PBs stay in their proven personal_bests sync; everything else is backed up here.
  delete copy.max; delete copy.repsAtMax;
  return copy;
 }
 function zagStateMarkerKey(){return zagSession?.user?.id?'zagStateCloudV17:'+zagSession.user.id:''}
 function zagLocalTrainingHasData(){
  return (Array.isArray(st.history)&&st.history.length>0) ||
-        Number(st.streak?.count||0)>0 ||
-        !!st.streak?.lastWorkout ||
-        !!st.demoGroup ||
-        (Array.isArray(st.groups)&&st.groups.length>0) ||
+        Number(st.streak?.count||0)>0 || !!st.streak?.lastWorkout ||
+        !!st.demoGroup || (Array.isArray(st.groups)&&st.groups.length>0) ||
         Object.keys(st.draft||{}).length>0;
+}
+function zagSetCloudBackupStatus(message,kind='pending'){
+ const el=document.getElementById('zagCloudBackupStatus');
+ if(el){el.textContent=message;el.style.color=kind==='ok'?'#a5e6b7':kind==='error'?'#ff9bad':'#f0c68b';}
+}
+function zagCloudBackupLastSaved(){
+ const key=zagStateMarkerKey(),last=key&&localStorage.getItem(key);
+ return last&&Number.isFinite(Date.parse(last))?'Cloud backup saved '+new Date(last).toLocaleString():'Cloud backup not yet confirmed';
 }
 async function zagSyncProfileTrainingSummary(){
  if(!zagSb||!zagSession?.user)return;
@@ -3278,35 +3287,87 @@ async function zagSyncProfileTrainingSummary(){
 }
 async function zagFetchCloudState(){
  if(!zagSb||!zagSession?.user)return null;
- const {data,error}=await zagSb.from('workouts').select('workout_data,completed_at')
-   .eq('user_id',zagSession.user.id).eq('workout_name','__ZAG_STATE_V17__')
+ // Versioned names coexist with the legacy v17 snapshot. Never rely on the old
+ // delete-then-insert operation; sorting by completed_at selects the newest.
+ const {data,error}=await zagSb.from('workouts').select('workout_data,completed_at,workout_name')
+   .eq('user_id',zagSession.user.id).like('workout_name',ZAG_BACKUP_PREFIX+'%')
    .order('completed_at',{ascending:false}).limit(1);
  if(error)throw error;
  return data&&data[0]?data[0]:null;
 }
+function zagScheduleCloudRetry(){
+ if(zagStateRetryTimer||!zagSession?.user)return;
+ zagStateRetryTimer=setTimeout(()=>{
+   zagStateRetryTimer=null;
+   if(navigator.onLine===false){zagScheduleCloudRetry();return;}
+   zagUploadCloudState().catch(e=>console.warn('Training cloud backup retry failed',e));
+ },zagStateRetryDelay);
+ zagStateRetryDelay=Math.min(zagStateRetryDelay*2,120000);
+}
 async function zagUploadCloudState(){
  if(!zagSb||!zagSession?.user)return;
- const uid=zagSession.user.id,now=new Date().toISOString(),payload=zagCloudStatePayload();
- const {error:delErr}=await zagSb.from('workouts').delete().eq('user_id',uid).eq('workout_name','__ZAG_STATE_V17__');
- if(delErr)throw delErr;
- const {error}=await zagSb.from('workouts').insert({
-   user_id:uid,workout_name:'__ZAG_STATE_V17__',completed_at:now,workout_data:payload
- });
- if(error)throw error;
- await zagSyncProfileTrainingSummary();
- localStorage.setItem(zagStateMarkerKey(),now);
+ // Serialize uploads. An older request must never finish after a newer one.
+ if(zagStateUploadPromise)return zagStateUploadPromise;
+ const uid=zagSession.user.id;
+ zagStateUploadPromise=(async()=>{
+   const revision=zagStateChangeCounter;
+   const payload=zagCloudStatePayload();
+   const now=new Date().toISOString();
+   const uniqueName=ZAG_BACKUP_PREFIX+':'+Date.now()+':'+Math.random().toString(36).slice(2,10);
+   zagSetCloudBackupStatus('Backing up workouts…');
+   try{
+     // Append new snapshot FIRST. Previous backups are never removed to make room.
+     const {error}=await zagSb.from('workouts').insert({
+       user_id:uid,workout_name:uniqueName,completed_at:now,workout_data:payload
+     });
+     if(error)throw error;
+     // Confirm that the newly written row can be read before reporting success.
+     const {data:verified,error:readError}=await zagSb.from('workouts')
+       .select('workout_name').eq('user_id',uid).eq('workout_name',uniqueName).limit(1);
+     if(readError)throw readError;
+     if(!verified||!verified.length)throw new Error('Cloud backup verification failed');
+     localStorage.setItem(zagStateMarkerKey(),now);
+     zagStateRetryDelay=5000;
+     if(zagStateRetryTimer){clearTimeout(zagStateRetryTimer);zagStateRetryTimer=null;}
+     zagSetCloudBackupStatus(zagCloudBackupLastSaved(),'ok');
+     // Summary is optional; a profile error must not invalidate a saved backup.
+     zagSyncProfileTrainingSummary().catch(e=>console.warn('Training profile summary sync failed',e));
+     // Retain the newest five versioned backups. Never delete the legacy snapshot,
+     // and never let a pruning failure invalidate the new successful backup.
+     try{
+       const {data:rows,error:listError}=await zagSb.from('workouts')
+         .select('workout_name,completed_at').eq('user_id',uid)
+         .like('workout_name',ZAG_BACKUP_PREFIX+':%')
+         .order('completed_at',{ascending:false});
+       if(listError)throw listError;
+       for(const old of (rows||[]).slice(5)){
+         const {error:deleteError}=await zagSb.from('workouts').delete()
+           .eq('user_id',uid).eq('workout_name',old.workout_name);
+         if(deleteError)throw deleteError;
+       }
+     }catch(pruneError){console.warn('Old backup cleanup deferred',pruneError);}
+     if(zagStateChangeCounter!==revision)zagQueueStateSync();
+   }catch(e){
+     zagSetCloudBackupStatus('Backup pending — saved on this iPhone. Will retry.','error');
+     zagScheduleCloudRetry();
+     throw e;
+   }
+ })();
+ try{return await zagStateUploadPromise;}
+ finally{zagStateUploadPromise=null;}
 }
 function zagApplyCloudState(row){
  if(!row||!row.workout_data)return;
  zagStateSyncSuppress=true;
- const keepMax=st.max,keepReps=st.repsAtMax;
- st={...st,...JSON.parse(JSON.stringify(row.workout_data))};
- st.max=keepMax||{}; st.repsAtMax=keepReps||{};zagRestoreManualPBs();
- st.history=Array.isArray(st.history)?st.history:[];
- st.groups=Array.isArray(st.groups)?st.groups:[];
- st.streak=st.streak||{count:0,lastWorkout:'',weekKey:'',restUsed:0,lastPopup:''};
- localStorage.setItem('zagScienceV2',JSON.stringify(st));
- zagStateSyncSuppress=false;
+ try{
+   const keepMax=st.max,keepReps=st.repsAtMax;
+   st={...st,...JSON.parse(JSON.stringify(row.workout_data))};
+   st.max=keepMax||{};st.repsAtMax=keepReps||{};zagRestoreManualPBs();
+   st.history=Array.isArray(st.history)?st.history:[];
+   st.groups=Array.isArray(st.groups)?st.groups:[];
+   st.streak=st.streak||{count:0,lastWorkout:'',weekKey:'',restUsed:0,lastPopup:''};
+   localStorage.setItem('zagScienceV2',JSON.stringify(st));
+ }finally{zagStateSyncSuppress=false;}
 }
 async function zagInitStateSync(){
  if(!zagSb||!zagSession?.user||zagStateSyncBusy)return;
@@ -3314,31 +3375,47 @@ async function zagInitStateSync(){
  try{
    const marker=localStorage.getItem(zagStateMarkerKey());
    const localHas=zagLocalTrainingHasData();
-   let cloud=await zagFetchCloudState();
-
-   // v17 migration: never import the faulty v16/v16.1 snapshots.
-   // The real populated phone creates the first v17 snapshot.
+   const initialRevision=zagStateChangeCounter;
+   const cloud=await zagFetchCloudState();
    if(!cloud){
-     if(localHas) await zagUploadCloudState();
-   }else if(!marker && !localHas){
-     zagApplyCloudState(cloud);
-     localStorage.setItem(zagStateMarkerKey(),cloud.completed_at);
-   }else if(!marker && localHas){
-     // Existing populated device wins the migration.
+     if(localHas)await zagUploadCloudState();
+   }else if(!marker&&!localHas){
+     // Never replace a locally edited session while a cloud fetch was in flight.
+     if(zagStateChangeCounter===initialRevision){
+       zagApplyCloudState(cloud);localStorage.setItem(zagStateMarkerKey(),cloud.completed_at);
+     }else zagQueueStateSync();
+   }else if(!marker&&localHas){
+     // Existing populated phone wins the initial migration; cloud is preserved.
      await zagUploadCloudState();
-   }else if(marker && new Date(cloud.completed_at).getTime()>new Date(marker).getTime()+1000){
-     zagApplyCloudState(cloud);
-     localStorage.setItem(zagStateMarkerKey(),cloud.completed_at);
+   }else if(marker&&Date.parse(cloud.completed_at)>Date.parse(marker)+1000){
+     // A single-device recovery may restore a newer cloud snapshot, but never
+     // discard unsynced local edits from the current session.
+     if(zagStateChangeCounter===initialRevision){
+       zagApplyCloudState(cloud);localStorage.setItem(zagStateMarkerKey(),cloud.completed_at);
+     }else zagQueueStateSync();
    }
-   await zagSyncProfileTrainingSummary();
- }catch(e){console.warn('Training cloud sync failed',e)}
- finally{zagStateSyncBusy=false}
+   zagSetCloudBackupStatus(zagCloudBackupLastSaved(),'ok');
+   zagSyncProfileTrainingSummary().catch(e=>console.warn('Training profile summary sync failed',e));
+ }catch(e){
+   console.warn('Training cloud sync failed',e);
+   zagSetCloudBackupStatus('Backup pending — saved on this iPhone. Will retry.','error');
+   zagScheduleCloudRetry();
+ }finally{zagStateSyncBusy=false;}
 }
 function zagQueueStateSync(){
  if(zagStateSyncSuppress||!zagSession?.user)return;
+ zagStateChangeCounter++;
+ zagSetCloudBackupStatus('Waiting to back up…');
  clearTimeout(zagStateSyncTimer);
- zagStateSyncTimer=setTimeout(()=>zagUploadCloudState().catch(e=>console.warn('Training cloud backup failed',e)),900);
+ zagStateSyncTimer=setTimeout(()=>{
+   zagUploadCloudState().catch(e=>console.warn('Training cloud backup failed',e));
+ },900);
 }
+window.addEventListener('online',()=>{
+ if(!zagSession?.user)return;
+ if(zagStateRetryTimer){clearTimeout(zagStateRetryTimer);zagStateRetryTimer=null;}
+ zagUploadCloudState().catch(e=>console.warn('Training cloud backup reconnect failed',e));
+});
 
 (async()=>{if(!zagSb)return;const {data}=await zagSb.auth.getSession();zagSession=data.session||null;zagRefreshAccountStatus();if(zagSession){setTimeout(()=>zagStartPushNotifications(false),500);zagInitStateSync().then(()=>zagInitPBSync());}zagSb.auth.onAuthStateChange((event,session)=>{zagSession=session||null;setTimeout(zagRefreshAccountStatus,0);if(session)setTimeout(()=>{zagStartPushNotifications(false).then(zagSavePushToken)},500);if(session){setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),150);setTimeout(zagSyncBodyweightProfile,300);}if(event==='PASSWORD_RECOVERY')setTimeout(()=>{const pw=prompt('Enter your new Zag Science password:');if(pw&&pw.length>=6)zagSb.auth.updateUser({password:pw}).then(({error})=>alert(error?error.message:'Password updated.'))},200)})})();
 </script>
