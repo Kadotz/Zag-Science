@@ -456,7 +456,7 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 <style id="zag-guide-slide-consistency">
 /* All tutorial slides use the same box, sizing and edge lighting. */
 #zagInfoPanelV6 .zagInfoSlide{background-size:100% 100%!important;background-position:center!important}
-#zagInfoPanelV6 .zagInfoSlide[data-i="0"]{filter:brightness(.93) saturate(.88);background-size:108% 108%!important}
+#zagInfoPanelV6 .zagInfoSlide[data-i="0"]{filter:brightness(.93) saturate(.88);background-size:100% 100%!important}
 </style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
@@ -823,7 +823,7 @@ function zagAnimateExerciseScroll(target,landscape=false){
  if(window._zagScrollAnim)cancelAnimationFrame(window._zagScrollAnim);
  const start=window.scrollY,delta=target-start,duration=landscape?860:720,startTime=performance.now();
  function frame(now){const t=Math.min(1,(now-startTime)/duration);const ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-  window.scrollTo(0,start+delta*ease);if(t<1)window._zagScrollAnim=requestAnimationFrame(frame);}
+  window.scrollTo({top:start+delta*ease,behavior:'instant'});if(t<1)window._zagScrollAnim=requestAnimationFrame(frame);}
  window._zagScrollAnim=requestAnimationFrame(frame);
 }
 function zagNextExerciseTarget(next,landscape){
@@ -867,7 +867,12 @@ function completeExercise(ex,e){
        requestAnimationFrame(()=>requestAnimationFrame(()=>{
          const fixed=document.querySelector('header, .stickyHeader, .appHeader');
          const fixedBottom=fixed&&getComputedStyle(fixed).position==='fixed'?fixed.getBoundingClientRect().bottom:0;
-         const topOffset=Math.max(headerH,fixedBottom)+8;
+         // Landscape cards can be near the end of the document. Provide enough
+         // scrollable space to align their top rather than stopping at max scroll.
+         let spacer=document.getElementById('zagLandscapeScrollSpacer');
+         if(!spacer){spacer=document.createElement('div');spacer.id='zagLandscapeScrollSpacer';spacer.setAttribute('aria-hidden','true');document.querySelector('.app').appendChild(spacer);}
+         spacer.style.height=Math.max(window.innerHeight,350)+'px';
+         const topOffset=Math.max(fixedBottom,0)+3;
          const y=Math.max(0,window.scrollY+next.getBoundingClientRect().top-topOffset);
          zagAnimateExerciseScroll(y,true);
        }));
