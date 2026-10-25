@@ -453,6 +453,10 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 .maxrow .zagMaxEditField input{width:100%;min-width:0;box-sizing:border-box}
 .maxrow{gap:5px}.maxrow .zagMaxEditField:first-of-type{max-width:90px}.maxrow .zagMaxEditField:nth-of-type(2){max-width:60px}
 @media(max-width:380px){.maxrow .zagMaxEditField:first-of-type{max-width:75px}.maxrow .zagMaxEditField:nth-of-type(2){max-width:48px}.maxrow .zagMaxEditField small{font-size:9px}}
+<style id="zag-guide-slide-consistency">
+/* All tutorial slides use the same box, sizing and edge lighting. */
+#zagInfoPanelV6 .zagInfoSlide{background-size:100% 100%!important;background-position:center!important}
+#zagInfoPanelV6 .zagInfoSlide[data-i="0"]{filter:brightness(.93) saturate(.88)}
 </style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
@@ -580,6 +584,7 @@ function setActiveNav(name){
  let current=currentId.startsWith("nav-")?currentId.slice(4):"";
  // Every main tab owns its own scroll position. Never carry one tab's Y into another.
  // Finish Workout can explicitly force Workout to top without re-saving its old position.
+ if(current==="workout")zagRememberWorkoutPanels();
  if(current && !zagSkipNextScrollSave && !(zagForceWorkoutTop && current==="workout"))st.pageScrolls[current]=window.scrollY||0;
  zagSkipNextScrollSave=false;
  if(zagForceWorkoutTop && name==="workout")st.pageScrolls.workout=0;
@@ -591,6 +596,7 @@ function setActiveNav(name){
  const screen=document.getElementById("screen");
  if(screen)screen.style.visibility="hidden";
  const restoreToken=++zagScrollRestoreToken;
+ if(current===name){if(screen)screen.style.visibility="visible";return;}
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
    if(restoreToken===zagScrollRestoreToken){
      window.scrollTo({top:target,left:0,behavior:"instant"});
@@ -740,8 +746,10 @@ function showStreakPopup(force=false){
  let o=document.createElement("div");o.className="streakOverlay";o.innerHTML=`<div class=streakPopup><div class="streakHero ${lost?'streakLost':''}"><div class=streakArmWrap><img class=streakPopupStateArm src="${arm}" alt="Streak state arm"></div><div class=big>${st.streak.count||0}</div></div><h2>${title}</h2><div style="font-size:18px;font-weight:900;color:#ef9cff">DAY STREAK</div><p>${msg}</p><button class=pick onclick="zagStreakPopupContinue(this)">LET'S GO</button></div>`;
  document.body.appendChild(o);st.streak.lastPopup=k;save();
 }
-function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el){el.classList.toggle('collapsed');let b=el.querySelector('.exerciseExpand');if(b)b.textContent=el.classList.contains('collapsed')?'EXPAND':'COLLAPSE'}}
-function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed')}
+function toggleExerciseCard(i){let el=document.getElementById('exercise-'+i);if(el){el.classList.toggle('collapsed');let b=el.querySelector('.exerciseExpand');if(b)b.textContent=el.classList.contains('collapsed')?'EXPAND':'COLLAPSE';zagRememberWorkoutPanels()}}
+function toggleExtrasCard(){document.getElementById('workoutExtras')?.classList.toggle('collapsed');zagRememberWorkoutPanels()}
+function zagRememberWorkoutPanels(){const root=document.getElementById('screen');if(!root)return;window.zagWorkoutOpen=Array.from(root.querySelectorAll('.exercise:not(.collapsed)[id]')).map(x=>x.id);window.zagWorkoutExtrasOpen=!!root.querySelector('#workoutExtras:not(.collapsed)')}
+function zagRestoreWorkoutPanels(){for(const id of (window.zagWorkoutOpen||[])){const el=document.getElementById(id);if(el){el.classList.remove('collapsed');const b=el.querySelector('.exerciseExpand');if(b)b.textContent='COLLAPSE'}}if(window.zagWorkoutExtrasOpen)document.getElementById('workoutExtras')?.classList.remove('collapsed')}
 // Point 4: Previous-session values are suggestions only, never completed sets.
 function zagPreviousSets(ex){
  const hist=Array.isArray(st.history)?st.history:[];
@@ -781,7 +789,7 @@ function zagPreviousMouse(event,input){
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><div class="zagGuideTitle"><h1>${esc(d[0])}</h1><button type="button" class="zagGuideLaunch" onclick="zagOpenWorkoutGuide()" aria-label="Workout guide"><img src="assets/images/workout-guide-info-icon.png" alt=""></button></div><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
 d[1].forEach((ex,e)=>{let ts=sets(ex),previousSets=zagPreviousSets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
 ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},prev=previousSets[i]||{},prevKg=Number.isFinite(Number(prev.kg))&&prev.kg!==undefined?String(kgToDisplay(prev.kg)):"",prevReps=Number.isFinite(Number(prev.reps))&&prev.reps!==undefined?String(prev.reps):"",stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal aria-label="Actual weight; double tap to use previous session weight" placeholder="${prevKg}" data-zag-previous="${prevKg}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal min="0.5" step="0.5" aria-label="Actual reps; double tap to use previous session reps" placeholder="${prevReps}" data-zag-previous="${prevReps}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
-s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
+s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s;zagRestoreWorkoutPanels()}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
 function compactWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='W'+o.value})}
@@ -811,16 +819,19 @@ function zagRecordPB(ex,kg,reps){
  zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);
  return true;
 }
-function zagAnimateExerciseScroll(target){
+function zagAnimateExerciseScroll(target,landscape=false){
  if(window._zagScrollAnim)cancelAnimationFrame(window._zagScrollAnim);
- const start=window.scrollY,delta=target-start,duration=720,startTime=performance.now();
- function frame(now){
-  const t=Math.min(1,(now-startTime)/duration);
-  const ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-  window.scrollTo(0,start+delta*ease);
-  if(t<1)window._zagScrollAnim=requestAnimationFrame(frame);
- }
+ const start=window.scrollY,delta=target-start,duration=landscape?860:720,startTime=performance.now();
+ function frame(now){const t=Math.min(1,(now-startTime)/duration);const ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  window.scrollTo(0,start+delta*ease);if(t<1)window._zagScrollAnim=requestAnimationFrame(frame);}
  window._zagScrollAnim=requestAnimationFrame(frame);
+}
+function zagNextExerciseTarget(next,landscape){
+ const header=document.querySelector('img.logo[alt="Zag Science"]');
+ const headerH=header?header.getBoundingClientRect().height:0;
+ // Landscape has its own offset to avoid exposing the bottom of the previous card.
+ const gap=landscape?10:4;
+ return Math.max(0,window.scrollY+next.getBoundingClientRect().top-headerH-gap);
 }
 function completeExercise(ex,e){
  const ts=sets(ex);let pbChanged=false;
@@ -848,8 +859,9 @@ function completeExercise(ex,e){
    requestAnimationFrame(()=>requestAnimationFrame(()=>{
      const header=document.querySelector('img.logo[alt="Zag Science"]');
      const headerH=header?header.getBoundingClientRect().height:0;
-     const y=Math.max(0,window.scrollY+next.getBoundingClientRect().top-headerH-4);
-     zagAnimateExerciseScroll(y);
+     const landscape=window.matchMedia("(orientation: landscape)").matches;
+     const y=zagNextExerciseTarget(next,landscape);
+     zagAnimateExerciseScroll(y,landscape);
    }));
  }));
 
