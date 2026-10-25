@@ -957,6 +957,10 @@ function zagSetMax(ex,v,repsInput){
  if(!zagValidLoggedSet(ex,kg,reps)||kg<=0){alert('Enter a weight greater than 0 and at least 0.5 reps (in half-rep steps) for this maximum.');return false;}
  st.max[ex]=kg;st.repsAtMax=st.repsAtMax||{};st.repsAtMax[ex]=reps;
  zagRememberManualPB(ex,kg,reps);
+ // A lower manual maximum does not silently rewrite real workout history.
+ // Offer an explicit review of historical sets above the new value.
+ const higher=zagFindHigherHistoricalSets(ex,kg);
+ if(higher.length){setTimeout(()=>{if(confirm(higher.length+' historical set(s) for '+ex+' exceed your newly saved maximum. Review and correct them?'))zagReviewHigherSets(ex,kg);},0);}
  document.querySelectorAll('input[data-zag-max-ex]').forEach(inp=>{if(inp.dataset.zagMaxEx===ex)inp.value=kgToDisplay(kg)});
  document.querySelectorAll('input[data-zag-max-reps]').forEach(inp=>{if(inp.dataset.zagMaxReps===ex)inp.value=reps});
  zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);save();zagPushOnePB(ex);return true;
@@ -965,6 +969,40 @@ function zagSaveMaxRow(btn){
  const row=btn.closest('.maxrow');if(!row)return;
  const w=row.querySelector('[data-zag-max-ex]'),r=row.querySelector('[data-zag-max-reps]');
  if(w&&r&&zagSetMax(w.dataset.zagMaxEx,w.value,r.value)){btn.textContent='Saved ✓';setTimeout(()=>{if(btn.isConnected)btn.textContent='Save'},1300)}
+}
+
+// Point 3: review actual source sets, rather than artificially clamping graph points.
+function zagFindHigherHistoricalSets(ex,kg){
+ const out=[];(st.history||[]).forEach((h,hi)=>(h.sets||[]).forEach((v,si)=>{
+  if(v.exercise===ex&&Number(v.kg)>kg)out.push({hi,si,entry:v,date:h.date||''});
+ }));return out;
+}
+function zagReviewHigherSets(ex,kg){
+ const found=zagFindHigherHistoricalSets(ex,kg);
+ if(!found.length){modal('Review '+esc(ex),'<p>No historical sets exceed your new maximum.</p>');return;}
+ const rows=found.map(({hi,si,entry,date})=>`<div class="pagecard" style="margin:9px 0"><div class="note">${esc(date)}</div><div>${esc(ex)}</div><label>Weight (${weightUnit()}) <input class="cell" type="number" min="0" step="any" id="zagCorrectionWeight${hi}_${si}" value="${kgToDisplay(Number(entry.kg))}"></label><label>Reps <input class="cell" type="number" min="0.5" step="0.5" id="zagCorrectionReps${hi}_${si}" value="${Number(entry.reps)}"></label><button class="btn" onclick="zagCorrectHistoricalSet(${hi},${si},'${q(ex)}',${kg})">Save correction</button></div>`).join('');
+ modal('Review higher records',`<p class="note">These sets exceed your manually entered max of ${weightText(kg)}. Correct only mistakes; genuine historical lifts should stay unchanged. Changing a set will recalculate the graph.</p>${rows}<button class="btn" onclick="closeModal()">Keep history unchanged</button>`);
+}
+function zagCorrectHistoricalSet(hi,si,ex,threshold){
+ const h=st.history?.[hi],entry=h?.sets?.[si];if(!entry||entry.exercise!==ex){alert('This set is no longer available. Reopen the review.');return;}
+ const wi=document.getElementById(`zagCorrectionWeight${hi}_${si}`),ri=document.getElementById(`zagCorrectionReps${hi}_${si}`);
+ if(!wi||!ri)return;
+ const kg=Number(displayToKg(wi.value)),reps=Number(ri.value);
+ if(wi.value.trim()===''||ri.value.trim()===''||!zagValidLoggedSet(ex,kg,reps)){
+  alert('Enter a valid weight and reps in half-rep steps.');return;
+ }
+ entry.kg=kg;entry.reps=reps;
+ // Recalculate the highest historical load without erasing the manual maximum.
+ // Manual maximum remains user-controlled and is never silently raised/lowered.
+ st.prHistory=st.prHistory||{};
+ if(Array.isArray(st.prHistory[ex])){
+  // Legacy PB event history can contain the erroneous reading; remove matching
+  // higher entries only after explicit correction, retaining other exercises.
+  st.prHistory[ex]=st.prHistory[ex].filter(x=>Number(x.kg??x.weight??0)<=Math.max(threshold,kg));
+ }
+ save();
+ if(typeof zagRenderWidgetState==='function')try{zagRenderWidgetState()}catch(_){}
+ zagReviewHigherSets(ex,threshold);
 }
 function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><label class="zagMaxEditField"><small>Weight (${weightUnit()})</small><input class=cell type=number min="0" step="any" data-zag-max-ex="${esc(x)}" value="${kgToDisplay(st.max[x]||0)}"></label><label class="zagMaxEditField"><small>Reps</small><input class=cell type=number min="0.5" step="0.5" data-zag-max-reps="${esc(x)}" value="${st.repsAtMax?.[x]||1}"></label><button type="button" class=btn onclick="zagSaveMaxRow(this)">Save</button><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
 
@@ -4419,34 +4457,60 @@ function zagStrengthGraphHTML(){
  const periodOptions=[['1m','Last month'],['3m','Last 3 months'],['6m','Last 6 months'],['1y','Last year'],['all','All time']];
  const intervalOptions=[['workout','Every workout'],['day','Daily'],['week','Weekly'],['month','Monthly']];
  const makeOpts=(arr,value)=>arr.map(([v,label])=>'<option value="'+v+'"'+(v===value?' selected':'')+'>'+label+'</option>').join('');
- return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" aria-label="Exercise" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div class="zagStrengthControls"><label>Time period<select class="zagStrengthSelect" aria-label="Time period" onchange="window.zagStrengthPeriod=this.value;historyPage()">'+makeOpts(periodOptions,period)+'</select></label><label>Graph interval<select class="zagStrengthSelect" aria-label="Graph interval" onchange="window.zagStrengthInterval=this.value;historyPage()">'+makeOpts(intervalOptions,interval)+'</select></label></div><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected,period,interval)+'</div><p class="zagStrengthLegend">Estimated strength from completed sets (weight × [1 + reps ÷ 30]). Overall shows average relative strength against each exercise’s first recorded result (100% baseline). Rest days never count as zero.</p></div>';
+ return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" aria-label="Exercise" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div class="zagStrengthControls"><label>Time period<select class="zagStrengthSelect" aria-label="Time period" onchange="window.zagStrengthPeriod=this.value;historyPage()">'+makeOpts(periodOptions,period)+'</select></label><label>Graph interval<select class="zagStrengthSelect" aria-label="Graph interval" onchange="window.zagStrengthInterval=this.value;historyPage()">'+makeOpts(intervalOptions,interval)+'</select></label></div><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected,period,interval)+'</div><p class="zagStrengthLegend">Estimated strength from completed sets (weight × [1 + reps ÷ 30]). The selected period compares a fixed group of exercises against their strength at the start of that period (100% baseline). New exercises do not dilute the comparison. Rest days never count as zero.</p></div>';
 }
 function zagStrengthSVG(records,selected,period,interval){
  const baseline=Object.create(null),latest=Object.create(null),points=[];
  const dated=records.map(r=>({...r,when:zagStrengthDate(r.date)})).filter(r=>r.when).sort((a,b)=>a.when-b.when);
- // Build baselines from the entire history, even when the visible range is shorter.
  const now=new Date(),cutoff=new Date(now);
  if(period==='1m')cutoff.setMonth(cutoff.getMonth()-1);
  else if(period==='3m')cutoff.setMonth(cutoff.getMonth()-3);
  else if(period==='6m')cutoff.setMonth(cutoff.getMonth()-6);
  else if(period==='1y')cutoff.setFullYear(cutoff.getFullYear()-1);
  const visibleStart=period==='all'?-Infinity:cutoff.getTime();
- dated.forEach(r=>{
+ const readings=Object.create(null);
+ for(const r of dated)for(const [name,value] of Object.entries(r.by)){
+  if(Number.isFinite(value)&&value>0)(readings[name]||(readings[name]=[])).push({time:r.when.getTime(),value});
+ }
+ // Fixed comparison cohort: for a selected period an exercise needs a baseline
+ // from on/before the start and a reading inside the period. For All Time it
+ // needs at least two distinct readings. New exercises cannot dilute the trend.
+ const eligible=[];
+ for(const [name,arr] of Object.entries(readings)){
+  if(period==='all'){
+   if(arr.length<2)continue;
+   baseline[name]=arr[0].value;
+  }else{
+   const before=arr.filter(v=>v.time<=visibleStart);
+   if(!before.length||!arr.some(v=>v.time>visibleStart))continue;
+   baseline[name]=before[before.length-1].value;
+  }
+  eligible.push(name);
+ }
+ if(selected!=='all'&&!eligible.includes(selected)){
+  return '<p class="note">Not enough readings to compare this exercise over the selected period. Try All Time or a longer period.</p>';
+ }
+ // Show the start of each period as 100% and carry forward last values on rest days.
+ if(period!=='all'){
+  for(const name of eligible)latest[name]=baseline[name];
+  points.push({time:visibleStart,v:100,date:new Date(visibleStart)});
+ }
+ for(const r of dated){
+  if(r.when.getTime()<visibleStart)continue;
   let changed=false;
   for(const [name,value] of Object.entries(r.by)){
-   if(!Number.isFinite(value)||value<=0)continue;
-   if(!(name in baseline))baseline[name]=value;
+   if(!eligible.includes(name)||!Number.isFinite(value)||value<=0)continue;
    latest[name]=value;
    if(selected==='all'||selected===name)changed=true;
   }
-  if(!changed||r.when.getTime()<visibleStart) return;
-  let v;
-  if(selected==='all'){
-   const names=Object.keys(latest).filter(name=>baseline[name]>0);
-   if(names.length)v=names.reduce((sum,name)=>sum+100*latest[name]/baseline[name],0)/names.length;
-  }else if(latest[selected]>0)v=latest[selected];
+  if(!changed)continue;
+  const names=selected==='all'?eligible:[selected];
+  // For All Time, don't count an exercise until its first recorded reading.
+  const active=names.filter(name=>latest[name]>0&&baseline[name]>0);
+  if(!active.length)continue;
+  const v=active.reduce((sum,name)=>sum+100*latest[name]/baseline[name],0)/active.length;
   if(Number.isFinite(v))points.push({time:r.when.getTime(),v,date:r.when});
- });
+ }
  if(interval!=='workout'){
   const grouped=new Map();
   for(const pt of points){
@@ -4464,7 +4528,7 @@ function zagStrengthSVG(records,selected,period,interval){
  if(points.length===1)return '<p class="note">Only one strength reading in this period. Select a longer period to see a trend.</p>';
  const w=330,h=180,px=40,right=314;
  let min=Math.min(...points.map(p=>p.v)),max=Math.max(...points.map(p=>p.v));
- if(selected==='all'){min=Math.min(min,100);max=Math.max(max,100);}
+ {min=Math.min(min,100);max=Math.max(max,100);}
  const pad=Math.max((max-min)*.12,selected==='all'?2:1);min-=pad;max+=pad;
  const range=max-min,first=points[0].time,last=points[points.length-1].time;
  const xy=points.map(pt=>[px+((pt.time-first)/Math.max(last-first,1))*(right-px),h-22-(pt.v-min)/range*(h-44)]);
@@ -4474,7 +4538,7 @@ function zagStrengthSVG(records,selected,period,interval){
  return '<svg class="zagStrengthChart" viewBox="0 0 330 180" role="img" aria-label="Strength progress chart">'
   +'<line x1="'+px+'" y1="8" x2="'+px+'" y2="158" stroke="#654075"/>'
   +'<line x1="'+px+'" y1="158" x2="'+right+'" y2="158" stroke="#654075"/>'
-  +(selected==='all'?'<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="'+right+'" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>':'')
+  +('<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="'+right+'" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>' )
   +'<path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'
   +xy.map(pt=>'<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="2.8" fill="#fff"/>').join('')
   +'<text x="2" y="17" fill="#dda5ff" font-size="10">'+max.toFixed(1)+'</text>'
