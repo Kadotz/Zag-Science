@@ -367,7 +367,7 @@ img.logo[alt="Zag Science"]{
 </style>
 
 <style id="zag-v27-4-groups-no-flash">
-body.zagGroupsBooting #screen{visibility:hidden!important}
+body.zagGroupsBooting #screen{visibility:visible!important}
 </style>
 <style id="zag-v27-5-group-emblem-size">
 .zagOnlineGroupCard .row{position:relative!important;min-height:164px!important;padding-left:168px!important}
@@ -548,7 +548,7 @@ function syncPlannedDays(){st.plannedDays=JSON.parse(JSON.stringify(st.days))}
 })();
 
 if(st.units!=='lb'&&st.units!=='kg')st.units='kg';
-function save(){zagRestoreManualPBs();localStorage.setItem("zagScienceV2",JSON.stringify(st));if(typeof zagWidgetScheduleSync==="function")zagWidgetScheduleSync();if(typeof zagQueuePBSync==="function")zagQueuePBSync();if(typeof zagQueueStateSync==="function")zagQueueStateSync()}
+function save(){zagRestoreManualPBs();localStorage.setItem("zagScienceV2",JSON.stringify(st));if(window.zagRestoringBackup)return;if(typeof zagWidgetScheduleSync==="function")zagWidgetScheduleSync();if(typeof zagQueuePBSync==="function")zagQueuePBSync();if(typeof zagQueueStateSync==="function")zagQueueStateSync()}
 function weightUnit(){return st.units==='lb'?'lb':'kg'}
 function kgToDisplay(v){if(v===''||v==null)return '';let n=Number(v);if(!Number.isFinite(n))return v;let out=weightUnit()==='lb'?n*2.2046226218:n;return Math.round(out*10)/10}
 function displayToKg(v){if(v===''||v==null)return '';let n=Number(v);if(!Number.isFinite(n))return v;let out=weightUnit()==='lb'?n/2.2046226218:n;return Math.round(out*1000)/1000}
@@ -575,6 +575,7 @@ function setActiveNav(name){
  st.pageScrolls=st.pageScrolls||{};
  // Migrate the older Maxes-only scroll value once, if present.
  if(st.pageScrolls.maxes==null&&st.maxesScrollY!=null)st.pageScrolls.maxes=Number(st.maxesScrollY)||0;
+ if(name!=="groups")window.zagGroupRequestId=(window.zagGroupRequestId||0)+1;document.body.classList.remove("zagGroupsBooting");
  let currentId=document.querySelector(".nav button.active")?.id||"";
  let current=currentId.startsWith("nav-")?currentId.slice(4):"";
  // Every main tab owns its own scroll position. Never carry one tab's Y into another.
@@ -757,23 +758,29 @@ function zagQuickPrevious(input){
 }
 function zagPreviousStart(event,input){
  if(!input||input.value!==''||!input.dataset.zagPrevious)return;
- const now=Date.now();
- if(input._zagLastTouch&&now-input._zagLastTouch<440){
-   event.preventDefault();input._zagDoubleTap=true;
- }
+ // Prevent the first touch from focusing the number input and opening iOS keyboard.
+ event.preventDefault();
 }
 function zagPreviousTouch(event,input){
  if(!input||input.value!==''||!input.dataset.zagPrevious)return;
+ event.preventDefault();
  const now=Date.now();
- if(input._zagDoubleTap||(input._zagLastTouch&&now-input._zagLastTouch<440)){
-   event.preventDefault();input._zagDoubleTap=false;input._zagLastTouch=0;
-   zagQuickPrevious(input);input.blur();return;
+ if(input._zagSingleTimer && now-(input._zagLastTouch||0)<410){
+  clearTimeout(input._zagSingleTimer);input._zagSingleTimer=null;input._zagLastTouch=0;
+  input.blur();zagQuickPrevious(input);return;
  }
- input._zagLastTouch=now;
+ clearTimeout(input._zagSingleTimer);input._zagLastTouch=now;
+ input._zagSingleTimer=setTimeout(()=>{
+  input._zagSingleTimer=null;
+  if(input.isConnected&&input.value==='')input.focus();
+ },410);
+}
+function zagPreviousMouse(event,input){
+ if(event.detail>=2){event.preventDefault();clearTimeout(input._zagSingleTimer);input._zagSingleTimer=null;input.blur();zagQuickPrevious(input);}
 }
 function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><div class="zagGuideTitle"><h1>${esc(d[0])}</h1><button type="button" class="zagGuideLaunch" onclick="zagOpenWorkoutGuide()" aria-label="Workout guide"><img src="assets/images/workout-guide-info-icon.png" alt=""></button></div><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
 d[1].forEach((ex,e)=>{let ts=sets(ex),previousSets=zagPreviousSets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},prev=previousSets[i]||{},prevKg=Number.isFinite(Number(prev.kg))&&prev.kg!==undefined?String(kgToDisplay(prev.kg)):"",prevReps=Number.isFinite(Number(prev.reps))&&prev.reps!==undefined?String(prev.reps):"",stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class="cell zagPreviousInput" type=number inputmode=decimal aria-label="Actual weight; double tap to use previous session weight" placeholder="${prevKg}" data-zag-previous="${prevKg}" ondblclick="zagQuickPrevious(this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class="cell zagPreviousInput" type=number inputmode=decimal min="0.5" step="0.5" aria-label="Actual reps; double tap to use previous session reps" placeholder="${prevReps}" data-zag-previous="${prevReps}" ondblclick="zagQuickPrevious(this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
+ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},prev=previousSets[i]||{},prevKg=Number.isFinite(Number(prev.kg))&&prev.kg!==undefined?String(kgToDisplay(prev.kg)):"",prevReps=Number.isFinite(Number(prev.reps))&&prev.reps!==undefined?String(prev.reps):"",stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal aria-label="Actual weight; double tap to use previous session weight" placeholder="${prevKg}" data-zag-previous="${prevKg}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal min="0.5" step="0.5" aria-label="Actual reps; double tap to use previous session reps" placeholder="${prevReps}" data-zag-previous="${prevReps}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.r??""}" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
 s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
@@ -806,7 +813,7 @@ function zagRecordPB(ex,kg,reps){
 }
 function zagAnimateExerciseScroll(target){
  if(window._zagScrollAnim)cancelAnimationFrame(window._zagScrollAnim);
- const start=window.scrollY,delta=target-start,duration=520,startTime=performance.now();
+ const start=window.scrollY,delta=target-start,duration=720,startTime=performance.now();
  function frame(now){
   const t=Math.min(1,(now-startTime)/duration);
   const ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -830,6 +837,7 @@ function completeExercise(ex,e){
    if(zagRecordPB(ex,kg,reps))pbChanged=true;
  });
  clickSound();save();if(pbChanged)zagPushOnePB(ex);
+ zagScrollRestoreToken++;
  workout();
  // Wait for the expanded card to settle, then animate its top below the sticky header.
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -838,8 +846,8 @@ function completeExercise(ex,e){
    next.classList.remove("collapsed");
    const b=next.querySelector(".exerciseExpand");if(b)b.textContent="COLLAPSE";
    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-     const header=document.querySelector('header,.zagHeader,.appHeader');
-     const headerH=header&&getComputedStyle(header).position==='fixed'?header.getBoundingClientRect().height:0;
+     const header=document.querySelector('img.logo[alt="Zag Science"]');
+     const headerH=header?header.getBoundingClientRect().height:0;
      const y=Math.max(0,window.scrollY+next.getBoundingClientRect().top-headerH-4);
      zagAnimateExerciseScroll(y);
    }));
@@ -1054,8 +1062,8 @@ function zagCorrectHistoricalSet(hi,si,ex,threshold){
 }
 function maxRow(x){return `<div class=maxrow><span>${esc(x)}</span><label class="zagMaxEditField"><small>Weight (${weightUnit()})</small><input class=cell type=number min="0" step="any" data-zag-max-ex="${esc(x)}" value="${kgToDisplay(st.max[x]||0)}"></label><label class="zagMaxEditField"><small>Reps</small><input class=cell type=number min="0.5" step="0.5" data-zag-max-reps="${esc(x)}" value="${st.repsAtMax?.[x]||1}"></label><button type="button" class=btn onclick="zagSaveMaxRow(this)">Save</button><button class=btn onclick="showPR('${q(x)}')">›</button></div>`}
 
-function toggleMaxSection(i){let el=document.getElementById("maxsec-"+i);if(!el)return;el.classList.toggle("collapsed");let b=el.querySelector(".maxToggle");if(b)b.textContent=el.classList.contains("collapsed")?"EXPAND":"COLLAPSE"}
-function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach((sec,i)=>{s+=`<section id="maxsec-${i}" class="maxsection collapsed"><div class=maxSectionHead onclick="toggleMaxSection(${i})"><h2>${esc(sec.name)}</h2><button type=button class="btn maxToggle" onclick="event.stopPropagation();toggleMaxSection(${i})">EXPAND</button></div><div class=maxSectionBody>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</div></section>`});document.getElementById("screen").innerHTML=s}
+function toggleMaxSection(i){let el=document.getElementById("maxsec-"+i);if(!el)return;el.classList.toggle("collapsed");window.zagOpenMaxSections=window.zagOpenMaxSections||new Set();if(el.classList.contains("collapsed"))window.zagOpenMaxSections.delete(i);else window.zagOpenMaxSections.add(i);let b=el.querySelector(".maxToggle");if(b)b.textContent=el.classList.contains("collapsed")?"EXPAND":"COLLAPSE"}
+function maxes(){setActiveNav("maxes");let s=`<div class=title><h1>Max & History</h1><p>${esc(st.splitName)}</p></div>`;uniqueSections().forEach((sec,i)=>{s+=`<section id="maxsec-${i}" class="maxsection collapsed"><div class=maxSectionHead onclick="toggleMaxSection(${i})"><h2>${esc(sec.name)}</h2><button type=button class="btn maxToggle" onclick="event.stopPropagation();toggleMaxSection(${i})">EXPAND</button></div><div class=maxSectionBody>${sec.mains.map(maxRow).join("")}<div class=extraslabel>${esc(sec.name)} EXTRAS</div>${sec.extras.map(maxRow).join("")}</div></section>`});document.getElementById("screen").innerHTML=s;for(const i of (window.zagOpenMaxSections||[])){const el=document.getElementById("maxsec-"+i);if(el){el.classList.remove("collapsed");const b=el.querySelector(".maxToggle");if(b)b.textContent="COLLAPSE"}}}
 function showPR(ex){let hist=st.prHistory[ex]||[];modal(esc(ex),`<p><b>Current max:</b> ${weightText(st.max[ex]||0)} &nbsp; <b>Reps:</b> ${st.repsAtMax[ex]||"—"}</p>${hist.length?hist.map(x=>`<div class=pagecard>${esc(x.date)} — ${weightText(x.from)} → <b>${weightText(x.to)}</b> × ${x.reps}</div>`).join(""):"<p class=small>No recorded PR changes yet.</p>"}`)}
 function historyPage(){setActiveNav("history");document.getElementById("screen").innerHTML=`<div class=title><h1>Workout History</h1></div>${zagStrengthGraphHTML()}${st.history.length?st.history.map(h=>`<div class=pagecard><b>${esc(h.day)}</b><div class=note>${esc(h.date)}</div>${h.sets.length} completed sets</div>`).join(""):"<p>No workouts saved yet.</p>"}`}
 function groupMembers(){
@@ -1380,7 +1388,7 @@ ${streakReminderTimeSetting()}
 </div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff;display:${window.zagBuildChannel==='testflight'?'block':'none'}"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">TestFlight only — unavailable in production builds.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><small id="zag-widget-diagnostics" style="display:block;margin-top:6px;color:#dca6ff">Widget bridge: checking…</small><pre id="zag-widget-graph-debug" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#e7b7ff;line-height:1.5;margin-top:8px">Graph diagnostics: checking…</pre><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 async function backup(){
  try{
-  const json=JSON.stringify({format:'zag-science-backup',version:1,exportedAt:new Date().toISOString(),data:st},null,2);
+  const json=JSON.stringify({format:'zag-science-backup',version:1,exportedAt:new Date().toISOString(),data:st,manualPBOverrides:zagManualPBOverrides()},null,2);
   const file=new File([json],'zag-science-backup-'+new Date().toISOString().slice(0,10)+'.json',{type:'application/json'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'Zag Science backup'});return;}
   const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
@@ -1393,7 +1401,16 @@ function restore(input){
    const parsed=JSON.parse(reader.result),data=parsed?.format==='zag-science-backup'?parsed.data:parsed;
    if(!data||typeof data!=='object'||!Array.isArray(data.history)||!Array.isArray(data.days)||!data.max||typeof data.max!=='object')throw new Error('Not a recognised Zag Science backup');
    if(!confirm('Import this backup? It will replace local workout data. Export your current backup first.'))return;
-   st=data;save();alert('Backup imported successfully.');location.reload();
+   // Save a rollback copy before changing any local data.
+   const old=localStorage.getItem('zagScienceV2');
+   if(old)localStorage.setItem('zagSciencePreImportRollback',old);
+   const overrides=parsed?.format==='zag-science-backup'?(parsed.manualPBOverrides||{}):{};
+   // Legacy backups do not include overrides: do not reapply newer local PBs.
+   localStorage.setItem(zagManualPBKey,JSON.stringify(overrides));
+   st=data;window.zagRestoringBackup=true;save();
+   // Delay cloud uploads until the restored local state can be reviewed.
+   sessionStorage.setItem('zagBackupJustRestored','1');
+   alert('Backup imported. Your saved workout data and PBs have been restored locally. Please check them before syncing.');location.reload();
   }catch(e){alert('Backup import failed: '+e.message)}finally{input.value='';}
  };reader.onerror=()=>alert('Could not read backup file');reader.readAsText(file);
 }
@@ -1435,8 +1452,8 @@ document.addEventListener("visibilitychange",()=>{
 <!-- ZAG TIPS UPDATE 2026-10-21 v2: complete border and iPhone widget guide -->
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
-  <div id="zagInfoCounterV2" aria-live="polite" style="position:absolute;top:2%;left:5%;z-index:7;color:#f5d5ff;font-size:11px;font-weight:800;text-shadow:0 0 8px #e53cff;pointer-events:none">GUIDE 1 / 5</div>
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-bordered.jpg')"></div>
+  
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-key-features-new.png')"></div>
   <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2.jpg')"></div>
   <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3.jpg')"></div>
   <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4.jpg')"></div>
@@ -1457,7 +1474,7 @@ document.addEventListener("visibilitychange",()=>{
  function showInfoPage(n){
    const slides=[...overlay.querySelectorAll(".zagInfoSlide")];
    zagInfoPage=Math.max(0,Math.min(slides.length-1,n));
-   slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage)); const counter=document.getElementById("zagInfoCounterV2");if(counter)counter.textContent=`GUIDE ${zagInfoPage+1} / ${slides.length}`;
+   slides.forEach((x,i)=>x.classList.toggle("active",i===zagInfoPage)); 
    const prev=overlay.querySelector(".zagInfoPrevHit"), next=overlay.querySelector(".zagInfoNextHit");
    const follow=overlay.querySelector("#zagInfoPage2FollowPlan"), jump=overlay.querySelector("#zagInfoPage2TopSets"), cta=overlay.querySelector("#zagInfoLastCTA");
    if(prev) prev.style.display=zagInfoPage===0?"none":"block";
@@ -3709,8 +3726,9 @@ if ('serviceWorker' in navigator) {
      document.getElementById("screen").innerHTML='<div class="title"><h1>Groups</h1></div><div class="pagecard"><h2>You need to be online</h2><p class="note">Connect to the internet to load your groups.</p></div>';
      return;
    }
-   document.body.classList.add("zagGroupsBooting");
-   await zagHydrateProfile();
+   setActiveNav("groups");
+   document.getElementById("screen").innerHTML='<div class="title"><h1>Groups</h1></div><div class="pagecard">Loading groups…</div>';
+   try{await Promise.race([zagHydrateProfile(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Connection timed out")),9000))]);}catch(e){if(requestId===window.zagGroupRequestId&&sessionStorage.getItem("zagActivePage")==="groups")document.getElementById("screen").innerHTML='<div class="title"><h1>Groups</h1></div><div class="pagecard"><h2>Unable to load Groups</h2><p class="note">Check your internet connection and try again.</p><button class="btn" onclick="zagOnlineGroupsHome()">Retry</button></div>';return;}
    if(requestId!==window.zagGroupRequestId||sessionStorage.getItem("zagActivePage")!=="groups"&&sessionStorage.getItem("zagActivePage")!==null)return;
    setActiveNav("groups");const h=document.getElementById("screen");
    h.innerHTML="";
@@ -4554,7 +4572,7 @@ function zagStrengthGraphHTML(){
 function zagStrengthSVG(records,selected,period,interval){
  const baseline=Object.create(null),latest=Object.create(null),points=[];
  const dated=records.map(r=>({...r,when:zagStrengthDate(r.date)})).filter(r=>r.when).sort((a,b)=>a.when-b.when);
- const now=new Date(),cutoff=new Date(now);
+ const now=dated.length?new Date(Math.max(...dated.map(r=>r.when.getTime()))):new Date(),cutoff=new Date(now);
  if(period==='1m')cutoff.setMonth(cutoff.getMonth()-1);
  else if(period==='3m')cutoff.setMonth(cutoff.getMonth()-3);
  else if(period==='6m')cutoff.setMonth(cutoff.getMonth()-6);

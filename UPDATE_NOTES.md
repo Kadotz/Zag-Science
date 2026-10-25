@@ -1,26 +1,22 @@
-# Zag Science — TestFlight feedback fixes (candidate)
+# Zag Science — follow-up feedback patch (provisional)
 
-Based on the prior Updated Three Tips package. Replace the files at the same relative paths; keep all other existing assets and native files.
+Built from the user's exact uploaded `index(20261025-162418).html`.
 
-## Implemented
-- Double-tap previous value: intercept second touch before keyboard focus, fill and blur. Single tap retains normal editing.
-- Separate Home guide from Tips: GUIDE counter and original five guide slots, removing Widget guide slide. Widget and graph remain in Tips & Tricks.
-- Remove streak reminder diagnostic/test/repair buttons (actual scheduling preserved).
-- On a genuine higher completed PB, clear stale manual PB override so the new PB isn't overwritten later.
-- Include all programmed/maxed exercises in strength graph selector, even without history.
-- Period graph can use first in-period reading as baseline when no earlier reading exists and at least two readings exist.
-- Offline Groups: show immediate connectivity message; ignore delayed group load results after navigation.
-- Backup export uses iOS share sheet when supported, falling back to a downloaded JSON. Import validates essential structure and requires confirmation.
-- Smooth Next Exercise scroll with a timed animation and header offset.
-- Historical-set review logic from prior version preserved.
+## Code changes
+- Suppressed guide counter and replaced first guide artwork with the approved Key Features image.
+- Remember expanded Maxes sections across tab changes in the current app session.
+- Adjusted previous-value tap handling with a 410ms double-tap window. iOS WebKit keyboard focus must be tested: delayed programmatic focus may not display the keyboard due to user-gesture restrictions.
+- Changed Groups loading to display immediately, added a 9-second timeout for initial profile loading, and invalidated outdated Groups requests when switching tabs. Further Supabase calls may still hang; live testing required.
+- Prevented the old Groups boot CSS from hiding the entire screen.
+- Included manual PB override metadata in exported backups and cleared newer overrides on legacy import; stored pre-import rollback in localStorage.
+- Improved Next Exercise animation duration and sticky logo offset.
+- Graph time windows now anchor to latest dated workout rather than current date (to make historical tests usable). This changes the interpretation of 'Last month' when there are no recent workouts.
 
-## Requires TestFlight verification / remaining risks
-- Native iOS file sharing and restore require device testing; exporting to Files requires choosing Save to Files in the share sheet.
-- iOS double-tap keyboard interaction requires on-device verification.
-- Graph periods with fewer than two readings legitimately cannot show a trend; historical date parsing and per-period baselines need verification against actual data.
-- PB sync across Supabase and all workout contexts needs on-device testing, particularly manual corrections vs genuine PBs.
-- Groups async paths other than main group list may still need navigation race protection.
-- All six prior improvements, StoreKit purchase verification and notification reliability are not fully covered by automated tests.
-- Do not uninstall the existing app or reset local data before confirming backup export/recovery.
+## NOT FULLY RESOLVED — do not treat as release-ready
+- The **Key Features** first-page artwork has now been replaced with the user-approved purple flask version. The other four guide pages remain unchanged.
+- Graph's historical PB readings are sourced from completed history, not manually changed Maxes. A manual PB edit does not rewrite historical workouts. A separate correction review is needed for bad historical records.
+- Cloud synchronisation after restoring an old backup needs a server-side conflict/restore policy. Local restore alone cannot guarantee that remote data won't replace the imported snapshot.
+- Groups, iOS keyboard behaviour, smooth scrolling, backup import/export, and all graph time windows require iPhone testing.
+- No live Supabase/StoreKit or iOS execution performed.
 
-12 automated tests and 52 embedded JavaScript syntax checks passed in the development environment.
+Keep a separate export of your data and do not delete the app while testing.
