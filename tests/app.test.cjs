@@ -36,14 +36,14 @@ test('valid sets accept whole and half reps',()=>{
 });
 test('reject invalid and excessive weights',()=>{
   const c=context(['zagIsBodyweightExercise','zagValidLoggedSet']);
-  for(const kg of [-1,0,10000,'',null,Infinity])assert.equal(c.zagValidLoggedSet('Bench Press',kg,8),false);
+  for(const kg of [-1,10000,'',null,Infinity])assert.equal(c.zagValidLoggedSet('Bench Press',kg,8),false);
   assert.equal(c.zagValidLoggedSet('Bench Press',2.5,8),true);
 });
-test('zero added weight is allowed only for designated bodyweight exercises',()=>{
+test('zero added weight is allowed for all exercises',()=>{
   const c=context(['zagIsBodyweightExercise','zagValidLoggedSet']);
   for(const ex of ['Pull Ups','Chin Ups','Push Ups','Dips'])assert.equal(c.zagValidLoggedSet(ex,0,10),true,ex);
-  assert.equal(c.zagValidLoggedSet('Bench Press',0,10),false);
-  assert.equal(c.zagValidLoggedSet('Lat Pull Up',0,10),false);
+  assert.equal(c.zagValidLoggedSet('Bench Press',0,10),true);
+  assert.equal(c.zagValidLoggedSet('Lat Pull Up',0,10),true);
 });
 test('a PB requires valid reps, weight and a genuine increase',()=>{
   const st={max:{'Bench Press':100},repsAtMax:{},prHistory:{}};

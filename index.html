@@ -801,9 +801,9 @@ function zagIsBodyweightExercise(ex){return /(?:^|\b)(?:pull[ -]?ups?|chin[ -]?u
 function zagValidLoggedSet(ex,kg,reps){
  if(kg===''||kg==null||reps===''||reps==null)return false;
  const w=Number(kg),r=Number(reps);
- return Number.isFinite(w)&&Number.isFinite(r)&&w>=0&&w<=9999&&Number.isInteger(r*2)&&r>=0.5&&r<=1000&&(w>0||zagIsBodyweightExercise(ex));
+ return Number.isFinite(w)&&Number.isFinite(r)&&w>=0&&w<=9999&&Number.isInteger(r*2)&&r>=0.5&&r<=1000;
 }
-function zagSetValidationMessage(){return 'Enter at least 0.5 reps (in half-rep steps) and a valid weight for each completed set. Zero weight is allowed for bodyweight exercises only.'}
+function zagSetValidationMessage(){return 'Enter at least 0.5 reps (in half-rep steps) and a valid weight for each completed set. Zero weight is allowed; reps must be greater than zero.'}
 function zagRecordPB(ex,kg,reps){
  kg=Number(kg);reps=Number(reps);
  if(!zagValidLoggedSet(ex,kg,reps)||kg<=0||kg<=Number(st.max[ex]||0))return false;
@@ -819,24 +819,22 @@ function zagRecordPB(ex,kg,reps){
  zagPBDirty=zagPBDirty||new Set();zagPBDirty.add(ex);
  return true;
 }
-function zagAnimateExerciseScroll(target,landscape=false){
+function zagAnimateExerciseScroll(target,landscape=false,onDone){
  if(window._zagScrollAnim)cancelAnimationFrame(window._zagScrollAnim);
- const start=window.scrollY,delta=target-start,duration=landscape?950:720,startTime=performance.now();
- // Numeric scrollTo avoids WebKit's native smooth-scroll cancellation/jump.
+ const start=window.scrollY,delta=target-start,duration=landscape?1050:850,startTime=performance.now();
+ // Keep layout stable until the next exercise has reached the top.
  function frame(now){
-  const t=Math.min(1,(now-startTime)/duration),ease=1-Math.pow(1-t,3);
+  const t=Math.min(1,(now-startTime)/duration),ease=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
   window.scrollTo(0,start+delta*ease);
   if(t<1)window._zagScrollAnim=requestAnimationFrame(frame);
-  else window._zagScrollAnim=0;
+  else {window._zagScrollAnim=0;if(typeof onDone==='function')onDone();}
  }
  window._zagScrollAnim=requestAnimationFrame(frame);
 }
-function zagNextExerciseTarget(next,landscape){
- const header=document.querySelector('img.logo[alt="Zag Science"]');
- const headerH=header?header.getBoundingClientRect().height:0;
- // Landscape has its own offset to avoid exposing the bottom of the previous card.
- const gap=landscape?10:4;
- return Math.max(0,window.scrollY+next.getBoundingClientRect().top-headerH-gap);
+function zagNextExerciseTarget(next){
+ const fixed=[...document.querySelectorAll('header,.stickyHeader,.appHeader')].filter(el=>['fixed','sticky'].includes(getComputedStyle(el).position));
+ const fixedBottom=Math.max(0,...fixed.map(el=>el.getBoundingClientRect().bottom));
+ return Math.max(0,window.scrollY+next.getBoundingClientRect().top-fixedBottom-2);
 }
 function completeExercise(ex,e){
  const ts=sets(ex);let pbChanged=false;
@@ -855,44 +853,35 @@ function completeExercise(ex,e){
  clickSound();save();if(pbChanged)zagPushOnePB(ex);
  if(window._zagScrollAnim)cancelAnimationFrame(window._zagScrollAnim);
  const landscape=window.matchMedia('(orientation: landscape)').matches;
- const originalY=window.scrollY;
- // The outgoing card must close in BOTH orientations. Prevent the panel-state
- // restorer from reopening it when workout() rebuilds the DOM.
- window.zagWorkoutOpen=(window.zagWorkoutOpen||[]).filter(id=>id!=='exercise-'+e);
- zagScrollRestoreToken++;
- workout();
  const current=document.getElementById('exercise-'+e);
- if(current){current.classList.add('collapsed');const btn=current.querySelector('.exerciseExpand');if(btn)btn.textContent='EXPAND';}
  const next=document.getElementById('exercise-'+(e+1));
- if(!next){zagRememberWorkoutPanels();return;}
+ if(!next){if(current){current.classList.add('collapsed');const b=current.querySelector('.exerciseExpand');if(b)b.textContent='EXPAND';}zagRememberWorkoutPanels();return;}
+ // DO NOT redraw or collapse the outgoing card before scrolling: both
+ // operations change document geometry and make WebKit appear to jump.
  next.classList.remove('collapsed');
  const nextBtn=next.querySelector('.exerciseExpand');if(nextBtn)nextBtn.textContent='COLLAPSE';
- zagRememberWorkoutPanels();
- if(!landscape){
-   // Keep the established portrait targeting and animation unchanged.
-   requestAnimationFrame(()=>requestAnimationFrame(()=>zagAnimateExerciseScroll(zagNextExerciseTarget(next,false),false)));
-   return;
- }
- // iOS scroll anchoring can shift the page when an exercise collapses.
- // Disable it for the duration of the landscape transition.
  const screen=document.getElementById('screen');
  if(screen)screen.style.overflowAnchor='none';
- // Place the spacer inside the scrolling document, after the exercises.
- // Without this, iOS clamps the final card before it reaches the top.
  let spacer=document.getElementById('zagLandscapeScrollSpacer');
  if(!spacer){spacer=document.createElement('div');spacer.id='zagLandscapeScrollSpacer';spacer.setAttribute('aria-hidden','true');}
  if(screen)screen.appendChild(spacer);
  spacer.style.height=Math.max(window.innerHeight*1.5,650)+'px';
- // Keep scroll position stable across the workout() DOM replacement.
- window.scrollTo(0,originalY);
+ zagRememberWorkoutPanels();
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-   const fixed=[...document.querySelectorAll('header,.stickyHeader,.appHeader')].filter(el=>['fixed','sticky'].includes(getComputedStyle(el).position));
-   const fixedBottom=Math.max(0,...fixed.map(el=>el.getBoundingClientRect().bottom));
-   // Top of the new card goes to the TOP of the visible screen, not below
-   // the previous card. Respect only genuinely fixed headers.
-   const destination=Math.max(0,window.scrollY+next.getBoundingClientRect().top-fixedBottom-2);
-   zagAnimateExerciseScroll(destination,true);
-   setTimeout(()=>{if(screen)screen.style.overflowAnchor='';},1050);
+  const destination=zagNextExerciseTarget(next);
+  zagAnimateExerciseScroll(destination,landscape,()=>{
+   // Previous card is now above the viewport. Collapse without altering
+   // the visual position of the current card (compensate scroll height).
+   if(current){
+    const before=next.getBoundingClientRect().top;
+    current.classList.add('collapsed');
+    const b=current.querySelector('.exerciseExpand');if(b)b.textContent='EXPAND';
+    const after=next.getBoundingClientRect().top;
+    window.scrollBy(0,after-before);
+   }
+   zagRememberWorkoutPanels();
+   if(screen)screen.style.overflowAnchor='';
+  });
  }));
 }
 function fillAllSets(ex){
