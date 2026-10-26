@@ -832,9 +832,13 @@ function zagAnimateExerciseScroll(target,landscape=false,onDone){
  window._zagScrollAnim=requestAnimationFrame(frame);
 }
 function zagNextExerciseTarget(next){
- const fixed=[...document.querySelectorAll('header,.stickyHeader,.appHeader')].filter(el=>['fixed','sticky'].includes(getComputedStyle(el).position));
+ const fixed=[...document.querySelectorAll('header,.stickyHeader,.appHeader,img.logo')].filter(el=>['fixed','sticky'].includes(getComputedStyle(el).position));
  const fixedBottom=Math.max(0,...fixed.map(el=>el.getBoundingClientRect().bottom));
- return Math.max(0,window.scrollY+next.getBoundingClientRect().top-fixedBottom-2);
+ // The app's actual sticky header is img.logo, not a <header> element.
+ // Keep the landscape target unchanged; in portrait leave a small visible gap.
+ const landscape=window.matchMedia('(orientation: landscape)').matches;
+ const clearance=landscape?2:12;
+ return Math.max(0,window.scrollY+next.getBoundingClientRect().top-fixedBottom-clearance);
 }
 function completeExercise(ex,e){
  const ts=sets(ex);let pbChanged=false;
