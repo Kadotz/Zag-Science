@@ -76,6 +76,11 @@ public class ZagWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
         } else if !wasPro {
             store.set("PRO: refreshing widget graph", forKey: "zag_widget_diagnostic")
         }
+        // Snapshot allows the widget extension to advance calendar state without launching the app.
+        if let snapshot = call.getObject("streakSnapshot"),
+           let snapshotData = try? JSONSerialization.data(withJSONObject: snapshot) {
+            store.set(snapshotData, forKey: "zag_widget_streak_snapshot")
+        }
         store.set(max(0, call.getInt("streakCount") ?? 0), forKey: "zag_widget_streak_count")
         let streakState = call.getString("streakState") ?? "rest"
         store.set(["active", "rest", "lost"].contains(streakState) ? streakState : "rest",

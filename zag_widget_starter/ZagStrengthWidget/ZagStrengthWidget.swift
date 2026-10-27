@@ -108,6 +108,55 @@ struct StrengthEntry: TimelineEntry {
     let streakState: String
 }
 
+// Projected streak display: calendar rollover works while the host app is closed.
+// Only days BEFORE today can be counted as missed; today remains available to train.
+private func zagProjectedStreak(_ defaults: UserDefaults?) -> (Int, String) {
+    var count = max(0, defaults?.integer(forKey: "zag_widget_streak_count") ?? 0)
+    var state = defaults?.string(forKey: "zag_widget_streak_state") ?? "rest"
+    guard let data = defaults?.data(forKey: "zag_widget_streak_snapshot"),
+          let payload = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+          let savedDay = payload["date"] as? String else { return (count, state) }
+    let formatter = DateFormatter()
+    formatter.calendar = Calendar(identifier: .gregorian)
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.timeZone = TimeZone.current
+    formatter.dateFormat = "yyyy-MM-dd"
+    guard let snapshotDate = formatter.date(from: savedDay) else { return (count, state) }
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: Date())
+    let start = calendar.startOfDay(for: snapshotDate)
+    guard start < today else { return (count, state) }
+    let restAllowance = max(0, (payload["restDays"] as? Int) ?? 0)
+    let weekRest = payload["weekRest"] as? [String: Int] ?? [:]
+    let lastWorkout = payload["lastWorkout"] as? String ?? ""
+    var restUsed = weekRest
+    var day = calendar.date(byAdding: .day, value: 1, to: start) ?? today
+    // Process completed days only. Protect against invalid snapshots and huge loops.
+    var iterations = 0
+    while day < today && iterations < 3660 {
+        iterations += 1
+        let dayKey = formatter.string(from: day)
+        if dayKey != lastWorkout {
+            let weekday = calendar.component(.weekday, from: day)
+            let offset = (weekday + 5) % 7 // Monday-based week
+            let monday = calendar.date(byAdding: .day, value: -offset, to: day) ?? day
+            let weekKey = formatter.string(from: monday)
+            let used = restUsed[weekKey] ?? 0
+            if used < restAllowance { restUsed[weekKey] = used + 1 }
+            else { count = 0; state = "lost" }
+        }
+        day = calendar.date(byAdding: .day, value: 1, to: day) ?? today
+    }
+    if count > 0 {
+        let weekday = calendar.component(.weekday, from: today)
+        let offset = (weekday + 5) % 7
+        let monday = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
+        let used = restUsed[formatter.string(from: monday)] ?? 0
+        state = used < restAllowance ? "rest" : "active"
+    }
+    return (count, state)
+}
+
 struct StrengthProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> StrengthEntry {
         StrengthEntry(date: .now, isPro: true, points: [45,48,47,54,60,62,68], change: 12.8,
@@ -118,14 +167,15 @@ struct StrengthProvider: AppIntentTimelineProvider {
         load(configuration)
     }
     func timeline(for configuration: StrengthWidgetConfiguration, in context: Context) async -> Timeline<StrengthEntry> {
-        Timeline(entries: [load(configuration)], policy: .after(Date().addingTimeInterval(60)))
+        let calendar = Calendar.current
+        let nextMidnight = calendar.nextDate(after: Date(), matching: DateComponents(hour: 0, minute: 1), matchingPolicy: .nextTime) ?? Date().addingTimeInterval(86400)
+        return Timeline(entries: [load(configuration)], policy: .after(nextMidnight))
     }
 
     private func load(_ configuration: StrengthWidgetConfiguration) -> StrengthEntry {
         let defaults = UserDefaults(suiteName: sharedSuite)
         let isPro = zagCurrentProAccess()
-        let streakCount = max(0, defaults?.integer(forKey: "zag_widget_streak_count") ?? 0)
-        let streakState = defaults?.string(forKey: "zag_widget_streak_state") ?? "rest"
+        let (streakCount, streakState) = zagProjectedStreak(defaults)
         let selected = configuration.exercise?.id ?? "all"
         let label = configuration.exercise?.name ?? "Overall strength"
         let empty = StrengthEntry(date: .now, isPro: isPro, points: [], change: nil,

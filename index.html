@@ -457,7 +457,14 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 /* All tutorial slides use the same box, sizing and edge lighting. */
 #zagInfoPanelV6 .zagInfoSlide{background-size:100% 100%!important;background-position:center!important}
 #zagInfoPanelV6 .zagInfoSlide[data-i="0"]{filter:brightness(.93) saturate(.88);background-size:100% 100%!important}
-</style></head>
+</style><style id="zag-weight-converter-style">
+.zagWeightCalc{margin:10px 0 16px;padding:14px 15px;border:1px solid #a92bc7;border-radius:16px;background:linear-gradient(135deg,#090914,#17091e);box-shadow:0 0 18px #a629c722;color:white}
+.zagCalcHead{display:flex;justify-content:space-between;align-items:center;letter-spacing:.6px;color:#f1cbff}.zagCalcHead span{color:#d78be9;font-size:13px}
+.zagCalcInputs{display:flex;align-items:end;gap:10px;margin-top:12px}.zagCalcInputs label{flex:1;min-width:0;font-size:12px;font-weight:700;color:#c8a5d4}.zagCalcInputs input{box-sizing:border-box;display:block;width:100%;margin-top:5px;padding:10px 9px;border:1px solid #86449a;border-radius:9px;background:#0b0710;color:white;font-size:19px;font-weight:700;outline:none}.zagCalcInputs input:focus{border-color:#e351ff;box-shadow:0 0 10px #bb34e455}.zagCalcSwap{font-size:24px;color:#e052ff;padding-bottom:7px}.zagCalcNote{font-size:11px;color:#bda6c7;margin-top:10px}
+.zagCalcTipPage{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;box-sizing:border-box;padding:10% 9% 14%;text-align:center;background:radial-gradient(ellipse at top,#350b49 0%,#13061d 45%,#050309 90%);border:2px solid #d84cff;border-radius:20px;color:white;box-shadow:inset 0 0 26px #8c1daf,0 0 18px #a820dc;overflow:auto}
+.zagCalcTipPage h2{font-size:clamp(21px,5vw,32px);color:#f5d6ff;margin:12px 0}.zagCalcTipPage p{font-size:clamp(13px,3.4vw,17px);line-height:1.5}.zagCalcTipIcon{font-weight:900;font-size:clamp(24px,6vw,38px);color:#ef65ff;text-shadow:0 0 20px #d72bff}.zagCalcTipExample{border:1px solid #b837e8;border-radius:12px;padding:13px 18px;line-height:1.8;font-size:18px;font-weight:800;background:#260c33}.zagCalcTipPage .zagCalcTipFoot{font-size:12px;color:#cfacd8}
+</style>
+</head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
 <main id="screen"></main></div>
@@ -796,7 +803,31 @@ function compactWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.opti
 function setExerciseWeek(ex,w){if(st.stickWeek)return;zagRestoreManualPBs();st.weeks[ex]=+w||1;save();workout()}
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
-function one(ex,i,btn){let key=k(ex,i),t=sets(ex)[i],row=btn?.closest("tr");if(st.draft[key]?.done){delete st.draft[key];btn?.classList.remove("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value="";if(ins[1])ins[1].value=""}}else{if(!zagValidLoggedSet(ex,t.kg,t.r)){alert(zagSetValidationMessage());return;}st.draft[key]={kg:t.kg,r:t.r,done:true};btn?.classList.add("done");if(row){let ins=row.querySelectorAll("input");if(ins[0])ins[0].value=kgToDisplay(t.kg);if(ins[1])ins[1].value=t.r}}clickSound();save()}
+function zagFillMissingSetFields(ex,i,planned,row){
+ const key=k(ex,i),v=st.draft[key]||{};
+ const ins=row?.querySelectorAll('input');
+ // Read the visible inputs too: an edit may not have triggered onchange yet.
+ if(ins&&ins[0]&&ins[0].value!=='' )v.kg=displayToKg(ins[0].value);
+ if(ins&&ins[1]&&ins[1].value!=='' )v.r=ins[1].value;
+ if(v.kg===undefined||v.kg===null||v.kg==='')v.kg=planned.kg;
+ if(v.r===undefined||v.r===null||v.r==='')v.r=planned.r;
+ if(!zagValidLoggedSet(ex,v.kg,v.r))return false;
+ v.done=true;st.draft[key]=v;
+ if(ins&&ins[0])ins[0].value=kgToDisplay(v.kg);
+ if(ins&&ins[1])ins[1].value=v.r;
+ return true;
+}
+function one(ex,i,btn){
+ const key=k(ex,i),t=sets(ex)[i],row=btn?.closest('tr');
+ if(st.draft[key]?.done){
+  // Unmark completion without deleting the manually entered numbers.
+  st.draft[key].done=false;btn?.classList.remove('done');
+ }else{
+  if(!zagFillMissingSetFields(ex,i,t,row)){alert(zagSetValidationMessage());return;}
+  btn?.classList.add('done');
+ }
+ clickSound();save();
+}
 function zagIsBodyweightExercise(ex){return /(?:^|\b)(?:pull[ -]?ups?|chin[ -]?ups?|push[ -]?ups?|dips?)(?:\b|$)/i.test(String(ex||''))&&!/lat[ -]?pull[ -]?up/i.test(String(ex||''))}
 function zagValidLoggedSet(ex,kg,reps){
  if(kg===''||kg==null||reps===''||reps==null)return false;
@@ -891,7 +922,12 @@ function completeExercise(ex,e){
 function fillAllSets(ex){
  zagRestoreManualPBs();
  const ts=sets(ex);
- ts.forEach((t,i)=>{st.draft[k(ex,i)]={kg:t.kg,r:t.r,done:true};});
+ let invalid=false;
+ ts.forEach((t,i)=>{
+  const row=document.querySelector(`#exercise-${st.days[st.day][1].indexOf(ex)} tbody tr:nth-child(${i+1})`);
+  if(!zagFillMissingSetFields(ex,i,t,row))invalid=true;
+ });
+ if(invalid){alert(zagSetValidationMessage());return;}
  clickSound();save();workout();
  requestAnimationFrame(()=>{
    const e=st.days[st.day][1].indexOf(ex),card=document.getElementById("exercise-"+e);
@@ -931,7 +967,16 @@ st.draft={};
 if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
 recordStreakWorkout();save();zagRescheduleNative().catch(console.warn);returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
 function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
-function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt=""></b><span>How Zag Science Works</span></button><button class="zagHomeCard zagTipsCard" type="button" onclick="zagOpenTips()"><b><img class="zagTipsSkateIcon" src="assets/images/home-skateboard-cropped.png" alt=""></b><span>Tips &amp; Tricks</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class="btn workoutDayBtn" onclick="st.day=${i};save();workout()"><span class=workoutDayName>Day ${i+1} — ${esc(d[0])}</span>${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span class=workoutDayChevron>›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
+function zagWeightCalculatorHTML(){return `<section class="zagWeightCalc" aria-label="Weight converter"><div class="zagCalcHead"><b>WEIGHT CONVERTER</b><span>kg ↔ lb</span></div><div class="zagCalcInputs"><label>KG<input id="zagCalcKg" type="number" inputmode="decimal" min="0" step="any" placeholder="Kilograms" oninput="zagConvertWeight('kg')"></label><span class="zagCalcSwap">⇄</span><label>LB<input id="zagCalcLb" type="number" inputmode="decimal" min="0" step="any" placeholder="Pounds" oninput="zagConvertWeight('lb')"></label></div><div class="zagCalcNote">Convert machine weights without changing your workout's unit setting.</div></section>`;}
+function zagConvertWeight(source){
+ const kg=document.getElementById('zagCalcKg'),lb=document.getElementById('zagCalcLb');if(!kg||!lb)return;
+ const from=source==='kg'?kg:lb,to=source==='kg'?lb:kg;
+ if(from.value===''){to.value='';return;}
+ const n=Number(from.value);if(!Number.isFinite(n)||n<0){to.value='';return;}
+ const result=source==='kg'?n*2.20462262185:n/2.20462262185;
+ to.value=String(Number(result.toFixed(2)));
+}
+function home(){setActiveNav("home");let rec=Number.isInteger(st.recommendedDay)?st.recommendedDay:st.day;let s=`<div class=title><h1>${esc(st.splitName)}</h1><p>${st.days.length}-day rotation</p></div><div class="zagHomeCards"><button id="zagPersistentInfo" class="zagHomeCard" type="button"><b><img class="zagInfoBookIcon" src="assets/images/info-book.png" alt=""></b><span>How Zag Science Works</span></button><button class="zagHomeCard zagTipsCard" type="button" onclick="zagOpenTips()"><b><img class="zagTipsSkateIcon" src="assets/images/home-skateboard-cropped.png" alt=""></b><span>Tips &amp; Tricks</span></button><button class="zagHomeCard zagProCard" type="button" onclick="openZagPro(event)"><b><img class="zagNeedle" src="assets/images/asset-018-f49b050b83e8.png" alt=""></b><span>Unlock the full app</span></button></div>${streakWidgetHTML()}${zagWeightCalculatorHTML()}<div class=section><div class=row><b class=grow>Workout Split</b><button class=btn onclick=editSplit()>Edit Split</button></div></div>${st.days.map((d,i)=>`<button class="btn workoutDayBtn" onclick="st.day=${i};save();workout()"><span class=workoutDayName>Day ${i+1} — ${esc(d[0])}</span>${i===rec?'<span class=recommendedBadge>RECOMMENDED</span>':''}<span class=workoutDayChevron>›</span></button>`).join("")}<button class=restInfoBox onclick=showRestInfo()>REST?</button>`;if(Object.keys(st.customSplits).length)s+=`<div class=section><h2>Saved Splits</h2>${Object.keys(st.customSplits).map(n=>`<button class=pick onclick="loadSplit('${q(n)}')">${esc(n)}</button>`).join("")}</div>`;document.getElementById("screen").innerHTML=s;setTimeout(()=>showStreakPopup(),120)}
 function showRestInfo(){modal("REST?",`<p><b>At Zag Science, we don't believe rest days need to be planned into fixed positions in your split.</b></p><p>Everyone recovers differently. Some people will need more rest than others, and your needs can change depending on training intensity, sleep, stress and how your body feels.</p><p>Pay attention to signs of fatigue, unusual soreness, falling performance or poor recovery. If you feel you need a rest day, take one and return to your recommended workout when you're ready.</p><p><b>You decide when — and if — you need to rest. Train hard, recover properly, and always train safely.</b></p>`)}
 function editSplit(){
   let saved=Object.keys(st.customSplits||{});
@@ -4714,7 +4759,14 @@ function zagStrengthSVG(records,selected,period,interval){
      const today=day.getFullYear()+'-'+String(day.getMonth()+1).padStart(2,'0')+'-'+String(day.getDate()).padStart(2,'0');
      const streakCount=Math.max(0,Math.floor(Number(streak.count)||0));
      const streakState=streak.justLost?'lost':(streak.lastWorkout===today?'active':'rest');
-     const result=await native.sync({records,pro,streakCount,streakState});
+     const streakSnapshot={
+       date:today,
+       lastWorkout:String(streak.lastWorkout||''),
+       restDays:Math.max(0,Math.floor(Number(st.streakRestDays)||0)),
+       weekRest:(streak.weekRest&&typeof streak.weekRest==='object')?streak.weekRest:{},
+       lastProcessed:String(streak.lastProcessed||today)
+     };
+     const result=await native.sync({records,pro,streakCount,streakState,streakSnapshot});
      window.zagNativeBridgeLoaded=true;
      window.zagNativeWidgetStatus=result;
      window.zagNativeWidgetError=null;
@@ -4891,7 +4943,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-01b-previous-values.png','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.png','assets/images/tip-08-widget.png','assets/images/tip-09-strength-graph.png'];
+const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-01b-previous-values.png','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.png','assets/images/tip-08-widget.png','assets/images/tip-09-strength-graph.png','assets/images/tip-10-weight-converter.png'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -4901,6 +4953,8 @@ function zagRenderTip(){
  if(custom)custom.style.display='none';
  img.style.display='block';
  img.src=zagTipImages[zagTipIndex];
+ img.style.display='block';
+ const oldCard=document.getElementById('zagCalcTipPage');if(oldCard)oldCard.style.display='none';
  img.classList.remove('zagTipTrimEdge');
  document.getElementById('zagTipPrev').style.visibility='visible';
  document.getElementById('zagTipNext').style.visibility='visible';
