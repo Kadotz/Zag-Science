@@ -800,21 +800,54 @@ s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
 function compactWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='W'+o.value})}
-function setExerciseWeek(ex,w){if(st.stickWeek)return;zagRestoreManualPBs();st.weeks[ex]=+w||1;save();workout()}
+function setExerciseWeek(ex,w){
+  if(st.stickWeek)return;
+  zagRestoreManualPBs();
+  const week=Math.max(1,Math.min(8,Number(w)||1));
+  const today=(st.days||[])[st.day];
+  const exercises=today&&Array.isArray(today[1])?today[1]:[];
+  // Only changing the first exercise realigns the rest of this workout day.
+  // Regular workout completion still advances each exercise independently.
+  if(exercises.length&&exercises[0]===ex){
+    // Ask before changing other exercises: cancelling keeps their weeks unchanged.
+    const changeOthers=exercises.length>1 && window.confirm(
+      'Also update the other exercises to follow in ascending weeks?\n\n' +
+      'Yes (OK): Set the following exercises to Week '+(week%8+1)+', Week '+((week+1)%8+1)+' and so on.\n' +
+      'No (Cancel): Change only this exercise.'
+    );
+    if(changeOthers){
+      exercises.forEach((name,index)=>{st.weeks[name]=((week-1+index)%8)+1});
+    }else{
+      st.weeks[ex]=week;
+    }
+  }else{
+    st.weeks[ex]=week;
+  }
+  save();workout();
+}
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
 function zagFillMissingSetFields(ex,i,planned,row){
- const key=k(ex,i),v=st.draft[key]||{};
- const ins=row?.querySelectorAll('input');
- // Read the visible inputs too: an edit may not have triggered onchange yet.
- if(ins&&ins[0]&&ins[0].value!=='' )v.kg=displayToKg(ins[0].value);
- if(ins&&ins[1]&&ins[1].value!=='' )v.r=ins[1].value;
- if(v.kg===undefined||v.kg===null||v.kg==='')v.kg=planned.kg;
- if(v.r===undefined||v.r===null||v.r==='')v.r=planned.r;
- if(!zagValidLoggedSet(ex,v.kg,v.r))return false;
- v.done=true;st.draft[key]=v;
- if(ins&&ins[0])ins[0].value=kgToDisplay(v.kg);
- if(ins&&ins[1])ins[1].value=v.r;
+ const key=k(ex,i), old=st.draft[key]||{};
+ // The two ACTUAL input fields are authoritative. Placeholders are previous-session
+ // hints only and must never be copied by ALL or Quick.
+ const inputs=row?.querySelectorAll('input.cell');
+ const weightInput=inputs?.[0], repsInput=inputs?.[1];
+ const enteredWeight=weightInput?weightInput.value.trim():
+   (old.kg===undefined||old.kg===null?'':String(kgToDisplay(old.kg)));
+ const enteredReps=repsInput?repsInput.value.trim():
+   (old.r===undefined||old.r===null?'':String(old.r));
+ const hasWeight=enteredWeight!=='';
+ const hasReps=enteredReps!=='';
+ // Preserve a typed 0 as a real weight. Only fill an empty input from the
+ // CURRENT WEEK'S prescribed target, never from the faded previous values.
+ const kg=hasWeight?displayToKg(enteredWeight):planned.kg;
+ const reps=hasReps?enteredReps:planned.r;
+ if(!zagValidLoggedSet(ex,kg,reps))return false;
+ const v={...old,kg,r:reps,done:true};
+ st.draft[key]=v;
+ if(weightInput&&!hasWeight)weightInput.value=String(kgToDisplay(kg));
+ if(repsInput&&!hasReps)repsInput.value=String(reps);
  return true;
 }
 function one(ex,i,btn){
