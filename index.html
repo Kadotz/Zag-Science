@@ -827,27 +827,34 @@ function setExerciseWeek(ex,w){
 }
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
-function zagFillMissingSetFields(ex,i,planned,row){
- const key=k(ex,i), old=st.draft[key]||{};
- // The two ACTUAL input fields are authoritative. Placeholders are previous-session
- // hints only and must never be copied by ALL or Quick.
+function zagPrepareSetFill(ex,i,planned,row){
+ const key=k(ex,i),old=st.draft[key]||{};
  const inputs=row?.querySelectorAll('input.cell');
- const weightInput=inputs?.[0], repsInput=inputs?.[1];
- const enteredWeight=weightInput?weightInput.value.trim():
-   (old.kg===undefined||old.kg===null?'':String(kgToDisplay(old.kg)));
- const enteredReps=repsInput?repsInput.value.trim():
-   (old.r===undefined||old.r===null?'':String(old.r));
+ const weightInput=inputs?.[0],repsInput=inputs?.[1];
+ // Current input contents take precedence over stored draft. Empty inputs are
+ // genuinely empty; grey previous-session placeholders are never values.
+ const enteredWeight=weightInput?weightInput.value.trim():(old.kg==null?'':String(kgToDisplay(old.kg)));
+ const enteredReps=repsInput?repsInput.value.trim():(old.r==null?'':String(old.r));
  const hasWeight=enteredWeight!=='';
  const hasReps=enteredReps!=='';
- // Preserve a typed 0 as a real weight. Only fill an empty input from the
- // CURRENT WEEK'S prescribed target, never from the faded previous values.
+ // Optional back-off sets have no prescribed numbers. Never invent any.
+ if((!hasWeight&&(planned.kg===''||planned.kg==null))||
+    (!hasReps&&(planned.r===''||planned.r==null)))return {skip:true};
  const kg=hasWeight?displayToKg(enteredWeight):planned.kg;
  const reps=hasReps?enteredReps:planned.r;
- if(!zagValidLoggedSet(ex,kg,reps))return false;
- const v={...old,kg,r:reps,done:true};
- st.draft[key]=v;
- if(weightInput&&!hasWeight)weightInput.value=String(kgToDisplay(kg));
- if(repsInput&&!hasReps)repsInput.value=String(reps);
+ if(!zagValidLoggedSet(ex,kg,reps))return {error:true};
+ return {key,old,kg,r:reps,weightInput,repsInput,hasWeight,hasReps};
+}
+function zagApplyPreparedSetFill(item){
+ if(item.skip)return;
+ st.draft[item.key]={...item.old,kg:item.kg,r:item.r,done:true};
+ if(item.weightInput&&!item.hasWeight)item.weightInput.value=String(kgToDisplay(item.kg));
+ if(item.repsInput&&!item.hasReps)item.repsInput.value=String(item.r);
+}
+function zagFillMissingSetFields(ex,i,planned,row){
+ const item=zagPrepareSetFill(ex,i,planned,row);
+ if(item.error||item.skip)return false;
+ zagApplyPreparedSetFill(item);
  return true;
 }
 function one(ex,i,btn){
@@ -954,17 +961,21 @@ function completeExercise(ex,e){
 }
 function fillAllSets(ex){
  zagRestoreManualPBs();
- const ts=sets(ex);
- let invalid=false;
- ts.forEach((t,i)=>{
-  const row=document.querySelector(`#exercise-${st.days[st.day][1].indexOf(ex)} tbody tr:nth-child(${i+1})`);
-  if(!zagFillMissingSetFields(ex,i,t,row))invalid=true;
- });
- if(invalid){alert(zagSetValidationMessage());return;}
+ const exerciseIndex=st.days[st.day][1].indexOf(ex);
+ if(exerciseIndex<0)return;
+ const ts=sets(ex),prepared=[];
+ // Validate the entire exercise BEFORE modifying any saved data or inputs.
+ for(let i=0;i<ts.length;i++){
+  const row=document.querySelector(`#exercise-${exerciseIndex} tbody tr:nth-child(${i+1})`);
+  const item=zagPrepareSetFill(ex,i,ts[i],row);
+  if(item.error){alert(zagSetValidationMessage());return;}
+  prepared.push(item);
+ }
+ prepared.forEach(zagApplyPreparedSetFill);
  clickSound();save();workout();
  requestAnimationFrame(()=>{
-   const e=st.days[st.day][1].indexOf(ex),card=document.getElementById("exercise-"+e);
-   if(card){card.classList.remove("collapsed");const b=card.querySelector(".exerciseExpand");if(b)b.textContent="COLLAPSE";}
+  const card=document.getElementById('exercise-'+exerciseIndex);
+  if(card){card.classList.remove('collapsed');const b=card.querySelector('.exerciseExpand');if(b)b.textContent='COLLAPSE';}
  });
 }
 // Legacy name retained in case an older cached click handler calls it.
@@ -1565,11 +1576,11 @@ document.addEventListener("visibilitychange",()=>{
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-key-features-new.png')"></div>
-  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2.jpg')"></div>
-  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3.jpg')"></div>
-  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4.jpg')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5.jpg')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.jpg')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -4976,7 +4987,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-01-landscape.jpg','assets/images/tip-01b-previous-values.png','assets/images/tip-02-smarter.jpg','assets/images/tip-03-pb.jpg','assets/images/tip-04-machines.jpg','assets/images/tip-05-reminder.jpg','assets/images/tip-07-aim.png','assets/images/tip-08-widget.png','assets/images/tip-09-strength-graph.png','assets/images/tip-10-weight-converter.png'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.jpg','assets/images/tip-01-landscape-new.jpg','assets/images/tip-02-previous-weight-new.jpg','assets/images/tip-03-train-smarter-new.jpg','assets/images/tip-04-missed-pb-new.jpg','assets/images/tip-05-different-machine-new.jpg','assets/images/tip-06-never-miss-session-new.jpg','assets/images/tip-07-aim-impossible-new.jpg','assets/images/tip-08-widget-new.jpg','assets/images/tip-09-strength-graph-new.jpg','assets/images/tip-10-weight-converter-new.jpg'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -4995,7 +5006,7 @@ function zagRenderTip(){
 function zagStepTip(d){zagTipIndex=(zagTipIndex+d+zagTipImages.length)%zagTipImages.length;zagRenderTip();}
 document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
 </script>
-<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-01-landscape.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
+<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-00-goat-explanation.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
 <style id="zag-v27-40-tip-trim-and-time-controls">
 .zagTipsPanel{background:#06020b!important}
 .zagTipsPanel img.zagTipTrimEdge{width:108%!important;height:108%!important;max-width:none!important;position:absolute!important;left:-4%!important;top:-4%!important;object-fit:fill!important;aspect-ratio:auto!important}
@@ -5034,6 +5045,46 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOver
     old.apply(this,arguments);
     const image=document.getElementById('zagTipImage');
     if(image)image.classList.toggle('zagLastTwoBalanced', ['tip-07-aim.png','tip-08-widget.png'].some(name=>zagTipImages[zagTipIndex].endsWith(name)));
+  };
+})();
+</script>
+
+
+<style id="zag-original-aspect-ratio-20261028">
+#zagInfoPanelV6 .zagInfoSlide{background-size:contain!important;background-position:center center!important}
+#zagInfoPanelV6 .zagInfoSlide[data-i="0"]{background-size:contain!important}
+.zagTipsPanel{
+  --zag-tip-ratio:0.666667;
+  width:min(88vw,calc(72dvh * var(--zag-tip-ratio)))!important;
+  aspect-ratio:var(--zag-tip-ratio)!important;
+  height:auto!important;
+}
+.zagTipsPanel #zagTipImage,
+.zagTipsPanel #zagTipImage.zagLastTwoBalanced {
+  position:relative!important;left:0!important;top:0!important;
+  width:100%!important;height:100%!important;max-width:100%!important;
+  max-height:100%!important;object-fit:contain!important;
+  object-position:center center!important;aspect-ratio:auto!important;
+  transform:none!important;clip-path:none!important;margin:0!important;
+}
+</style>
+<script id="zag-native-tip-ratio-20261028">
+(function(){
+  const oldRender=window.zagRenderTip;
+  if(typeof oldRender!=='function')return;
+  window.zagRenderTip=function(){
+    oldRender.apply(this,arguments);
+    const img=document.getElementById('zagTipImage');
+    const panel=img&&img.closest('.zagTipsPanel');
+    if(!img||!panel)return;
+    img.classList.remove('zagLastTwoBalanced','zagTipTrimEdge');
+    const updateRatio=function(){
+      if(img.naturalWidth&&img.naturalHeight){
+        panel.style.setProperty('--zag-tip-ratio',String(img.naturalWidth/img.naturalHeight));
+      }
+    };
+    img.addEventListener('load',updateRatio,{once:true});
+    if(img.complete)updateRatio();
   };
 })();
 </script>
