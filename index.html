@@ -829,31 +829,37 @@ function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
 function zagPrepareSetFill(ex,i,planned,row){
  const key=k(ex,i),old=st.draft[key]||{};
- const inputs=row?.querySelectorAll('input.cell');
- const weightInput=inputs?.[0],repsInput=inputs?.[1];
- // Current input contents take precedence over stored draft. Empty inputs are
- // genuinely empty; grey previous-session placeholders are never values.
- const enteredWeight=weightInput?weightInput.value.trim():(old.kg==null?'':String(kgToDisplay(old.kg)));
- const enteredReps=repsInput?repsInput.value.trim():(old.r==null?'':String(old.r));
- const hasWeight=enteredWeight!=='';
- const hasReps=enteredReps!=='';
- // Optional back-off sets have no prescribed numbers. Never invent any.
- if((!hasWeight&&(planned.kg===''||planned.kg==null))||
-    (!hasReps&&(planned.r===''||planned.r==null)))return {skip:true};
- const kg=hasWeight?displayToKg(enteredWeight):planned.kg;
- const reps=hasReps?enteredReps:planned.r;
- if(!zagValidLoggedSet(ex,kg,reps))return {error:true};
- return {key,old,kg,r:reps,weightInput,repsInput,hasWeight,hasReps};
+ if(old.done)return {skip:true};
+ // NEVER infer a row from another exercise or a hidden/off-screen table.
+ if(!row || !row.closest('.exercise') || row.closest('.exercise').querySelector('.name')?.textContent.trim()!==ex)return {skip:true};
+ const inputs=row.querySelectorAll('input.cell');
+ if(inputs.length<2)return {skip:true};
+ const weightInput=inputs[0],repsInput=inputs[1];
+ const enteredWeight=weightInput.value.trim(),enteredReps=repsInput.value.trim();
+ const hasWeight=enteredWeight!=='' || (old.kg!==undefined&&old.kg!==null&&old.kg!=='');
+ const hasReps=enteredReps!=='' || (old.r!==undefined&&old.r!==null&&old.r!=='');
+ // A partially-entered set is user-owned: leave BOTH fields and its status alone.
+ if(hasWeight||hasReps)return {skip:true};
+ // No guessed values for optional sets or exercises without a configured max.
+ if(planned.backoff||planned.kg===''||planned.kg==null||Number(planned.kg)<=0||
+    planned.r===''||planned.r==null)return {skip:true};
+ if(!zagValidLoggedSet(ex,planned.kg,planned.r))return {skip:true};
+ return {key,old,kg:planned.kg,r:planned.r,weightInput,repsInput,hasWeight:false,hasReps:false};
 }
 function zagApplyPreparedSetFill(item){
  if(item.skip)return;
- st.draft[item.key]={...item.old,kg:item.kg,r:item.r,done:true};
- if(item.weightInput&&!item.hasWeight)item.weightInput.value=String(kgToDisplay(item.kg));
- if(item.repsInput&&!item.hasReps)item.repsInput.value=String(item.r);
+ // Recheck before mutation in case a value changed since preparation.
+ const previous=st.draft[item.key]||{};
+ if(previous.done||previous.kg!==undefined&&previous.kg!==''||previous.r!==undefined&&previous.r!==''||
+    item.weightInput.value.trim()!==''||item.repsInput.value.trim()!=='')return;
+ st.draft[item.key]={...previous,kg:item.kg,r:item.r,done:true};
+ item.weightInput.value=String(kgToDisplay(item.kg));
+ item.repsInput.value=String(item.r);
+ item.weightInput.closest('tr')?.querySelector('.fist')?.classList.add('done');
 }
 function zagFillMissingSetFields(ex,i,planned,row){
  const item=zagPrepareSetFill(ex,i,planned,row);
- if(item.error||item.skip)return false;
+ if(item.skip)return false;
  zagApplyPreparedSetFill(item);
  return true;
 }
@@ -863,7 +869,10 @@ function one(ex,i,btn){
   // Unmark completion without deleting the manually entered numbers.
   st.draft[key].done=false;btn?.classList.remove('done');
  }else{
-  if(!zagFillMissingSetFields(ex,i,t,row)){alert(zagSetValidationMessage());return;}
+  const inputs=row?.querySelectorAll('input.cell');
+  const weight=inputs?.[0]?.value.trim()??'',reps=inputs?.[1]?.value.trim()??'';
+  if(!zagValidLoggedSet(ex,weight===''?'':displayToKg(weight),reps)){alert(zagSetValidationMessage());return;}
+  st.draft[key]={...(st.draft[key]||{}),kg:displayToKg(weight),r:reps,done:true};
   btn?.classList.add('done');
  }
  clickSound();save();
@@ -960,23 +969,16 @@ function completeExercise(ex,e){
  }));
 }
 function fillAllSets(ex){
- zagRestoreManualPBs();
  const exerciseIndex=st.days[st.day][1].indexOf(ex);
  if(exerciseIndex<0)return;
- const ts=sets(ex),prepared=[];
- // Validate the entire exercise BEFORE modifying any saved data or inputs.
- for(let i=0;i<ts.length;i++){
-  const row=document.querySelector(`#exercise-${exerciseIndex} tbody tr:nth-child(${i+1})`);
-  const item=zagPrepareSetFill(ex,i,ts[i],row);
-  if(item.error){alert(zagSetValidationMessage());return;}
-  prepared.push(item);
- }
+ const card=document.getElementById('exercise-'+exerciseIndex);
+ if(!card)return;
+ const ts=sets(ex),rows=[...card.querySelectorAll('.exerciseBody table tr')].slice(1);
+ if(rows.length!==ts.length){alert('Could not verify the set rows. Please reopen this exercise.');return;}
+ const prepared=ts.map((t,i)=>zagPrepareSetFill(ex,i,t,rows[i]));
  prepared.forEach(zagApplyPreparedSetFill);
- clickSound();save();workout();
- requestAnimationFrame(()=>{
-  const card=document.getElementById('exercise-'+exerciseIndex);
-  if(card){card.classList.remove('collapsed');const b=card.querySelector('.exerciseExpand');if(b)b.textContent='COLLAPSE';}
- });
+ clickSound();save();
+ // Do not rebuild the workout DOM: that could erase uncommitted typed values.
 }
 // Legacy name retained in case an older cached click handler calls it.
 function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
@@ -1147,7 +1149,11 @@ function zagSetMax(ex,v,repsInput){
 function zagSaveMaxRow(btn){
  const row=btn.closest('.maxrow');if(!row)return;
  const w=row.querySelector('[data-zag-max-ex]'),r=row.querySelector('[data-zag-max-reps]');
- if(w&&r&&zagSetMax(w.dataset.zagMaxEx,w.value,r.value)){btn.textContent='Saved ✓';setTimeout(()=>{if(btn.isConnected)btn.textContent='Save'},1300)}
+ if(w&&r&&zagSetMax(w.dataset.zagMaxEx,w.value,r.value)){
+  btn.textContent='Saved ✓';setTimeout(()=>{if(btn.isConnected)btn.textContent='Save'},1300);
+  const now=new Date();
+  modal('Maximum saved',`<p><b>${esc(w.dataset.zagMaxEx)}</b></p><p>Weight: <b>${esc(w.value)} ${esc(weightUnit())}</b><br>Reps: <b>${esc(r.value)}</b></p><p>Date: <b>${esc(now.toLocaleDateString())}</b><br>Time: <b>${esc(now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}))}</b></p><button class=btn onclick=closeModal()>OK</button>`);
+ }
 }
 
 // Point 3: review actual source sets, rather than artificially clamping graph points.
@@ -1576,11 +1582,11 @@ document.addEventListener("visibilitychange",()=>{
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.jpg')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.png')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.png')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.png')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.png')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.png')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -3515,7 +3521,7 @@ async function zagSubmitAuth(){
      if(error)throw error;
      zagSession=data.session;zagCloseAccount();zagRefreshAccountStatus();
      setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),100);
-     setTimeout(()=>modal('Signed in',`<div class=note>Signed in as ${esc(data.user?.user_metadata?.username||data.user?.email||'Zag Science user')}.</div>`),100)
+     setTimeout(()=>zagShowWelcomeGuide(),250)
    }
  }catch(e){zagAuthMessage(e.message||'Something went wrong. Please try again.',true)}
 }
@@ -4863,6 +4869,74 @@ function zagStrengthSVG(records,selected,period,interval){
   clip-path:none!important; margin:0!important;
 }
 </style>
+
+<style id="zag-popup-controls-restored-20261030">
+/* Reserve room OUTSIDE the illustration for visible, functional app controls. */
+#zagInfoPanelV6,.zagTipsPanel{
+ box-sizing:border-box!important;background:#07020d!important;
+ border:2px solid #d948ff!important;border-radius:18px!important;
+ box-shadow:0 0 12px #b51bff,0 0 35px #a016df88!important;
+ overflow:hidden!important;
+}
+#zagInfoPanelV6{width:min(94vw,calc(90dvh * 2 / 3))!important;aspect-ratio:2/3!important;max-height:90dvh!important}
+#zagInfoPanelV6 .zagInfoSlide{inset:0 0 10% 0!important;background-color:#08020c!important;background-size:contain!important;background-position:center!important}
+.zagTipsPanel{width:min(94vw,calc(90dvh * 2 / 3))!important;aspect-ratio:2/3!important;max-height:90dvh!important}
+.zagTipsPanel #zagTipImage,.zagTipsPanel #zagTipImage.zagLastTwoBalanced{position:absolute!important;inset:0 0 auto 0!important;width:100%!important;height:90%!important;object-fit:contain!important;background:#08020c!important}
+#zagInfoCloseTop,.zagTipsClose{
+ position:absolute!important;right:8px!important;top:8px!important;
+ width:36px!important;height:36px!important;z-index:250!important;
+ opacity:1!important;pointer-events:auto!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ border:1.5px solid #ef8cff!important;border-radius:50%!important;
+ background:#160520!important;color:white!important;
+ box-shadow:0 0 12px #a523e7!important;font-size:27px!important;
+ line-height:1!important;font-weight:700!important;
+}
+.zagInfoPrevHit,.zagInfoNextHit,.zagTipsPrev,.zagTipsNext{
+ position:absolute!important;bottom:1.3%!important;top:auto!important;height:7.2%!important;
+ width:39%!important;z-index:230!important;display:flex!important;
+ justify-content:center!important;align-items:center!important;
+ border:1.5px solid #e05aff!important;border-radius:12px!important;
+ background:linear-gradient(180deg,#421052,#16061f)!important;
+ color:#fff!important;font-weight:800!important;font-size:clamp(12px,3vw,17px)!important;
+ box-shadow:0 0 9px #b529e488!important;opacity:1!important;
+}
+.zagInfoPrevHit,.zagTipsPrev{left:4%!important;right:auto!important}
+.zagInfoNextHit,.zagTipsNext{right:4%!important;left:auto!important}
+#zagInfoLastCTA{bottom:1.3%!important;right:4%!important;width:57%!important;height:7.2%!important;z-index:240!important}
+#zagInfoPage2FollowPlan,#zagInfoPage2TopSets{z-index:220!important}
+.zagTipsOverlay,#zagInfoOverlayV6{padding:8px!important}
+</style>
+<script id="zag-popup-controls-and-welcome-20261030">
+(function(){
+ function setLabels(){
+  const controls=[['zagInfoCloseTop','×'],['zagTipPrev','‹ Previous'],['zagTipNext','Next ›']];
+  for(const [id,label] of controls){const el=document.getElementById(id);if(el)el.textContent=label;}
+  for(const [selector,label] of [['.zagInfoPrevHit','‹ Previous'],['.zagInfoNextHit','Next ›']]){
+   const el=document.querySelector('#zagInfoPanelV6 '+selector);if(el)el.textContent=label;
+  }
+  const x=document.querySelector('.zagTipsClose');if(x)x.textContent='×';
+ }
+ setLabels();
+ // The guide retains its five images; tips retain their eleven images.
+ const tipNext=document.getElementById('zagTipNext'),tipPrev=document.getElementById('zagTipPrev');
+ const oldRender=window.zagRenderTip;
+ if(typeof oldRender==='function')window.zagRenderTip=function(){oldRender.apply(this,arguments);if(tipPrev)tipPrev.style.visibility=zagTipIndex===0?'hidden':'visible';if(tipNext)tipNext.style.visibility=zagTipIndex===zagTipImages.length-1?'hidden':'visible';};
+ window.zagStepTip=function(d){const next=zagTipIndex+d;if(next<0||next>=zagTipImages.length)return;zagTipIndex=next;zagRenderTip();};
+})();
+function zagShowWelcomeGuide(){
+ if(document.getElementById('zagWelcomeOverlay'))return;
+ const cover=document.createElement('div');cover.id='zagWelcomeOverlay';
+ cover.style.cssText='position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;background:#05010de8;padding:20px;box-sizing:border-box';
+ cover.innerHTML=`<div style="width:min(92vw,420px);background:#10071d;border:2px solid #c94aff;border-radius:18px;padding:22px;text-align:center;color:white;box-shadow:0 0 25px #b72cff88"><h2 style="color:#ef8aff;margin-top:0">Welcome to Zag Science</h2><p>Before your first workout, explore the <b>Guide</b> and <b>Tips & Tricks</b> on the Home page, plus the <b>Info</b> pages on the Workout page.</p><p>These explain the GOAT split, logging sets, progression and app features.</p><button id="zagWelcomeGuide" class="btn" style="width:100%;margin:5px 0">Open Guide</button><button id="zagWelcomeTips" class="btn" style="width:100%;margin:5px 0">Open Tips & Tricks</button><button id="zagWelcomeWorkout" class="btn" style="width:100%;margin:5px 0">Workout Info</button><button id="zagWelcomeLater" class="btn" style="width:100%;margin:5px 0">Explore later</button></div>`;
+ document.body.appendChild(cover);
+ function close(){cover.remove();if(typeof closeModal==='function')closeModal();}
+ cover.querySelector('#zagWelcomeGuide').onclick=()=>{close();window.openZagInfo?.()};
+ cover.querySelector('#zagWelcomeTips').onclick=()=>{close();window.zagOpenTips?.()};
+ cover.querySelector('#zagWelcomeWorkout').onclick=()=>{close();if(typeof workout==='function')workout();window.zagOpenWorkoutGuide?.()};
+ cover.querySelector('#zagWelcomeLater').onclick=close;
+}
+</script>
 </body></html>
 
 
@@ -4987,7 +5061,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.jpg','assets/images/tip-01-landscape-new.jpg','assets/images/tip-02-previous-weight-new.jpg','assets/images/tip-03-train-smarter-new.jpg','assets/images/tip-04-missed-pb-new.jpg','assets/images/tip-05-different-machine-new.jpg','assets/images/tip-06-never-miss-session-new.jpg','assets/images/tip-07-aim-impossible-new.jpg','assets/images/tip-08-widget-new.jpg','assets/images/tip-09-strength-graph-new.jpg','assets/images/tip-10-weight-converter-new.jpg'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.png','assets/images/tip-01-landscape-new.png','assets/images/tip-02-previous-weight-new.png','assets/images/tip-03-train-smarter-new.png','assets/images/tip-04-missed-pb-new.png','assets/images/tip-05-different-machine-new.png','assets/images/tip-06-never-miss-session-new.png','assets/images/tip-07-aim-impossible-new.png','assets/images/tip-08-widget-new.png','assets/images/tip-09-strength-graph-new.png','assets/images/tip-10-weight-converter-new.png'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -5006,7 +5080,7 @@ function zagRenderTip(){
 function zagStepTip(d){zagTipIndex=(zagTipIndex+d+zagTipImages.length)%zagTipImages.length;zagRenderTip();}
 document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
 </script>
-<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-00-goat-explanation.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
+<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-00-goat-explanation.png" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
 <style id="zag-v27-40-tip-trim-and-time-controls">
 .zagTipsPanel{background:#06020b!important}
 .zagTipsPanel img.zagTipTrimEdge{width:108%!important;height:108%!important;max-width:none!important;position:absolute!important;left:-4%!important;top:-4%!important;object-fit:fill!important;aspect-ratio:auto!important}
