@@ -830,50 +830,54 @@ function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='k
 function zagPrepareSetFill(ex,i,planned,row){
  const key=k(ex,i),old=st.draft[key]||{};
  if(old.done)return {skip:true};
- // NEVER infer a row from another exercise or a hidden/off-screen table.
- if(!row || !row.closest('.exercise') || row.closest('.exercise').querySelector('.name')?.textContent.trim()!==ex)return {skip:true};
+ if(!row||!row.closest('.exercise')||row.closest('.exercise').querySelector('.name')?.textContent.trim()!==ex)return {skip:true};
  const inputs=row.querySelectorAll('input.cell');
  if(inputs.length<2)return {skip:true};
- const weightInput=inputs[0],repsInput=inputs[1];
- const enteredWeight=weightInput.value.trim(),enteredReps=repsInput.value.trim();
- const hasWeight=enteredWeight!=='' || (old.kg!==undefined&&old.kg!==null&&old.kg!=='');
- const hasReps=enteredReps!=='' || (old.r!==undefined&&old.r!==null&&old.r!=='');
- // A partially-entered set is user-owned: leave BOTH fields and its status alone.
- if(hasWeight||hasReps)return {skip:true};
- // No guessed values for optional sets or exercises without a configured max.
- if(planned.backoff||planned.kg===''||planned.kg==null||Number(planned.kg)<=0||
-    planned.r===''||planned.r==null)return {skip:true};
- if(!zagValidLoggedSet(ex,planned.kg,planned.r))return {skip:true};
- return {key,old,kg:planned.kg,r:planned.r,weightInput,repsInput,hasWeight:false,hasReps:false};
+ const [weightInput,repsInput]=inputs;
+ // Read live input first: onchange may not yet have saved a value to draft.
+ const liveWeight=weightInput.value.trim(),liveReps=repsInput.value.trim();
+ const savedWeight=old.kg!==undefined&&old.kg!==null&&old.kg!==''?String(kgToDisplay(old.kg)):'';
+ const savedReps=old.r!==undefined&&old.r!==null&&old.r!==''?String(old.r):'';
+ const weight=liveWeight!==''?liveWeight:savedWeight;
+ const reps=liveReps!==''?liveReps:savedReps;
+ // A prescribed set can supply only missing fields. Never use grey placeholders.
+ const planWeight=planned.kg!==''&&planned.kg!=null&&Number.isFinite(Number(planned.kg))&&Number(planned.kg)>=0?String(kgToDisplay(planned.kg)):'';
+ const planReps=planned.r!==''&&planned.r!=null?String(planned.r):'';
+ const finalWeight=weight!==''?weight:planWeight;
+ const finalReps=reps!==''?reps:planReps;
+ if(finalWeight===''||finalReps==='')return {skip:true};
+ const kg=displayToKg(finalWeight);
+ if(!zagValidLoggedSet(ex,kg,finalReps))return {skip:true};
+ return {key,kg,r:finalReps,weightInput,repsInput,originalWeight:weight,originalReps:reps};
 }
 function zagApplyPreparedSetFill(item){
- if(item.skip)return;
- // Recheck before mutation in case a value changed since preparation.
- const previous=st.draft[item.key]||{};
- if(previous.done||previous.kg!==undefined&&previous.kg!==''||previous.r!==undefined&&previous.r!==''||
-    item.weightInput.value.trim()!==''||item.repsInput.value.trim()!=='')return;
- st.draft[item.key]={...previous,kg:item.kg,r:item.r,done:true};
- item.weightInput.value=String(kgToDisplay(item.kg));
- item.repsInput.value=String(item.r);
- item.weightInput.closest('tr')?.querySelector('.fist')?.classList.add('done');
-}
-function zagFillMissingSetFields(ex,i,planned,row){
- const item=zagPrepareSetFill(ex,i,planned,row);
  if(item.skip)return false;
- zagApplyPreparedSetFill(item);
+ const old=st.draft[item.key]||{};
+ if(old.done)return false;
+ // Never overwrite a field that has been typed since preparation.
+ const weight=item.weightInput.value.trim();
+ const reps=item.repsInput.value.trim();
+ const finalWeight=weight!==''?weight:(item.originalWeight!==''?item.originalWeight:String(kgToDisplay(item.kg)));
+ const finalReps=reps!==''?reps:(item.originalReps!==''?item.originalReps:String(item.r));
+ const kg=displayToKg(finalWeight);
+ if(!zagValidLoggedSet('',kg,finalReps))return false;
+ if(weight==='')item.weightInput.value=finalWeight;
+ if(reps==='')item.repsInput.value=finalReps;
+ st.draft[item.key]={...old,kg,r:finalReps,done:true};
+ item.weightInput.closest('tr')?.querySelector('.fist')?.classList.add('done');
  return true;
 }
+function zagFillMissingSetFields(ex,i,planned,row){
+ return zagApplyPreparedSetFill(zagPrepareSetFill(ex,i,planned,row));
+}
 function one(ex,i,btn){
- const key=k(ex,i),t=sets(ex)[i],row=btn?.closest('tr');
+ const key=k(ex,i),planned=sets(ex)[i],row=btn?.closest('tr');
  if(st.draft[key]?.done){
-  // Unmark completion without deleting the manually entered numbers.
   st.draft[key].done=false;btn?.classList.remove('done');
  }else{
-  const inputs=row?.querySelectorAll('input.cell');
-  const weight=inputs?.[0]?.value.trim()??'',reps=inputs?.[1]?.value.trim()??'';
-  if(!zagValidLoggedSet(ex,weight===''?'':displayToKg(weight),reps)){alert(zagSetValidationMessage());return;}
-  st.draft[key]={...(st.draft[key]||{}),kg:displayToKg(weight),r:reps,done:true};
-  btn?.classList.add('done');
+  if(!zagFillMissingSetFields(ex,i,planned,row)){
+   alert(zagSetValidationMessage());return;
+  }
  }
  clickSound();save();
 }
@@ -976,9 +980,10 @@ function fillAllSets(ex){
  const ts=sets(ex),rows=[...card.querySelectorAll('.exerciseBody table tr')].slice(1);
  if(rows.length!==ts.length){alert('Could not verify the set rows. Please reopen this exercise.');return;}
  const prepared=ts.map((t,i)=>zagPrepareSetFill(ex,i,t,rows[i]));
- prepared.forEach(zagApplyPreparedSetFill);
- clickSound();save();
- // Do not rebuild the workout DOM: that could erase uncommitted typed values.
+ let completed=0;
+ prepared.forEach(item=>{if(zagApplyPreparedSetFill(item))completed++});
+ if(completed){clickSound();save();}
+ // Preserve live user inputs and their focus; do not redraw the workout.
 }
 // Legacy name retained in case an older cached click handler calls it.
 function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
