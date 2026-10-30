@@ -4927,15 +4927,29 @@ function zagStrengthSVG(records,selected,period,interval){
 function zagShowWelcomeGuide(){
  if(document.getElementById('zagWelcomeOverlay'))return;
  const cover=document.createElement('div');cover.id='zagWelcomeOverlay';
- cover.style.cssText='position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;background:#05010de8;padding:20px;box-sizing:border-box';
- cover.innerHTML=`<div style="width:min(92vw,420px);background:#10071d;border:2px solid #c94aff;border-radius:18px;padding:22px;text-align:center;color:white;box-shadow:0 0 25px #b72cff88"><h2 style="color:#ef8aff;margin-top:0">Welcome to Zag Science</h2><p>Before your first workout, explore the <b>Guide</b> and <b>Tips & Tricks</b> on the Home page, plus the <b>Info</b> pages on the Workout page.</p><p>These explain the GOAT split, logging sets, progression and app features.</p><button id="zagWelcomeGuide" class="btn" style="width:100%;margin:5px 0">Open Guide</button><button id="zagWelcomeTips" class="btn" style="width:100%;margin:5px 0">Open Tips & Tricks</button><button id="zagWelcomeWorkout" class="btn" style="width:100%;margin:5px 0">Workout Info</button><button id="zagWelcomeLater" class="btn" style="width:100%;margin:5px 0">Explore later</button></div>`;
- document.body.appendChild(cover);
- function close(){cover.remove();if(typeof closeModal==='function')closeModal();}
- cover.querySelector('#zagWelcomeGuide').onclick=()=>{close();window.openZagInfo?.()};
- cover.querySelector('#zagWelcomeTips').onclick=()=>{close();window.zagOpenTips?.()};
- cover.querySelector('#zagWelcomeWorkout').onclick=()=>{close();if(typeof workout==='function')workout();window.zagOpenWorkoutGuide?.()};
- cover.querySelector('#zagWelcomeLater').onclick=close;
+ cover.style.cssText='position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;background:rgba(3,0,12,.96);padding:8px;box-sizing:border-box';
+ const slides=['assets/images/onboarding-find-guide.jpg','assets/images/onboarding-find-tips.jpg','assets/images/onboarding-find-info.jpg'];
+ let page=0;
+ const frame=document.createElement('div');
+ frame.style.cssText='position:relative;width:min(96vw,520px);max-height:calc(100dvh - 16px);aspect-ratio:1024/1536;overflow:hidden';
+ const img=document.createElement('img');img.alt='Zag Science onboarding instructions';
+ img.style.cssText='display:block;width:100%;height:100%;object-fit:contain';
+ frame.appendChild(img);
+ const hotspot=(left,top,width,height,handler,label)=>{
+   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
+   b.style.cssText=`position:absolute;left:${left}%;top:${top}%;width:${width}%;height:${height}%;background:transparent;border:0;cursor:pointer;touch-action:manipulation;`;
+   b.addEventListener('click',handler);frame.appendChild(b);return b;
+ };
+ function close(){cover.remove();}
+ const prev=hotspot(7,86,31,10,()=>setPage(page-1),'Previous slide');
+ const next=hotspot(66,86,29,10,()=>{if(page===2)close();else setPage(page+1)},'Next slide or finish');
+ hotspot(85,4,12,9,close,'Close onboarding');
+ const dots=[0,1,2].map((i)=>hotspot(40+i*6.5,88,6,7,()=>setPage(i),'Go to slide '+(i+1)));
+ function setPage(n){page=Math.max(0,Math.min(2,n));img.src=slides[page];prev.disabled=page===0;prev.style.pointerEvents=page===0?'none':'auto';next.setAttribute('aria-label',page===2?'Finish onboarding':'Next slide');}
+ cover.addEventListener('click',e=>{if(e.target===cover)close()});
+ cover.appendChild(frame);document.body.appendChild(cover);setPage(0);
 }
+
 </script>
 </body></html>
 
