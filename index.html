@@ -829,55 +829,42 @@ function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
 function field(key,f,v){st.draft[key]=st.draft[key]||{};st.draft[key][f]=(f==='kg'?displayToKg(v):v);save()}
 function zagPrepareSetFill(ex,i,planned,row){
  const key=k(ex,i),old=st.draft[key]||{};
- if(old.done)return {skip:true};
- if(!row||!row.closest('.exercise')||row.closest('.exercise').querySelector('.name')?.textContent.trim()!==ex)return {skip:true};
- const inputs=row.querySelectorAll('input.cell');
- if(inputs.length<2)return {skip:true};
- const [weightInput,repsInput]=inputs;
- // Read live input first: onchange may not yet have saved a value to draft.
- const liveWeight=weightInput.value.trim(),liveReps=repsInput.value.trim();
- const savedWeight=old.kg!==undefined&&old.kg!==null&&old.kg!==''?String(kgToDisplay(old.kg)):'';
- const savedReps=old.r!==undefined&&old.r!==null&&old.r!==''?String(old.r):'';
- const weight=liveWeight!==''?liveWeight:savedWeight;
- const reps=liveReps!==''?liveReps:savedReps;
- // A prescribed set can supply only missing fields. Never use grey placeholders.
- const planWeight=planned.kg!==''&&planned.kg!=null&&Number.isFinite(Number(planned.kg))&&Number(planned.kg)>=0?String(kgToDisplay(planned.kg)):'';
- const planReps=planned.r!==''&&planned.r!=null?String(planned.r):'';
- const finalWeight=weight!==''?weight:planWeight;
- const finalReps=reps!==''?reps:planReps;
- if(finalWeight===''||finalReps==='')return {skip:true};
- const kg=displayToKg(finalWeight);
- if(!zagValidLoggedSet(ex,kg,finalReps))return {skip:true};
- return {key,kg,r:finalReps,weightInput,repsInput,originalWeight:weight,originalReps:reps};
+ const inputs=row?.querySelectorAll('input.cell');
+ const weightInput=inputs?.[0],repsInput=inputs?.[1];
+ // Current input contents take precedence over stored draft. Empty inputs are
+ // genuinely empty; grey previous-session placeholders are never values.
+ const enteredWeight=weightInput?weightInput.value.trim():(old.kg==null?'':String(kgToDisplay(old.kg)));
+ const enteredReps=repsInput?repsInput.value.trim():(old.r==null?'':String(old.r));
+ const hasWeight=enteredWeight!=='';
+ const hasReps=enteredReps!=='';
+ // Optional back-off sets have no prescribed numbers. Never invent any.
+ if((!hasWeight&&(planned.kg===''||planned.kg==null))||
+    (!hasReps&&(planned.r===''||planned.r==null)))return {skip:true};
+ const kg=hasWeight?displayToKg(enteredWeight):planned.kg;
+ const reps=hasReps?enteredReps:planned.r;
+ if(!zagValidLoggedSet(ex,kg,reps))return {error:true};
+ return {key,old,kg,r:reps,weightInput,repsInput,hasWeight,hasReps};
 }
 function zagApplyPreparedSetFill(item){
- if(item.skip)return false;
- const old=st.draft[item.key]||{};
- if(old.done)return false;
- // Never overwrite a field that has been typed since preparation.
- const weight=item.weightInput.value.trim();
- const reps=item.repsInput.value.trim();
- const finalWeight=weight!==''?weight:(item.originalWeight!==''?item.originalWeight:String(kgToDisplay(item.kg)));
- const finalReps=reps!==''?reps:(item.originalReps!==''?item.originalReps:String(item.r));
- const kg=displayToKg(finalWeight);
- if(!zagValidLoggedSet('',kg,finalReps))return false;
- if(weight==='')item.weightInput.value=finalWeight;
- if(reps==='')item.repsInput.value=finalReps;
- st.draft[item.key]={...old,kg,r:finalReps,done:true};
- item.weightInput.closest('tr')?.querySelector('.fist')?.classList.add('done');
- return true;
+ if(item.skip)return;
+ st.draft[item.key]={...item.old,kg:item.kg,r:item.r,done:true};
+ if(item.weightInput&&!item.hasWeight)item.weightInput.value=String(kgToDisplay(item.kg));
+ if(item.repsInput&&!item.hasReps)item.repsInput.value=String(item.r);
 }
 function zagFillMissingSetFields(ex,i,planned,row){
- return zagApplyPreparedSetFill(zagPrepareSetFill(ex,i,planned,row));
+ const item=zagPrepareSetFill(ex,i,planned,row);
+ if(item.error||item.skip)return false;
+ zagApplyPreparedSetFill(item);
+ return true;
 }
 function one(ex,i,btn){
- const key=k(ex,i),planned=sets(ex)[i],row=btn?.closest('tr');
+ const key=k(ex,i),t=sets(ex)[i],row=btn?.closest('tr');
  if(st.draft[key]?.done){
+  // Unmark completion without deleting the manually entered numbers.
   st.draft[key].done=false;btn?.classList.remove('done');
  }else{
-  if(!zagFillMissingSetFields(ex,i,planned,row)){
-   alert(zagSetValidationMessage());return;
-  }
+  if(!zagFillMissingSetFields(ex,i,t,row)){alert(zagSetValidationMessage());return;}
+  btn?.classList.add('done');
  }
  clickSound();save();
 }
@@ -973,17 +960,23 @@ function completeExercise(ex,e){
  }));
 }
 function fillAllSets(ex){
+ zagRestoreManualPBs();
  const exerciseIndex=st.days[st.day][1].indexOf(ex);
  if(exerciseIndex<0)return;
- const card=document.getElementById('exercise-'+exerciseIndex);
- if(!card)return;
- const ts=sets(ex),rows=[...card.querySelectorAll('.exerciseBody table tr')].slice(1);
- if(rows.length!==ts.length){alert('Could not verify the set rows. Please reopen this exercise.');return;}
- const prepared=ts.map((t,i)=>zagPrepareSetFill(ex,i,t,rows[i]));
- let completed=0;
- prepared.forEach(item=>{if(zagApplyPreparedSetFill(item))completed++});
- if(completed){clickSound();save();}
- // Preserve live user inputs and their focus; do not redraw the workout.
+ const ts=sets(ex),prepared=[];
+ // Validate the entire exercise BEFORE modifying any saved data or inputs.
+ for(let i=0;i<ts.length;i++){
+  const row=document.querySelector(`#exercise-${exerciseIndex} tbody tr:nth-child(${i+1})`);
+  const item=zagPrepareSetFill(ex,i,ts[i],row);
+  if(item.error){alert(zagSetValidationMessage());return;}
+  prepared.push(item);
+ }
+ prepared.forEach(zagApplyPreparedSetFill);
+ clickSound();save();workout();
+ requestAnimationFrame(()=>{
+  const card=document.getElementById('exercise-'+exerciseIndex);
+  if(card){card.classList.remove('collapsed');const b=card.querySelector('.exerciseExpand');if(b)b.textContent='COLLAPSE';}
+ });
 }
 // Legacy name retained in case an older cached click handler calls it.
 function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
@@ -1154,11 +1147,7 @@ function zagSetMax(ex,v,repsInput){
 function zagSaveMaxRow(btn){
  const row=btn.closest('.maxrow');if(!row)return;
  const w=row.querySelector('[data-zag-max-ex]'),r=row.querySelector('[data-zag-max-reps]');
- if(w&&r&&zagSetMax(w.dataset.zagMaxEx,w.value,r.value)){
-  btn.textContent='Saved ✓';setTimeout(()=>{if(btn.isConnected)btn.textContent='Save'},1300);
-  const now=new Date();
-  modal('Maximum saved',`<p><b>${esc(w.dataset.zagMaxEx)}</b></p><p>Weight: <b>${esc(w.value)} ${esc(weightUnit())}</b><br>Reps: <b>${esc(r.value)}</b></p><p>Date: <b>${esc(now.toLocaleDateString())}</b><br>Time: <b>${esc(now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}))}</b></p><button class=btn onclick=closeModal()>OK</button>`);
- }
+ if(w&&r&&zagSetMax(w.dataset.zagMaxEx,w.value,r.value)){btn.textContent='Saved ✓';setTimeout(()=>{if(btn.isConnected)btn.textContent='Save'},1300)}
 }
 
 // Point 3: review actual source sets, rather than artificially clamping graph points.
@@ -1587,11 +1576,11 @@ document.addEventListener("visibilitychange",()=>{
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.png')"></div>
-  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.png')"></div>
-  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.png')"></div>
-  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.png')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.png')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.jpg')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -3526,7 +3515,7 @@ async function zagSubmitAuth(){
      if(error)throw error;
      zagSession=data.session;zagCloseAccount();zagRefreshAccountStatus();
      setTimeout(()=>zagInitStateSync().then(()=>zagInitPBSync()),100);
-     setTimeout(()=>zagShowWelcomeGuide(),250)
+     setTimeout(()=>modal('Signed in',`<div class=note>Signed in as ${esc(data.user?.user_metadata?.username||data.user?.email||'Zag Science user')}.</div>`),100)
    }
  }catch(e){zagAuthMessage(e.message||'Something went wrong. Please try again.',true)}
 }
@@ -4874,88 +4863,6 @@ function zagStrengthSVG(records,selected,period,interval){
   clip-path:none!important; margin:0!important;
 }
 </style>
-
-<style id="zag-popup-controls-restored-20261030">
-/* Reserve room OUTSIDE the illustration for visible, functional app controls. */
-#zagInfoPanelV6,.zagTipsPanel{
- box-sizing:border-box!important;background:#07020d!important;
- border:2px solid #d948ff!important;border-radius:18px!important;
- box-shadow:0 0 12px #b51bff,0 0 35px #a016df88!important;
- overflow:hidden!important;
-}
-#zagInfoPanelV6{width:min(94vw,calc(90dvh * 2 / 3))!important;aspect-ratio:2/3!important;max-height:90dvh!important}
-#zagInfoPanelV6 .zagInfoSlide{inset:0 0 10% 0!important;background-color:#08020c!important;background-size:contain!important;background-position:center!important}
-.zagTipsPanel{width:min(94vw,calc(90dvh * 2 / 3))!important;aspect-ratio:2/3!important;max-height:90dvh!important}
-.zagTipsPanel #zagTipImage,.zagTipsPanel #zagTipImage.zagLastTwoBalanced{position:absolute!important;inset:0 0 auto 0!important;width:100%!important;height:90%!important;object-fit:contain!important;background:#08020c!important}
-#zagInfoCloseTop,.zagTipsClose{
- position:absolute!important;right:8px!important;top:8px!important;
- width:36px!important;height:36px!important;z-index:250!important;
- opacity:1!important;pointer-events:auto!important;
- display:flex!important;align-items:center!important;justify-content:center!important;
- border:1.5px solid #ef8cff!important;border-radius:50%!important;
- background:#160520!important;color:white!important;
- box-shadow:0 0 12px #a523e7!important;font-size:27px!important;
- line-height:1!important;font-weight:700!important;
-}
-.zagInfoPrevHit,.zagInfoNextHit,.zagTipsPrev,.zagTipsNext{
- position:absolute!important;bottom:1.3%!important;top:auto!important;height:7.2%!important;
- width:39%!important;z-index:230!important;display:flex!important;
- justify-content:center!important;align-items:center!important;
- border:1.5px solid #e05aff!important;border-radius:12px!important;
- background:linear-gradient(180deg,#421052,#16061f)!important;
- color:#fff!important;font-weight:800!important;font-size:clamp(12px,3vw,17px)!important;
- box-shadow:0 0 9px #b529e488!important;opacity:1!important;
-}
-.zagInfoPrevHit,.zagTipsPrev{left:4%!important;right:auto!important}
-.zagInfoNextHit,.zagTipsNext{right:4%!important;left:auto!important}
-#zagInfoLastCTA{bottom:1.3%!important;right:4%!important;width:57%!important;height:7.2%!important;z-index:240!important}
-#zagInfoPage2FollowPlan,#zagInfoPage2TopSets{z-index:220!important}
-.zagTipsOverlay,#zagInfoOverlayV6{padding:8px!important}
-</style>
-<script id="zag-popup-controls-and-welcome-20261030">
-(function(){
- function setLabels(){
-  const controls=[['zagInfoCloseTop','×'],['zagTipPrev','‹ Previous'],['zagTipNext','Next ›']];
-  for(const [id,label] of controls){const el=document.getElementById(id);if(el)el.textContent=label;}
-  for(const [selector,label] of [['.zagInfoPrevHit','‹ Previous'],['.zagInfoNextHit','Next ›']]){
-   const el=document.querySelector('#zagInfoPanelV6 '+selector);if(el)el.textContent=label;
-  }
-  const x=document.querySelector('.zagTipsClose');if(x)x.textContent='×';
- }
- setLabels();
- // The guide retains its five images; tips retain their eleven images.
- const tipNext=document.getElementById('zagTipNext'),tipPrev=document.getElementById('zagTipPrev');
- const oldRender=window.zagRenderTip;
- if(typeof oldRender==='function')window.zagRenderTip=function(){oldRender.apply(this,arguments);if(tipPrev)tipPrev.style.visibility=zagTipIndex===0?'hidden':'visible';if(tipNext)tipNext.style.visibility=zagTipIndex===zagTipImages.length-1?'hidden':'visible';};
- window.zagStepTip=function(d){const next=zagTipIndex+d;if(next<0||next>=zagTipImages.length)return;zagTipIndex=next;zagRenderTip();};
-})();
-function zagShowWelcomeGuide(){
- if(document.getElementById('zagWelcomeOverlay'))return;
- const cover=document.createElement('div');cover.id='zagWelcomeOverlay';
- cover.style.cssText='position:fixed;inset:0;z-index:2147483600;display:flex;align-items:center;justify-content:center;background:rgba(3,0,12,.96);padding:8px;box-sizing:border-box';
- const slides=['assets/images/onboarding-find-guide.jpg','assets/images/onboarding-find-tips.jpg','assets/images/onboarding-find-info.jpg'];
- let page=0;
- const frame=document.createElement('div');
- frame.style.cssText='position:relative;width:min(96vw,520px);max-height:calc(100dvh - 16px);aspect-ratio:1024/1536;overflow:hidden';
- const img=document.createElement('img');img.alt='Zag Science onboarding instructions';
- img.style.cssText='display:block;width:100%;height:100%;object-fit:contain';
- frame.appendChild(img);
- const hotspot=(left,top,width,height,handler,label)=>{
-   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label);
-   b.style.cssText=`position:absolute;left:${left}%;top:${top}%;width:${width}%;height:${height}%;background:transparent;border:0;cursor:pointer;touch-action:manipulation;`;
-   b.addEventListener('click',handler);frame.appendChild(b);return b;
- };
- function close(){cover.remove();}
- const prev=hotspot(7,86,31,10,()=>setPage(page-1),'Previous slide');
- const next=hotspot(66,86,29,10,()=>{if(page===2)close();else setPage(page+1)},'Next slide or finish');
- hotspot(85,4,12,9,close,'Close onboarding');
- const dots=[0,1,2].map((i)=>hotspot(40+i*6.5,88,6,7,()=>setPage(i),'Go to slide '+(i+1)));
- function setPage(n){page=Math.max(0,Math.min(2,n));img.src=slides[page];prev.disabled=page===0;prev.style.pointerEvents=page===0?'none':'auto';next.setAttribute('aria-label',page===2?'Finish onboarding':'Next slide');}
- cover.addEventListener('click',e=>{if(e.target===cover)close()});
- cover.appendChild(frame);document.body.appendChild(cover);setPage(0);
-}
-
-</script>
 </body></html>
 
 
@@ -5080,7 +4987,7 @@ function zagShowWelcomeGuide(){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.png','assets/images/tip-01-landscape-new.png','assets/images/tip-02-previous-weight-new.png','assets/images/tip-03-train-smarter-new.png','assets/images/tip-04-missed-pb-new.png','assets/images/tip-05-different-machine-new.png','assets/images/tip-06-never-miss-session-new.png','assets/images/tip-07-aim-impossible-new.png','assets/images/tip-08-widget-new.png','assets/images/tip-09-strength-graph-new.png','assets/images/tip-10-weight-converter-new.png'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.png','assets/images/tip-01-landscape-new.jpg','assets/images/tip-02-previous-weight-new.jpg','assets/images/tip-03-train-smarter-new.jpg','assets/images/tip-04-missed-pb-new.jpg','assets/images/tip-05-different-machine-new.jpg','assets/images/tip-06-never-miss-session-new.jpg','assets/images/tip-07-aim-impossible-new.jpg','assets/images/tip-08-widget-new.jpg','assets/images/tip-09-strength-graph-new.png','assets/images/tip-10-weight-converter-new.png'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
