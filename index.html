@@ -464,6 +464,21 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 .zagCalcTipPage{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;box-sizing:border-box;padding:10% 9% 14%;text-align:center;background:radial-gradient(ellipse at top,#350b49 0%,#13061d 45%,#050309 90%);border:2px solid #d84cff;border-radius:20px;color:white;box-shadow:inset 0 0 26px #8c1daf,0 0 18px #a820dc;overflow:auto}
 .zagCalcTipPage h2{font-size:clamp(21px,5vw,32px);color:#f5d6ff;margin:12px 0}.zagCalcTipPage p{font-size:clamp(13px,3.4vw,17px);line-height:1.5}.zagCalcTipIcon{font-weight:900;font-size:clamp(24px,6vw,38px);color:#ef65ff;text-shadow:0 0 20px #d72bff}.zagCalcTipExample{border:1px solid #b837e8;border-radius:12px;padding:13px 18px;line-height:1.8;font-size:18px;font-weight:800;background:#260c33}.zagCalcTipPage .zagCalcTipFoot{font-size:12px;color:#cfacd8}
 </style>
+
+<style id="zag-transparent-art-final-fix">
+/* Real alpha PNG assets, no opaque panel backing, border or box shadow. */
+#zagInfoPanelV6,.zagTipsPanel{background:transparent!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+#zagInfoPanelV6 .zagInfoSlide{background-color:transparent!important;background-size:contain!important;background-repeat:no-repeat!important;}
+.zagTipsPanel img{object-fit:contain!important;}
+#zagInfoOverlayV6,.zagTipsOverlay{background:rgba(1,0,8,.88)!important;backdrop-filter:blur(9px)!important;}
+/* Visible controls live outside artwork; transparent purple lightning-inspired styling. */
+#zagInfoCloseTop,.zagTipsClose{background:radial-gradient(circle,rgba(68,0,93,.7),rgba(16,0,30,.15))!important;border:2px solid #f056ff!important;border-radius:50%!important;box-shadow:0 0 12px #db21ff, inset 0 0 10px #a40cda!important;opacity:1!important;}
+#zagInfoCloseTop:after,.zagTipsClose:after{content:'×';color:white;font:bold 28px/1 system-ui;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-shadow:0 0 9px #ec28ff;}
+.zagInfoPrevHit,.zagInfoNextHit,.zagTipsPrev,.zagTipsNext{background:linear-gradient(130deg,rgba(115,0,150,.22),rgba(14,0,25,.35))!important;border:2px solid #e642ff!important;border-radius:14px!important;box-shadow:0 0 12px #d62aff,inset 0 0 11px #af18e077!important;opacity:1!important;}
+.zagInfoPrevHit:after,.zagTipsPrev:after{content:'‹  PREVIOUS';}
+.zagInfoNextHit:after,.zagTipsNext:after{content:'NEXT  ›';}
+.zagInfoPrevHit:after,.zagInfoNextHit:after,.zagTipsPrev:after,.zagTipsNext:after{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font:700 clamp(10px,2.5vw,18px)/1 system-ui;text-shadow:0 0 8px #f033ff;letter-spacing:.04em;}
+</style>
 </head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
@@ -1576,11 +1591,11 @@ document.addEventListener("visibilitychange",()=>{
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.jpg')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/guide-transparent-01.webp')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/guide-transparent-02.webp')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/guide-transparent-03.webp')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/guide-transparent-04.webp')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/guide-transparent-05.webp')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -4987,7 +5002,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.png','assets/images/tip-01-landscape-new.jpg','assets/images/tip-02-previous-weight-new.jpg','assets/images/tip-03-train-smarter-new.jpg','assets/images/tip-04-missed-pb-new.jpg','assets/images/tip-05-different-machine-new.jpg','assets/images/tip-06-never-miss-session-new.jpg','assets/images/tip-07-aim-impossible-new.jpg','assets/images/tip-08-widget-new.jpg','assets/images/tip-09-strength-graph-new.png','assets/images/tip-10-weight-converter-new.png'];
+const zagTipImages=['assets/images/tip-transparent-01.webp','assets/images/tip-transparent-02.webp','assets/images/tip-transparent-03.webp','assets/images/tip-transparent-04.webp','assets/images/tip-transparent-05.webp','assets/images/tip-transparent-06.webp','assets/images/tip-transparent-07.webp','assets/images/tip-transparent-08.webp','assets/images/tip-transparent-09.webp','assets/images/tip-transparent-10.webp','assets/images/tip-transparent-11.webp'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -5006,7 +5021,7 @@ function zagRenderTip(){
 function zagStepTip(d){zagTipIndex=(zagTipIndex+d+zagTipImages.length)%zagTipImages.length;zagRenderTip();}
 document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
 </script>
-<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-00-goat-explanation.png" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
+<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-transparent-01.webp" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
 <style id="zag-v27-40-tip-trim-and-time-controls">
 .zagTipsPanel{background:#06020b!important}
 .zagTipsPanel img.zagTipTrimEdge{width:108%!important;height:108%!important;max-width:none!important;position:absolute!important;left:-4%!important;top:-4%!important;object-fit:fill!important;aspect-ratio:auto!important}
