@@ -464,28 +464,7 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 .zagCalcTipPage{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;box-sizing:border-box;padding:10% 9% 14%;text-align:center;background:radial-gradient(ellipse at top,#350b49 0%,#13061d 45%,#050309 90%);border:2px solid #d84cff;border-radius:20px;color:white;box-shadow:inset 0 0 26px #8c1daf,0 0 18px #a820dc;overflow:auto}
 .zagCalcTipPage h2{font-size:clamp(21px,5vw,32px);color:#f5d6ff;margin:12px 0}.zagCalcTipPage p{font-size:clamp(13px,3.4vw,17px);line-height:1.5}.zagCalcTipIcon{font-weight:900;font-size:clamp(24px,6vw,38px);color:#ef65ff;text-shadow:0 0 20px #d72bff}.zagCalcTipExample{border:1px solid #b837e8;border-radius:12px;padding:13px 18px;line-height:1.8;font-size:18px;font-weight:800;background:#260c33}.zagCalcTipPage .zagCalcTipFoot{font-size:12px;color:#cfacd8}
 </style>
-
-<style id="zag-transparent-art-final-fix">
-/* Real alpha PNG assets, no opaque panel backing, border or box shadow. */
-#zagInfoPanelV6,.zagTipsPanel{background:transparent!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
-#zagInfoPanelV6 .zagInfoSlide{background-color:transparent!important;background-size:contain!important;background-repeat:no-repeat!important;}
-.zagTipsPanel img{object-fit:contain!important;}
-#zagInfoOverlayV6,.zagTipsOverlay{background:rgba(1,0,8,.88)!important;backdrop-filter:blur(9px)!important;}
-/* Visible controls live outside artwork; transparent purple lightning-inspired styling. */
-#zagInfoCloseTop,.zagTipsClose{background:radial-gradient(circle,rgba(68,0,93,.7),rgba(16,0,30,.15))!important;border:2px solid #f056ff!important;border-radius:50%!important;box-shadow:0 0 12px #db21ff, inset 0 0 10px #a40cda!important;opacity:1!important;}
-#zagInfoCloseTop:after,.zagTipsClose:after{content:'×';color:white;font:bold 28px/1 system-ui;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-shadow:0 0 9px #ec28ff;}
-.zagInfoPrevHit,.zagInfoNextHit,.zagTipsPrev,.zagTipsNext{background:linear-gradient(130deg,rgba(115,0,150,.22),rgba(14,0,25,.35))!important;border:2px solid #e642ff!important;border-radius:14px!important;box-shadow:0 0 12px #d62aff,inset 0 0 11px #af18e077!important;opacity:1!important;}
-.zagInfoPrevHit:after,.zagTipsPrev:after{content:'‹  PREVIOUS';}
-.zagInfoNextHit:after,.zagTipsNext:after{content:'NEXT  ›';}
-.zagInfoPrevHit:after,.zagInfoNextHit:after,.zagTipsPrev:after,.zagTipsNext:after{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font:700 clamp(10px,2.5vw,18px)/1 system-ui;text-shadow:0 0 8px #f033ff;letter-spacing:.04em;}
-</style>
-<style id="zag-unified-tutorial-page-sizing-20261101">
-#zagInfoPanelV6,.zagTipsPanel{width:min(94vw,calc(72dvh * 2 / 3),700px)!important;aspect-ratio:2/3!important;height:auto!important;max-height:none!important;overflow:visible!important;}
-#zagInfoPanelV6 .zagInfoSlide{position:absolute!important;inset:0!important;background-size:100% 100%!important;background-position:center!important;}
-.zagTipsPanel #zagTipImage,.zagTipsPanel #zagTipImage.zagLastTwoBalanced,.zagTipsPanel #zagTipImage.zagTipTrimEdge{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;transform:none!important;clip-path:none!important;margin:0!important;}
-.zagArtworkNav.top{justify-content:flex-end!important;}.zagArtworkNav.top button.close{margin-left:auto!important;}
-.zagArtworkNav.bottom{justify-content:space-between!important;}
-</style></head>
+</head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
 <main id="screen"></main></div>
@@ -1597,11 +1576,11 @@ document.addEventListener("visibilitychange",()=>{
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/guide-transparent-01.webp')"></div>
-  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/guide-transparent-02.webp')"></div>
-  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/guide-transparent-03.webp')"></div>
-  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/guide-transparent-04.webp')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/guide-transparent-05.webp')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.jpg')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.jpg')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -4884,57 +4863,7 @@ function zagStrengthSVG(records,selected,period,interval){
   clip-path:none!important; margin:0!important;
 }
 </style>
-<style id="zag-nav-artwork-20261101">
-#zagInfoOverlayV6,#zagTipsOverlay{align-items:center!important;justify-content:center!important;overflow-y:auto!important;padding:env(safe-area-inset-top,10px) 8px env(safe-area-inset-bottom,10px)!important;box-sizing:border-box!important}
-#zagInfoPanelV6,.zagTipsPanel{position:relative!important;display:block!important;overflow:visible!important;width:min(94vw,calc(72dvh * 2 / 3),700px)!important;height:auto!important;max-height:none!important;aspect-ratio:2/3!important;margin:76px auto 76px!important;flex-shrink:0!important}
-#zagInfoPanelV6:before{display:none!important}
-#zagInfoPanelV6 .zagInfoSlide{inset:0!important;background-size:contain!important}
-.zagTipsPanel #zagTipImage{width:100%!important;height:100%!important;object-fit:contain!important}
-#zagInfoCloseTop,#zagInfoGoV6,.zagInfoPrevHit,.zagInfoNextHit,.zagTipsClose,.zagTipsPrev,.zagTipsNext{display:none!important}
-.zagArtworkNav{position:absolute!important;left:0;right:0;height:62px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:150!important;pointer-events:none}
-.zagArtworkNav.top{top:-70px}.zagArtworkNav.bottom{bottom:-70px}
-.zagArtworkNav button{position:relative!important;display:block!important;pointer-events:auto!important;flex:0 1 37%;width:37%;height:60px!important;min-width:0!important;border:0!important;background:transparent!important;padding:0!important;opacity:1!important;box-shadow:none!important;touch-action:manipulation}
-.zagArtworkNav button.close{flex:0 0 58px;width:58px!important;height:58px!important;margin-left:auto}
-.zagArtworkNav button img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
-.zagArtworkNav button:disabled{opacity:.18!important;pointer-events:none!important}
-#zagInfoLastCTA{z-index:110!important}
-@media(max-height:720px){#zagInfoPanelV6,.zagTipsPanel{width:min(94vw,calc(60dvh * 2 / 3))!important;margin:58px auto!important}.zagArtworkNav.top{top:-58px}.zagArtworkNav.bottom{bottom:-58px}.zagArtworkNav{height:52px}.zagArtworkNav button{height:50px!important}.zagArtworkNav button.close{width:48px!important;height:48px!important;flex-basis:48px}}
-</style><script id="zag-nav-artwork-20261101-script">
-(function(){
- const path='assets/images/';
- function addBars(panel,mode){
-  if(!panel||panel.querySelector('.zagArtworkNav'))return;
-  for(const side of ['top','bottom']){
-   const bar=document.createElement('div');bar.className='zagArtworkNav '+side;
-   for(const [type,file,label] of (side==='top' ? [['close','nav-close.png','Close']] : [['prev','nav-previous.png','Previous page'],['next','nav-next.png','Next page']])){
-    const btn=document.createElement('button');btn.type='button';btn.className=type;btn.setAttribute('aria-label',label);
-    const img=document.createElement('img');img.src=path+file;img.alt='';btn.appendChild(img);
-    btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();
-     if(mode==='tips'){if(type==='close')zagCloseTips();else zagStepTip(type==='next'?1:-1);}
-     else{if(type==='close')window.closeZagInfo();else panel.querySelector(type==='next'?'.zagInfoNextHit':'.zagInfoPrevHit')?.click();}
-    });bar.appendChild(btn);
-   }panel.appendChild(bar);
-  }
- }
- function sync(){
-  const guide=document.getElementById('zagInfoPanelV6');const tips=document.querySelector('.zagTipsPanel');
-  addBars(guide,'guide');addBars(tips,'tips');
-  if(guide){const slides=[...guide.querySelectorAll('.zagInfoSlide')];const i=slides.findIndex(x=>x.classList.contains('active'));
-   guide.querySelectorAll('.zagArtworkNav .prev').forEach(b=>b.disabled=i<=0);
-   guide.querySelectorAll('.zagArtworkNav .next').forEach(b=>b.disabled=i>=slides.length-1);
-  }
-  if(tips){const n=window.zagTipImages?.length||11;const i=typeof zagTipIndex==='number'?zagTipIndex:0;
-   tips.querySelectorAll('.zagArtworkNav .prev').forEach(b=>b.disabled=i<=0);
-   tips.querySelectorAll('.zagArtworkNav .next').forEach(b=>b.disabled=i>=n-1);
-  }
- }
- document.addEventListener('DOMContentLoaded',()=>{sync();
-  const g=document.getElementById('zagInfoPanelV6');const t=document.querySelector('.zagTipsPanel');
-  if(g)new MutationObserver(sync).observe(g,{subtree:true,attributes:true,attributeFilter:['class']});
-  if(t)new MutationObserver(sync).observe(t,{subtree:true,attributes:true,attributeFilter:['src']});
- });
-})();
-</script></body></html>
+</body></html>
 
 
 
@@ -5058,7 +4987,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-transparent-02.webp','assets/images/tip-transparent-03.webp','assets/images/tip-transparent-04.webp','assets/images/tip-transparent-05.webp','assets/images/tip-transparent-06.webp','assets/images/tip-transparent-07.webp','assets/images/tip-transparent-08.webp','assets/images/tip-transparent-09.webp','assets/images/tip-transparent-10.webp','assets/images/tip-transparent-11.webp'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.jpg','assets/images/tip-01-landscape-correct.png','assets/images/tip-02-previous-weight-new.jpg','assets/images/tip-03-train-smarter-new.jpg','assets/images/tip-04-missed-pb-new.jpg','assets/images/tip-05-different-machine-new.jpg','assets/images/tip-06-never-miss-session-new.jpg','assets/images/tip-07-aim-impossible-new.jpg','assets/images/tip-08-widget-new.jpg','assets/images/tip-09-strength-graph-new.jpg','assets/images/tip-10-weight-converter-new.jpg'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
@@ -5077,7 +5006,7 @@ function zagRenderTip(){
 function zagStepTip(d){zagTipIndex=(zagTipIndex+d+zagTipImages.length)%zagTipImages.length;zagRenderTip();}
 document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOverlay')?.classList.contains('open'))return;if(e.key==='Escape')zagCloseTips();if(e.key==='ArrowLeft')zagStepTip(-1);if(e.key==='ArrowRight')zagStepTip(1)});
 </script>
-<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-transparent-02.webp" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
+<div id="zagTipsOverlay" class="zagTipsOverlay" aria-hidden="true" onclick="if(event.target===this)zagCloseTips()"><div class="zagTipsPanel" role="dialog" aria-label="Tips and Tricks" on touchstart="zagTipTouchX=event.touches[0].clientX" on touchend="if(zagTipTouchX!==null){let delta=event.changedTouches[0].clientX-zagTipTouchX;if(Math.abs(delta)>55)zagStepTip(delta<0?1:-1);zagTipTouchX=null}"><img id="zagTipImage" src="assets/images/tip-00-goat-explanation.jpg" alt="Zag Science workout tip"><button class="zagTipsClick zagTipsClose" aria-label="Close tips" onclick="zagCloseTips()"></button><button id="zagTipPrev" class="zagTipsClick zagTipsPrev" aria-label="Previous tip" onclick="zagStepTip(-1)"></button><button id="zagTipNext" class="zagTipsClick zagTipsNext" aria-label="Next tip" onclick="zagStepTip(1)"></button></div></div>
 <style id="zag-v27-40-tip-trim-and-time-controls">
 .zagTipsPanel{background:#06020b!important}
 .zagTipsPanel img.zagTipTrimEdge{width:108%!important;height:108%!important;max-width:none!important;position:absolute!important;left:-4%!important;top:-4%!important;object-fit:fill!important;aspect-ratio:auto!important}
@@ -5139,39 +5068,23 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('zagTipsOver
   transform:none!important;clip-path:none!important;margin:0!important;
 }
 </style>
-
-
-<style id="zag-fixed-tips-and-guide-layout-20261101">
-/* Consistent page dimensions across all slides; navigation belongs to the frame, not the image. */
-#zagTipsOverlay,#zagInfoOverlayV6{
- position:fixed!important;inset:0!important;
- align-items:center!important;justify-content:center!important;
- overflow:hidden!important;box-sizing:border-box!important;
- padding:calc(env(safe-area-inset-top,0px) + 66px) 10px calc(env(safe-area-inset-bottom,0px) + 66px)!important;
-}
-.zagTipsPanel,#zagInfoPanelV6{
- position:relative!important;flex:0 0 auto!important;
- width:min(92vw,calc((100dvh - 170px) * 2 / 3),520px)!important;
- height:auto!important;aspect-ratio:2 / 3!important;
- max-height:calc(100dvh - 170px)!important;
- margin:0 auto!important;overflow:visible!important;
- --zag-tip-ratio:0.6666667!important;
-}
-.zagTipsPanel #zagTipImage,.zagTipsPanel #zagTipImage.zagLastTwoBalanced{
- position:absolute!important;inset:0!important;display:block!important;
- width:100%!important;height:100%!important;object-fit:contain!important;
- object-position:center center!important;transform:none!important;
-}
-#zagInfoPanelV6 .zagInfoSlide{position:absolute!important;inset:0!important;background-size:contain!important;background-position:center!important}
-.zagArtworkNav{left:0!important;right:0!important;height:56px!important;position:absolute!important;z-index:150!important}
-.zagArtworkNav.top{top:-62px!important;justify-content:flex-end!important}
-.zagArtworkNav.bottom{bottom:-62px!important;justify-content:space-between!important}
-.zagArtworkNav button{height:54px!important}
-.zagArtworkNav button.close{height:54px!important;width:54px!important;flex-basis:54px!important}
-@media(max-height:700px){
- .zagTipsPanel,#zagInfoPanelV6{width:min(90vw,calc((100dvh - 132px) * 2 / 3))!important;max-height:calc(100dvh - 132px)!important}
- .zagArtworkNav.top{top:-48px!important}.zagArtworkNav.bottom{bottom:-48px!important}
- .zagArtworkNav{height:44px!important}.zagArtworkNav button{height:42px!important}
- .zagArtworkNav button.close{width:42px!important;height:42px!important;flex-basis:42px!important}
-}
-</style>
+<script id="zag-native-tip-ratio-20261028">
+(function(){
+  const oldRender=window.zagRenderTip;
+  if(typeof oldRender!=='function')return;
+  window.zagRenderTip=function(){
+    oldRender.apply(this,arguments);
+    const img=document.getElementById('zagTipImage');
+    const panel=img&&img.closest('.zagTipsPanel');
+    if(!img||!panel)return;
+    img.classList.remove('zagLastTwoBalanced','zagTipTrimEdge');
+    const updateRatio=function(){
+      if(img.naturalWidth&&img.naturalHeight){
+        panel.style.setProperty('--zag-tip-ratio',String(img.naturalWidth/img.naturalHeight));
+      }
+    };
+    img.addEventListener('load',updateRatio,{once:true});
+    if(img.complete)updateRatio();
+  };
+})();
+</script>
