@@ -4878,7 +4878,57 @@ function zagStrengthSVG(records,selected,period,interval){
   clip-path:none!important; margin:0!important;
 }
 </style>
-</body></html>
+<style id="zag-nav-artwork-20261101">
+#zagInfoOverlayV6,#zagTipsOverlay{align-items:center!important;justify-content:center!important;overflow-y:auto!important;padding:env(safe-area-inset-top,10px) 8px env(safe-area-inset-bottom,10px)!important;box-sizing:border-box!important}
+#zagInfoPanelV6,.zagTipsPanel{position:relative!important;display:block!important;overflow:visible!important;width:min(96vw,calc(68dvh * 2 / 3),700px)!important;height:auto!important;max-height:none!important;aspect-ratio:2/3!important;margin:76px auto 76px!important;flex-shrink:0!important}
+#zagInfoPanelV6:before{display:none!important}
+#zagInfoPanelV6 .zagInfoSlide{inset:0!important;background-size:contain!important}
+.zagTipsPanel #zagTipImage{width:100%!important;height:100%!important;object-fit:contain!important}
+#zagInfoCloseTop,#zagInfoGoV6,.zagInfoPrevHit,.zagInfoNextHit,.zagTipsClose,.zagTipsPrev,.zagTipsNext{display:none!important}
+.zagArtworkNav{position:absolute!important;left:0;right:0;height:62px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:150!important;pointer-events:none}
+.zagArtworkNav.top{top:-70px}.zagArtworkNav.bottom{bottom:-70px}
+.zagArtworkNav button{position:relative!important;display:block!important;pointer-events:auto!important;flex:0 1 37%;width:37%;height:60px!important;min-width:0!important;border:0!important;background:transparent!important;padding:0!important;opacity:1!important;box-shadow:none!important;touch-action:manipulation}
+.zagArtworkNav button.close{flex:0 0 58px;width:58px!important;height:58px!important;margin-left:auto}
+.zagArtworkNav button img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.zagArtworkNav button:disabled{opacity:.18!important;pointer-events:none!important}
+#zagInfoLastCTA{z-index:110!important}
+@media(max-height:720px){#zagInfoPanelV6,.zagTipsPanel{width:min(94vw,calc(60dvh * 2 / 3))!important;margin:58px auto!important}.zagArtworkNav.top{top:-58px}.zagArtworkNav.bottom{bottom:-58px}.zagArtworkNav{height:52px}.zagArtworkNav button{height:50px!important}.zagArtworkNav button.close{width:48px!important;height:48px!important;flex-basis:48px}}
+</style><script id="zag-nav-artwork-20261101-script">
+(function(){
+ const path='assets/images/';
+ function addBars(panel,mode){
+  if(!panel||panel.querySelector('.zagArtworkNav'))return;
+  for(const side of ['top','bottom']){
+   const bar=document.createElement('div');bar.className='zagArtworkNav '+side;
+   for(const [type,file,label] of [['prev','nav-previous.png','Previous page'],['next','nav-next.png','Next page'],['close','nav-close.png','Close']]){
+    const btn=document.createElement('button');btn.type='button';btn.className=type;btn.setAttribute('aria-label',label);
+    const img=document.createElement('img');img.src=path+file;img.alt='';btn.appendChild(img);
+    btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();
+     if(mode==='tips'){if(type==='close')zagCloseTips();else zagStepTip(type==='next'?1:-1);}
+     else{if(type==='close')window.closeZagInfo();else panel.querySelector(type==='next'?'.zagInfoNextHit':'.zagInfoPrevHit')?.click();}
+    });bar.appendChild(btn);
+   }panel.appendChild(bar);
+  }
+ }
+ function sync(){
+  const guide=document.getElementById('zagInfoPanelV6');const tips=document.querySelector('.zagTipsPanel');
+  addBars(guide,'guide');addBars(tips,'tips');
+  if(guide){const slides=[...guide.querySelectorAll('.zagInfoSlide')];const i=slides.findIndex(x=>x.classList.contains('active'));
+   guide.querySelectorAll('.zagArtworkNav .prev').forEach(b=>b.disabled=i<=0);
+   guide.querySelectorAll('.zagArtworkNav .next').forEach(b=>b.disabled=i>=slides.length-1);
+  }
+  if(tips){const n=window.zagTipImages?.length||11;const i=typeof zagTipIndex==='number'?zagTipIndex:0;
+   tips.querySelectorAll('.zagArtworkNav .prev').forEach(b=>b.disabled=i<=0);
+   tips.querySelectorAll('.zagArtworkNav .next').forEach(b=>b.disabled=i>=n-1);
+  }
+ }
+ document.addEventListener('DOMContentLoaded',()=>{sync();
+  const g=document.getElementById('zagInfoPanelV6');const t=document.querySelector('.zagTipsPanel');
+  if(g)new MutationObserver(sync).observe(g,{subtree:true,attributes:true,attributeFilter:['class']});
+  if(t)new MutationObserver(sync).observe(t,{subtree:true,attributes:true,attributeFilter:['src']});
+ });
+})();
+</script></body></html>
 
 
 
