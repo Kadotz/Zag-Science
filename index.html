@@ -479,7 +479,13 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 .zagInfoNextHit:after,.zagTipsNext:after{content:'NEXT  ›';}
 .zagInfoPrevHit:after,.zagInfoNextHit:after,.zagTipsPrev:after,.zagTipsNext:after{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font:700 clamp(10px,2.5vw,18px)/1 system-ui;text-shadow:0 0 8px #f033ff;letter-spacing:.04em;}
 </style>
-</head>
+<style id="zag-unified-tutorial-page-sizing-20261101">
+#zagInfoPanelV6,.zagTipsPanel{width:min(94vw,calc(72dvh * 2 / 3),700px)!important;aspect-ratio:2/3!important;height:auto!important;max-height:none!important;overflow:visible!important;}
+#zagInfoPanelV6 .zagInfoSlide{position:absolute!important;inset:0!important;background-size:100% 100%!important;background-position:center!important;}
+.zagTipsPanel #zagTipImage,.zagTipsPanel #zagTipImage.zagLastTwoBalanced,.zagTipsPanel #zagTipImage.zagTipTrimEdge{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;transform:none!important;clip-path:none!important;margin:0!important;}
+.zagArtworkNav.top{justify-content:flex-end!important;}.zagArtworkNav.top button.close{margin-left:auto!important;}
+.zagArtworkNav.bottom{justify-content:space-between!important;}
+</style></head>
 <body><div class="app">
 <img class="logo" alt="Zag Science" src="assets/images/asset-006-8b283c6b61e7.png">
 <main id="screen"></main></div>
@@ -4880,7 +4886,7 @@ function zagStrengthSVG(records,selected,period,interval){
 </style>
 <style id="zag-nav-artwork-20261101">
 #zagInfoOverlayV6,#zagTipsOverlay{align-items:center!important;justify-content:center!important;overflow-y:auto!important;padding:env(safe-area-inset-top,10px) 8px env(safe-area-inset-bottom,10px)!important;box-sizing:border-box!important}
-#zagInfoPanelV6,.zagTipsPanel{position:relative!important;display:block!important;overflow:visible!important;width:min(96vw,calc(68dvh * 2 / 3),700px)!important;height:auto!important;max-height:none!important;aspect-ratio:2/3!important;margin:76px auto 76px!important;flex-shrink:0!important}
+#zagInfoPanelV6,.zagTipsPanel{position:relative!important;display:block!important;overflow:visible!important;width:min(94vw,calc(72dvh * 2 / 3),700px)!important;height:auto!important;max-height:none!important;aspect-ratio:2/3!important;margin:76px auto 76px!important;flex-shrink:0!important}
 #zagInfoPanelV6:before{display:none!important}
 #zagInfoPanelV6 .zagInfoSlide{inset:0!important;background-size:contain!important}
 .zagTipsPanel #zagTipImage{width:100%!important;height:100%!important;object-fit:contain!important}
@@ -4900,7 +4906,7 @@ function zagStrengthSVG(records,selected,period,interval){
   if(!panel||panel.querySelector('.zagArtworkNav'))return;
   for(const side of ['top','bottom']){
    const bar=document.createElement('div');bar.className='zagArtworkNav '+side;
-   for(const [type,file,label] of [['prev','nav-previous.png','Previous page'],['next','nav-next.png','Next page'],['close','nav-close.png','Close']]){
+   for(const [type,file,label] of (side==='top' ? [['close','nav-close.png','Close']] : [['prev','nav-previous.png','Previous page'],['next','nav-next.png','Next page']])){
     const btn=document.createElement('button');btn.type='button';btn.className=type;btn.setAttribute('aria-label',label);
     const img=document.createElement('img');img.src=path+file;img.alt='';btn.appendChild(img);
     btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();
