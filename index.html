@@ -1576,11 +1576,11 @@ document.addEventListener("visibilitychange",()=>{
 <div id="zagInfoOverlayV6" aria-hidden="true">
  <div id="zagInfoPanelV6">
   
-  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/info-page-1-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/info-page-2-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/info-page-3-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/info-page-4-zag-new.jpg')"></div>
-  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/info-page-5-zag-new.jpg')"></div>
+  <div class="zagInfoSlide active" data-i="0" style="background-image:url('assets/images/guide-transparent-01.webp')"></div>
+  <div class="zagInfoSlide" data-i="1" style="background-image:url('assets/images/guide-transparent-02.webp')"></div>
+  <div class="zagInfoSlide" data-i="2" style="background-image:url('assets/images/guide-transparent-03.webp')"></div>
+  <div class="zagInfoSlide" data-i="3" style="background-image:url('assets/images/guide-transparent-04.webp')"></div>
+  <div class="zagInfoSlide" data-i="4" style="background-image:url('assets/images/guide-transparent-05.webp')"></div>
   <button id="zagInfoCloseTop" type="button" aria-label="Close information"></button>
   <button class="zagInfoHit zagInfoPrevHit" type="button" aria-label="Previous information page"></button>
   <button class="zagInfoHit zagInfoNextHit" type="button" aria-label="Next information page"></button>
@@ -4863,6 +4863,58 @@ function zagStrengthSVG(records,selected,period,interval){
   clip-path:none!important; margin:0!important;
 }
 </style>
+
+<style id="zag-restored-fixed-transparent-overlays">
+/* All artwork lives inside a fixed 2:3 image viewport. The navigation is outside the artwork. */
+#zagInfoOverlayV6.open, .zagTipsOverlay.open{display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;background:rgba(2,0,12,.96)!important}
+#zagInfoPanelV6{position:relative!important;width:min(92vw,calc(72dvh * 2 / 3))!important;height:auto!important;aspect-ratio:2/3!important;max-height:72dvh!important;overflow:visible!important;background:none!important;border-radius:0!important;box-shadow:none!important}
+#zagInfoPanelV6 .zagInfoSlide{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;border:0!important;box-shadow:none!important}
+#zagInfoPanelV6 .zagInfoSlide:not(.active){display:none!important}
+#zagInfoPanelV6 #zagInfoCloseTop,#zagInfoPanelV6 .zagInfoPrevHit,#zagInfoPanelV6 .zagInfoNextHit{opacity:0!important;pointer-events:none!important}
+#zagInfoPanelV6 #zagInfoGoV6,#zagInfoPanelV6 #zagInfoLastCTA{display:none!important}
+.zagTipsPanel{position:relative!important;width:min(92vw,calc(72dvh * 2 / 3))!important;height:auto!important;aspect-ratio:2/3!important;max-height:72dvh!important;overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;--zag-tip-ratio:0.6666667!important}
+.zagTipsPanel #zagTipImage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;transform:none!important;max-width:100%!important;max-height:100%!important}
+.zagTipsPanel .zagTipsClick{opacity:0!important;pointer-events:none!important}
+.zagOverlayControls{position:absolute;inset:0;pointer-events:none;z-index:500}
+.zagOverlayControls button{position:absolute;display:block;border:0;padding:0;background-color:transparent;background-size:contain;background-position:center;background-repeat:no-repeat;pointer-events:auto;cursor:pointer;touch-action:manipulation}
+.zagOverlayControls .zagOClose{right:0;top:-11%;width:17%;height:10%;background-image:url('assets/images/nav-close.png')}
+.zagOverlayControls .zagOPrev{left:0;bottom:-12%;width:40%;height:9%;background-image:url('assets/images/nav-previous.png')}
+.zagOverlayControls .zagONext{right:0;bottom:-12%;width:40%;height:9%;background-image:url('assets/images/nav-next.png')}
+.zagOverlayControls button:disabled{opacity:.22;pointer-events:none}
+</style>
+<script id="zag-restored-fixed-transparent-overlays-js">
+(function(){
+ function controls(parent,kind){
+   if(!parent||parent.querySelector('.zagOverlayControls'))return;
+   const c=document.createElement('div');c.className='zagOverlayControls';
+   c.innerHTML='<button type="button" class="zagOClose" aria-label="Close"></button><button type="button" class="zagOPrev" aria-label="Previous"></button><button type="button" class="zagONext" aria-label="Next"></button>';
+   parent.appendChild(c);
+   const get=(x)=>c.querySelector(x);
+   get('.zagOClose').onclick=()=>kind==='guide'?document.getElementById('zagInfoCloseTop').click():zagCloseTips();
+   get('.zagOPrev').onclick=()=>kind==='guide'?parent.querySelector('.zagInfoPrevHit').click():zagStepTip(-1);
+   get('.zagONext').onclick=()=>kind==='guide'?parent.querySelector('.zagInfoNextHit').click():zagStepTip(1);
+   function refresh(){
+     if(kind==='guide'){
+       const slides=[...parent.querySelectorAll('.zagInfoSlide')];const i=slides.findIndex(x=>x.classList.contains('active'));
+       get('.zagOPrev').disabled=i<=0;get('.zagONext').disabled=i>=slides.length-1;
+     }else{
+       get('.zagOPrev').disabled=zagTipIndex<=0;get('.zagONext').disabled=zagTipIndex>=zagTipImages.length-1;
+     }
+   }
+   if(kind==='guide')new MutationObserver(refresh).observe(parent,{subtree:true,attributes:true,attributeFilter:['class']});
+   else {
+     const old=window.zagRenderTip;
+     if(typeof old==='function')window.zagRenderTip=function(){old.apply(this,arguments);refresh()};
+   }
+   refresh();
+ }
+ controls(document.getElementById('zagInfoPanelV6'),'guide');
+ controls(document.querySelector('#zagTipsOverlay .zagTipsPanel'),'tips');
+ // The original image-ratio handler changes the panel width between slides; keep it fixed.
+ const tipImg=document.getElementById('zagTipImage');
+ if(tipImg)tipImg.addEventListener('load',()=>{const p=tipImg.closest('.zagTipsPanel');if(p)p.style.setProperty('--zag-tip-ratio','0.6666667','important')});
+})();
+</script>
 </body></html>
 
 
@@ -4987,7 +5039,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.jpg','assets/images/tip-01-landscape-correct.png','assets/images/tip-02-previous-weight-new.jpg','assets/images/tip-03-train-smarter-new.jpg','assets/images/tip-04-missed-pb-new.jpg','assets/images/tip-05-different-machine-new.jpg','assets/images/tip-06-never-miss-session-new.jpg','assets/images/tip-07-aim-impossible-new.jpg','assets/images/tip-08-widget-new.jpg','assets/images/tip-09-strength-graph-new.jpg','assets/images/tip-10-weight-converter-new.jpg'];
+const zagTipImages=['assets/images/tip-transparent-01.webp','assets/images/tip-transparent-02.webp','assets/images/tip-transparent-03.webp','assets/images/tip-transparent-04.webp','assets/images/tip-transparent-05.webp','assets/images/tip-transparent-06.webp','assets/images/tip-transparent-07.webp','assets/images/tip-transparent-08.webp','assets/images/tip-transparent-09.webp','assets/images/tip-transparent-10.webp','assets/images/tip-transparent-11.webp'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
