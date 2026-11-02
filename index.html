@@ -965,8 +965,16 @@ function fillAllSets(ex){
  if(exerciseIndex<0)return;
  const ts=sets(ex),prepared=[];
  // Validate the entire exercise BEFORE modifying any saved data or inputs.
+ const table=document.querySelector(`#exercise-${exerciseIndex} table`);
+ if(!table)return;
  for(let i=0;i<ts.length;i++){
-  const row=document.querySelector(`#exercise-${exerciseIndex} tbody tr:nth-child(${i+1})`);
+  // The first table row contains headings, not set 1. Use the actual
+  // table row index so every ALL action reads its own set's inputs.
+  const row=table.rows[i+1];
+  if(!row)return;
+  const key=k(ex,i),existing=st.draft[key]||{};
+  // A completed set must never be rewritten or marked incomplete.
+  if(existing.done)continue;
   const item=zagPrepareSetFill(ex,i,ts[i],row);
   if(item.error){alert(zagSetValidationMessage());return;}
   prepared.push(item);
