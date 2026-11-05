@@ -768,7 +768,9 @@ function zagQuickPrevious(input){
  const raw=Number(input.dataset.zagPrevious);
  if(!Number.isFinite(raw))return;
  input.value=String(raw);
+ input.dispatchEvent(new Event('input',{bubbles:true}));
  input.dispatchEvent(new Event('change',{bubbles:true}));
+ zagUpdateSetButton(input);
  input.classList.add('zagPreviousFilled');
 }
 function zagPreviousStart(event,input){
@@ -1332,11 +1334,11 @@ async function zagRescheduleNative(){
   if(!await zagNativePermission(false)){window.zagLastScheduleError='Notification permission not granted';return;}
   window.zagLastScheduleError='';
   const desired=zagDesiredReminders();
-  const wanted=JSON.stringify(desired.map(x=>[x.id,new Date(x.schedule.at).getTime()]).sort((a,b)=>a[0]-b[0]));
+  const wanted=JSON.stringify(desired.map(x=>[x.id,new Date(x.schedule.at).getTime(),x.title,x.body,x.extra?.recommendedDay]).sort((a,b)=>a[0]-b[0]));
   const pending=(await n.getPending())?.notifications||[];
   const ids=new Set(desired.map(x=>x.id));
   const ours=pending.filter(x=>Number(x.id)>=8200&&Number(x.id)<8300);
-  const alreadyGood=localStorage.getItem('zagNativeReminderSignatureV3')===wanted&&desired.every(x=>ours.some(p=>Number(p.id)===x.id))&&!ours.some(p=>!ids.has(Number(p.id)));
+  const alreadyGood=localStorage.getItem('zagNativeReminderSignatureV4')===wanted&&desired.every(x=>ours.some(p=>Number(p.id)===x.id&&p.body===x.body))&&!ours.some(p=>!ids.has(Number(p.id)));
   if(alreadyGood)return;
   if(ours.length)await n.cancel({notifications:ours.map(x=>({id:Number(x.id)}))});
   // Schedule separately so a bodyweight reminder cannot block a streak reminder.
@@ -1357,11 +1359,11 @@ async function zagRescheduleNative(){
    const detail='Native queue has '+confirmed.length+' pending. '+(errors.length?'Schedule errors: '+errors.join('; ')+'. ':'')+(missing.length?'Not retained: '+missing.map(x=>x.id).join(', '):'');
    throw Error(detail);
   }
-  localStorage.setItem('zagNativeReminderSignatureV3',wanted);
+  localStorage.setItem('zagNativeReminderSignatureV4',wanted);
  })().catch(e=>{
   console.warn('Zag reminder scheduling failed',e);
   window.zagLastScheduleError=String(e?.message||e);
-  localStorage.removeItem('zagNativeReminderSignatureV3');
+  localStorage.removeItem('zagNativeReminderSignatureV4');
  }).finally(()=>{
   zagSchedulingPromise=null;
   if(zagScheduleAgain){zagScheduleAgain=false;zagRescheduleNative().catch(console.warn)}
@@ -1487,7 +1489,7 @@ async function zagRepairStreakSchedule(){
   if(!n){show('Cannot access the native LocalNotifications plugin. Check the iOS build includes @capacitor/local-notifications.');return;}
   const granted=await zagNativePermission(true);
   if(!granted){show('Notifications are not permitted. Open iPhone Settings → Notifications → Zag Science.');return;}
-  localStorage.removeItem('zagNativeReminderSignatureV3');
+  localStorage.removeItem('zagNativeReminderSignatureV4');
   await zagRescheduleNative();
   await zagCheckStreakSchedule();
  }catch(e){show('Scheduling error: '+String(e?.message||e));}
@@ -5064,7 +5066,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.png', 'assets/images/tip-transparent-01.webp', 'assets/images/tip-transparent-02.webp', 'assets/images/tip-transparent-03.webp', 'assets/images/tip-transparent-04.webp', 'assets/images/tip-transparent-05.webp', 'assets/images/tip-transparent-06.webp', 'assets/images/tip-transparent-07.webp', 'assets/images/tip-transparent-08.webp', 'assets/images/tip-transparent-09.webp', 'assets/images/tip-transparent-10.webp'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.png', 'assets/images/tip-transparent-01.webp', 'assets/images/tip-transparent-02.webp', 'assets/images/tip-transparent-03.webp', 'assets/images/tip-transparent-04.webp', 'assets/images/tip-transparent-05.webp', 'assets/images/tip-transparent-06.webp', 'assets/images/tip-transparent-07.webp', 'assets/images/tip-transparent-08.webp', 'assets/images/tip-transparent-09.webp', 'assets/images/tip-transparent-10.webp', 'assets/images/tip-transparent-11.webp', 'assets/images/tip-transparent-12.webp'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
