@@ -4,6 +4,9 @@ import AppIntents
 import UIKit
 
 private let sharedSuite = "group.com.zagscience.app"
+// Bodyweight is sent by the app as its own series. It can be chosen in Edit Widget,
+// but it is not a lift, so it never counts towards "Overall strength".
+private let zagBodyweightSeries = "Bodyweight"
 
 // Read the most recently committed entitlement from a shared, atomic file.
 // WidgetKit and the main app run in different processes; a disk snapshot
@@ -264,13 +267,13 @@ struct StrengthProvider: AppIntentTimelineProvider {
             for (name, value) in record.by where value.isFinite && value > 0 {
                 if baseline[name] == nil { baseline[name] = value }
                 latest[name] = value
-                if selected == "all" || selected == name { changed = true }
+                if (selected == "all" && name != zagBodyweightSeries) || selected == name { changed = true }
             }
             guard changed, start.map({ date >= $0 }) ?? true else { continue }
             let value: Double?
             if selected == "all" {
                 let ratios = latest.compactMap { (name, v) -> Double? in
-                    guard let base = baseline[name], base > 0 else { return nil }
+                    guard name != zagBodyweightSeries, let base = baseline[name], base > 0 else { return nil }
                     return 100 * v / base
                 }
                 value = ratios.isEmpty ? nil : ratios.reduce(0, +) / Double(ratios.count)

@@ -8,7 +8,18 @@ Built on commit `27a0b0a` ("Zag Science v107", branch `ios-development`).
 - `tests/e2e/phase2.e2e.cjs` — new, browser run of the whole app (needs Playwright; not part of `npm test`).
 - `PHASE_2_NOTES.md` — this file.
 
-No Swift, widget, Codemagic, Capacitor, package or image file was changed.
+- `assets/images/tip-transparent-13.webp`, `assets/images/tip-transparent-14.webp` — new Tips & Tricks pages ("It's supposed to be brutal" and "Set it. Flip it. Lift it."), added at the end of the sequence.
+
+- `zag_widget_starter/ZagStrengthWidget/ZagStrengthWidget.swift` — three small lines so the new Bodyweight series is selectable in Edit Widget but never counts towards "Overall strength". NOT compiled or tested here.
+
+No Codemagic, Capacitor or package file was changed, and no existing image was changed.
+
+## Bodyweight (added 13 Nov)
+- Saving a bodyweight shows a pop-up with the new weight, date and time.
+- Every saved weigh-in is kept with its date (`st.bodyweightLog`, one entry per day). The log starts from the weight already saved, dated when it was last saved.
+- History graph: new "Bodyweight" option, in the chosen unit, with the same time-period filter.
+- History graph: "Show bodyweight on this graph" toggle draws bodyweight as a white line on the strength graph, as change since the start of the period (same scale as strength). The setting is remembered.
+- Widget: bodyweight is sent as its own "Bodyweight" series and appears in the Edit Widget exercise list.
 
 ## What changed in the app
 1. **Four names merged**: Deadlifts → Deadlift, Dumbbell Flat Press → Dumbbell Flat Chest Press, Cable Fly → Cable Chest Fly, Pin Machine Cable Fly → Pin Machine Chest Fly (library, splits, maxes, reps, PB events, history, drafts, graphs, group lists).

@@ -1885,8 +1885,81 @@ function zagHandleNotificationAction(){
 }
 setInterval(()=>{try{maybeBrowserStreakReminder()}catch(e){}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)try{processStreakCalendar();maybeBrowserStreakReminder()}catch(e){}});
+// ----- Bodyweight log: every saved weigh-in is kept with its date so it can be graphed -----
+const ZAG_BODYWEIGHT_SERIES='Bodyweight';
+function zagBodyweightLog(){
+ if(!Array.isArray(st.bodyweightLog))st.bodyweightLog=[];
+ // First use: start the log from the weight already saved, dated when it was last saved.
+ if(!st.bodyweightLog.length&&Number.isFinite(Number(st.bodyweightKg))&&Number(st.bodyweightKg)>0){
+  const anchor=Number(st.bodyweightReminderAnchor),now=Date.now();
+  st.bodyweightLog.push({at:new Date(Number.isFinite(anchor)&&anchor>0&&anchor<=now?anchor:now).toISOString(),kg:Number(st.bodyweightKg)});
+ }
+ return st.bodyweightLog;
+}
+function zagLogBodyweight(kg,when){
+ const log=zagBodyweightLog(),at=(when||new Date()),day=at.toDateString(),last=log[log.length-1];
+ // One entry per calendar day: saving again the same day corrects that day's entry.
+ if(last&&new Date(last.at).toDateString()===day){last.at=at.toISOString();last.kg=kg}
+ else log.push({at:at.toISOString(),kg:kg});
+ return log;
+}
+function zagBodyweightPoints(){
+ return zagBodyweightLog().map(function(x){return {time:new Date(x.at).getTime(),kg:Number(x.kg)}}).filter(function(x){return Number.isFinite(x.time)&&Number.isFinite(x.kg)&&x.kg>0}).sort(function(a,b){return a.time-b.time});
+}
+function zagBodyweightSVG(period){
+ const all=zagBodyweightPoints();
+ const today=new Date();today.setHours(23,59,59,999);
+ const start=new Date();start.setHours(0,0,0,0);
+ if(period==='1m')start.setMonth(start.getMonth()-1);
+ else if(period==='3m')start.setMonth(start.getMonth()-3);
+ else if(period==='6m')start.setMonth(start.getMonth()-6);
+ else if(period==='1y')start.setFullYear(start.getFullYear()-1);
+ else if(all.length)start.setTime(Math.min(start.getTime(),all[0].time));
+ const first=start.getTime(),last=today.getTime();
+ const label=function(d){return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})};
+ const before=all.filter(function(p){return p.time<first}),inside=all.filter(function(p){return p.time>=first&&p.time<=last});
+ const points=[];
+ // A weigh-in from before the window gives the starting value; nothing is invented otherwise.
+ if(before.length)points.push({time:first,v:Number(kgToDisplay(before[before.length-1].kg))});
+ inside.forEach(function(p){points.push({time:p.time,v:Number(kgToDisplay(p.kg))})});
+ if(points.length&&points[points.length-1].time<last)points.push({time:last,v:points[points.length-1].v});
+ const w=330,h=180,px=40,right=314,values=points.map(function(p){return p.v});
+ let min=values.length?Math.min.apply(null,values):0,max=values.length?Math.max.apply(null,values):1;
+ const pad=Math.max((max-min)*.15,1);min-=pad;max+=pad;
+ const range=max-min;
+ const xy=points.map(function(pt){return [px+((pt.time-first)/Math.max(last-first,1))*(right-px),h-22-(pt.v-min)/range*(h-44)]});
+ const path=xy.map(function(pt,i){return (i?'L':'M')+pt[0].toFixed(1)+' '+pt[1].toFixed(1)}).join(' ');
+ return '<svg class="zagStrengthChart" viewBox="0 0 330 180" role="img" aria-label="Bodyweight chart from '+label(start)+' to '+label(today)+'">'
+  +'<line x1="'+px+'" y1="8" x2="'+px+'" y2="158" stroke="#654075"/>'
+  +'<line x1="'+px+'" y1="158" x2="'+right+'" y2="158" stroke="#654075"/>'
+  +(path?'<path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>':'')
+  +xy.map(function(pt){return '<circle cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="2.8" fill="#fff"/>'}).join('')
+  +'<text x="2" y="17" fill="#dda5ff" font-size="10">'+max.toFixed(1)+'</text>'
+  +'<text x="2" y="157" fill="#dda5ff" font-size="10">'+min.toFixed(1)+'</text>'
+  +'<text x="'+px+'" y="174" fill="#dda5ff" font-size="9">'+label(start)+'</text>'
+  +'<text x="'+right+'" y="174" text-anchor="end" fill="#dda5ff" font-size="9">'+label(today)+'</text></svg>'
+  +(!points.length?'<p class="note">No bodyweight saved in this period yet. Save your bodyweight in Settings to start this graph.</p>':'');
+}
+// Bodyweight as a percentage of its value at the start of the graph window, so it can be drawn
+// on the same scale as the strength line (100 = no change).
+function zagBodyweightOverlay(first,last){
+ const all=zagBodyweightPoints().filter(function(p){return p.time<=last});
+ const before=all.filter(function(p){return p.time<first}),inside=all.filter(function(p){return p.time>=first});
+ const base=before.length?before[before.length-1].kg:(inside.length?inside[0].kg:0);
+ if(!(base>0))return [];
+ const pts=[];
+ if(before.length)pts.push({time:first,v:100});
+ inside.forEach(function(p){pts.push({time:p.time,v:100*p.kg/base})});
+ if(pts.length&&pts[pts.length-1].time<last)pts.push({time:last,v:pts[pts.length-1].v});
+ return pts;
+}
+function zagBodyweightKeyHTML(){
+ const pts=zagBodyweightPoints();
+ if(!pts.length)return '<p class="zagStrengthLegend">Bodyweight: save your bodyweight in Settings to see it here.</p>';
+ return '<p class="zagStrengthLegend"><span style="color:#e73cff">&#9644;</span> Selected strength &nbsp; <span style="color:#fff">&#9644;</span> Bodyweight (now '+esc(weightText(pts[pts.length-1].kg))+'). Both lines show change since the start of the period.</p>';
+}
 function zagBodyweightDisplay(){if(st.bodyweightKg===null||st.bodyweightKg===""||!Number.isFinite(Number(st.bodyweightKg)))return "";return kgToDisplay(Number(st.bodyweightKg))}
-function zagSaveBodyweight(input){let v=(input?.value||"").trim();if(!v){st.bodyweightKg=null;save();settings();return}let kg=displayToKg(v);if(!Number.isFinite(Number(kg))||Number(kg)<=0){alert("Enter a valid bodyweight.");return}st.bodyweightKg=Math.round(Number(kg)*1000)/1000;st.bodyweightReminderAnchor=Date.now();st.bodyweightReminderLastShown=0;save();zagRescheduleNative().catch(console.warn);zagSyncBodyweightProfile();settings()}
+function zagSaveBodyweight(input){let v=(input?.value||"").trim();if(!v){st.bodyweightKg=null;save();settings();return}let kg=displayToKg(v);if(!Number.isFinite(Number(kg))||Number(kg)<=0){alert("Enter a valid bodyweight.");return}const savedAt=new Date();zagBodyweightLog();st.bodyweightKg=Math.round(Number(kg)*1000)/1000;zagLogBodyweight(st.bodyweightKg,savedAt);st.bodyweightReminderAnchor=savedAt.getTime();st.bodyweightReminderLastShown=0;save();zagRescheduleNative().catch(console.warn);zagSyncBodyweightProfile();settings();modal('Bodyweight saved','<div class=note style="font-size:15px;line-height:1.6">Your bodyweight is now <b style="font-size:20px;color:#fff">'+esc(weightText(st.bodyweightKg))+'</b><br>Saved '+esc(savedAt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))+' at '+esc(savedAt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}))+'</div><button class=pick onclick="closeModal()">OK</button>')}
 async function zagSyncBodyweightProfile(){if(!zagSb||!zagSession?.user||!Number.isFinite(Number(st.bodyweightKg))||Number(st.bodyweightKg)<=0)return;try{await zagSb.from('profiles').update({bodyweight_kg:Number(st.bodyweightKg),updated_at:new Date().toISOString()}).eq('id',zagSession.user.id)}catch(e){console.warn('Bodyweight cloud update failed',e)}}
 function zagCheckBodyweightReminder(){/* Native iPhone reminders are scheduled by zagRescheduleNative; never send a new alert on every app open. */}
 // iOS time wheels: commit on change, but never redraw Settings while the picker is open.
@@ -5153,13 +5226,13 @@ function zagStrengthGraphHTML(){
  ])].filter(Boolean).sort((a,b)=>a.localeCompare(b));
  const selected=window.zagStrengthExercise||'all';
  const period=window.zagStrengthPeriod||'all',interval=window.zagStrengthInterval||'workout';
- const opts='<option value="all">Overall strength (all exercises)</option>'+exercises.map(x=>'<option value="'+esc(x)+'" '+(x===selected?'selected':'')+'>'+esc(x)+'</option>').join('');
+ const opts='<option value="all">Overall strength (all exercises)</option><option value="__bodyweight" '+(selected==='__bodyweight'?'selected':'')+'>Bodyweight</option>'+exercises.map(x=>'<option value="'+esc(x)+'" '+(x===selected?'selected':'')+'>'+esc(x)+'</option>').join('');
  const periodOptions=[['1m','Last month'],['3m','Last 3 months'],['6m','Last 6 months'],['1y','Last year'],['all','All time']];
  const intervalOptions=[['workout','Every workout'],['day','Daily'],['week','Weekly'],['month','Monthly']];
  const makeOpts=(arr,value)=>arr.map(([v,label])=>'<option value="'+v+'"'+(v===value?' selected':'')+'>'+label+'</option>').join('');
- return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" aria-label="Exercise" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div class="zagStrengthControls"><label>Time period<select class="zagStrengthSelect" aria-label="Time period" onchange="window.zagStrengthPeriod=this.value;historyPage()">'+makeOpts(periodOptions,period)+'</select></label><label>Graph interval<select class="zagStrengthSelect" aria-label="Graph interval" onchange="window.zagStrengthInterval=this.value;historyPage()">'+makeOpts(intervalOptions,interval)+'</select></label></div><div id="zagStrengthChartContainer">'+zagStrengthSVG(records,selected,period,interval)+'</div><p class="zagStrengthLegend">Estimated strength from completed sets (weight × [1 + reps ÷ 30]). The selected period compares a fixed group of exercises against their strength at the start of that period (100% baseline). New exercises do not dilute the comparison. Rest days never count as zero.</p></div>';
+ return '<div class="pagecard"><h2>Strength Progress</h2><select class="zagStrengthSelect" aria-label="Exercise" onchange="window.zagStrengthExercise=this.value;historyPage()">'+opts+'</select><div class="zagStrengthControls"><label>Time period<select class="zagStrengthSelect" aria-label="Time period" onchange="window.zagStrengthPeriod=this.value;historyPage()">'+makeOpts(periodOptions,period)+'</select></label><label>Graph interval<select class="zagStrengthSelect" aria-label="Graph interval" onchange="window.zagStrengthInterval=this.value;historyPage()">'+makeOpts(intervalOptions,interval)+'</select></label></div><div id="zagStrengthChartContainer">'+(selected==='__bodyweight'?zagBodyweightSVG(period):zagStrengthSVG(records,selected,period,interval,!!st.graphShowBodyweight))+'</div>'+(selected==='__bodyweight'?'':'<div class="row" style="margin:6px 0 2px"><span class="grow zagStrengthLegend" style="margin:0">Show bodyweight on this graph</span><button class="btn" onclick="st.graphShowBodyweight=!st.graphShowBodyweight;save();historyPage()">'+(st.graphShowBodyweight?'On':'Off')+'</button></div>'+(st.graphShowBodyweight?zagBodyweightKeyHTML():''))+'<p class="zagStrengthLegend"'+(selected==='__bodyweight'?'':' hidden')+'>Your saved bodyweight in '+weightUnit()+'. Each point is a weigh-in saved in Settings; the line holds your last weight until the next one. The graph interval setting does not apply.</p><p class="zagStrengthLegend"'+(selected==='__bodyweight'?' hidden':'')+'>Estimated strength from completed sets (weight × [1 + reps ÷ 30]). The selected period compares a fixed group of exercises against their strength at the start of that period (100% baseline). New exercises do not dilute the comparison. Rest days never count as zero.</p></div>';
 }
-function zagStrengthSVG(records,selected,period,interval){
+function zagStrengthSVG(records,selected,period,interval,showBodyweight){
  const dated=records.map(r=>({...r,when:zagStrengthDate(r.date)})).filter(r=>r.when).sort((a,b)=>a.when-b.when);
  const today=new Date();today.setHours(0,0,0,0);
  const start=new Date(today);
@@ -5209,7 +5282,9 @@ function zagStrengthSVG(records,selected,period,interval){
  // Carry forward the last known value to today, but never invent a reading before the first workout.
  if(points.length&&points[points.length-1].time<last)points.push({time:last,v:points[points.length-1].v});
  const w=330,h=180,px=40,right=314;
- const values=points.map(p=>p.v);
+ // Optional overlay: bodyweight as change since the start of the window, on the same scale.
+ const bw=(showBodyweight&&typeof zagBodyweightOverlay==='function')?zagBodyweightOverlay(first,last):[];
+ const values=points.map(p=>p.v).concat(bw.map(p=>p.v));
  let min=Math.min(100,...values),max=Math.max(100,...values);
  const pad=Math.max((max-min)*.12,selected==='all'?2:1);min-=pad;max+=pad;
  const range=max-min;
@@ -5220,6 +5295,7 @@ function zagStrengthSVG(records,selected,period,interval){
   +'<line x1="'+px+'" y1="8" x2="'+px+'" y2="158" stroke="#654075"/>'
   +'<line x1="'+px+'" y1="158" x2="'+right+'" y2="158" stroke="#654075"/>'
   +'<line x1="'+px+'" y1="'+baselineY.toFixed(1)+'" x2="'+right+'" y2="'+baselineY.toFixed(1)+'" stroke="#a578af" stroke-dasharray="4 4"/>'
+  +(bw.length?'<path d="'+bw.map((pt,i)=>(i?'L':'M')+(px+((pt.time-first)/Math.max(last-first,1))*(right-px)).toFixed(1)+' '+(h-22-(pt.v-min)/range*(h-44)).toFixed(1)).join(' ')+'" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".92"/>':'')
   +(path?'<path d="'+path+'" fill="none" stroke="#e73cff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>':'')
   +xy.map(pt=>'<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="2.8" fill="#fff"/>').join('')
   +'<text x="2" y="17" fill="#dda5ff" font-size="10">'+max.toFixed(1)+'</text>'
@@ -5264,6 +5340,8 @@ function zagStrengthSVG(records,selected,period,interval){
          return {date:parsed instanceof Date && Number.isFinite(parsed.getTime())
                    ? parsed.toISOString() : String(r.date||''),by:r.by,order:i};
        });
+     // Bodyweight goes to the widget as its own series so it can be picked in Edit Widget.
+     try{(typeof zagBodyweightPoints==='function'?zagBodyweightPoints():[]).forEach(p=>{const by={};by[ZAG_BODYWEIGHT_SERIES]=p.kg;records.push({date:new Date(p.time).toISOString(),by,order:records.length})})}catch(_){}
      const pro=window.zagVerifiedProEntitled===true || (window.zagBuildChannel==='testflight' && window.zagProEntitled===true);
      const streak=typeof st!=='undefined' && st && st.streak ? st.streak : {};
      const day=new Date();
@@ -5506,7 +5584,7 @@ function zagStrengthSVG(records,selected,period,interval){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.png', 'assets/images/tip-transparent-01.webp', 'assets/images/tip-transparent-02.webp', 'assets/images/tip-transparent-03.webp', 'assets/images/tip-transparent-04.webp', 'assets/images/tip-transparent-05.webp', 'assets/images/tip-transparent-06.webp', 'assets/images/tip-transparent-07.webp', 'assets/images/tip-transparent-08.webp', 'assets/images/tip-transparent-09.webp', 'assets/images/tip-transparent-10.webp', 'assets/images/tip-transparent-11.webp', 'assets/images/tip-transparent-12.webp'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.png', 'assets/images/tip-transparent-01.webp', 'assets/images/tip-transparent-02.webp', 'assets/images/tip-transparent-03.webp', 'assets/images/tip-transparent-04.webp', 'assets/images/tip-transparent-05.webp', 'assets/images/tip-transparent-06.webp', 'assets/images/tip-transparent-07.webp', 'assets/images/tip-transparent-08.webp', 'assets/images/tip-transparent-09.webp', 'assets/images/tip-transparent-10.webp', 'assets/images/tip-transparent-11.webp', 'assets/images/tip-transparent-12.webp', 'assets/images/tip-transparent-13.webp', 'assets/images/tip-transparent-14.webp'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
