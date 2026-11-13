@@ -57,3 +57,7 @@ The old v3 migration no longer copies values. Maxes it copied in September are l
 ## Outstanding
 - Old-name rows remain in Supabase `personal_bests`; the app folds them on read. A one-off server clean-up should follow once the schema is reviewed.
 - Reloading while on History or Settings gives a blank page (older bug, logic audit).
+
+## Later fixes (13 Nov)
+- Tips: the Weight Converter page was listed twice (`tip-transparent-10.webp` and `tip-transparent-11.webp` are the same image). The second entry is removed from the sequence; the file itself is left in place.
+- Day editor (Edit Split → Edit exercises in a day): × on a main exercise now moves it to the top of Extras instead of deleting it; extras show ＋, which moves the exercise to the end of the day's main exercises. Dragging still works.

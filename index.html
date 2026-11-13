@@ -1516,10 +1516,10 @@ function dayExerciseEditor(i){
  let d=st.days[i];
  const row=(x,j,type)=>`<div class="extra splitDragExercise" draggable="true" data-day="${i}" data-type="${type}" data-index="${j}">
    <span class=splitDragHandle aria-hidden=true>⋮⋮</span><span class=splitDragName>${esc(x)}</span>
-   <button type="button" class="btn danger" onclick="event.stopPropagation();removeExercise(${i},${type},${j})">×</button>
+   ${type?`<button type="button" class="btn" aria-label="Add to this day" onclick="event.stopPropagation();zagExtraToMain(${i},${j})">＋</button>`:`<button type="button" class="btn danger" aria-label="Move to extras" onclick="event.stopPropagation();zagMainToExtra(${i},${j})">×</button>`}
  </div>`;
  modal("Edit "+esc(d[0]),`
-   <p class="small splitDragHelp">Drag exercises between Main Exercises and Extras, or drag within a section to change the order.</p>
+   <p class="small splitDragHelp">Tap × to move an exercise down to Extras, or ＋ to add an extra to the day. You can also drag exercises between the sections or within a section to change the order.</p>
    <div class="extraslabel">MAIN EXERCISES</div>
    <div class="splitDropZone" data-day="${i}" data-type="0">${d[1].map((x,j)=>row(x,j,0)).join("")}<div class="splitEmptyHint">Drop exercises here</div></div>
    <button type="button" class=pick onclick="addExerciseTo(${i},0)">+ Main Exercise</button>
@@ -1569,6 +1569,10 @@ function initSplitExerciseDrag(){
  });
 }
 
+// Nothing is deleted from the day editor: x moves a main exercise down to Extras (top of the list),
+// and + moves an extra up to the end of the day's main exercises.
+function zagMainToExtra(di,j){if(!window.zagRequirePro())return;const d=st.days[di];if(!d||j<0||j>=d[1].length)return;const [ex]=d[1].splice(j,1);if(d[2].indexOf(ex)<0)d[2].unshift(ex);syncPlannedDays();save();dayExerciseEditor(di)}
+function zagExtraToMain(di,j){if(!window.zagRequirePro())return;const d=st.days[di];if(!d||j<0||j>=d[2].length)return;const [ex]=d[2].splice(j,1);d[1].push(ex);syncPlannedDays();save();dayExerciseEditor(di)}
 function removeExercise(di,type,j){st.days[di][type?2:1].splice(j,1);syncPlannedDays();save();dayExerciseEditor(di)}
 function addExerciseTo(di,type){textEntryModal(type?"Add Extra Exercise":"Add Main Exercise","Exercise name","",n=>{st.days[di][type?2:1].push(zagCanon(n));syncPlannedDays();save();dayExerciseEditor(di)})}
 function nextCustomSplitName(){let i=1;while(st.customSplits["Custom Split "+i])i++;return "Custom Split "+i}
@@ -5584,7 +5588,7 @@ function zagStrengthSVG(records,selected,period,interval,showBodyweight){
 }
 </style>
 <script id="zag-tips-logic-v1">
-const zagTipImages=['assets/images/tip-00-goat-explanation.png', 'assets/images/tip-transparent-01.webp', 'assets/images/tip-transparent-02.webp', 'assets/images/tip-transparent-03.webp', 'assets/images/tip-transparent-04.webp', 'assets/images/tip-transparent-05.webp', 'assets/images/tip-transparent-06.webp', 'assets/images/tip-transparent-07.webp', 'assets/images/tip-transparent-08.webp', 'assets/images/tip-transparent-09.webp', 'assets/images/tip-transparent-10.webp', 'assets/images/tip-transparent-11.webp', 'assets/images/tip-transparent-12.webp', 'assets/images/tip-transparent-13.webp', 'assets/images/tip-transparent-14.webp'];
+const zagTipImages=['assets/images/tip-00-goat-explanation.png', 'assets/images/tip-transparent-01.webp', 'assets/images/tip-transparent-02.webp', 'assets/images/tip-transparent-03.webp', 'assets/images/tip-transparent-04.webp', 'assets/images/tip-transparent-05.webp', 'assets/images/tip-transparent-06.webp', 'assets/images/tip-transparent-07.webp', 'assets/images/tip-transparent-08.webp', 'assets/images/tip-transparent-09.webp', 'assets/images/tip-transparent-10.webp', 'assets/images/tip-transparent-12.webp', 'assets/images/tip-transparent-13.webp', 'assets/images/tip-transparent-14.webp'];
 let zagTipIndex=0,zagTipTouchX=null;
 function zagOpenTips(){zagTipIndex=0;const o=document.getElementById('zagTipsOverlay');o.classList.add('open');o.setAttribute('aria-hidden','false');zagRenderTip();}
 function zagCloseTips(){const o=document.getElementById('zagTipsOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
