@@ -480,27 +480,416 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 <script>
 const warm=[[.2,20],[.4,8],[.6,5],[.75,3],[.9,2]];
 const plans={1:[[.7,8],[.725,8],[.75,8],[.725,8],[.7,10]],2:[[.725,8],[.75,7],[.775,6],[.725,8],[.7,10]],3:[[.75,6],[.8,5],[.825,4],[.75,6],[.7,10]],4:[[.775,5],[.825,4],[.85,3],[.775,5],[.725,8]],5:[[.8,5],[.85,3],[.875,3],[.8,5],[.75,8]],6:[[.825,4],[.875,2],[.9,2],[.8,5]],7:[[.6,8],[.65,6],[.7,5]],8:[[.9,1],[1,1],[1.05,1]]};
-const base=[["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 1",["Smith Shoulder Press","Pin Machine Decline Chest Press","Pin Machine Lateral Raise","Pin Machine Cable Fly","Pin Machine Shoulder Press Blue","Cable Front Raise"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Cable Upward Chest Fly","Dumbbell Flat Chest Press","Pin Machine Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlifts","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Chest 1",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Decline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Cable Fly","Bench Press Flat","Dumbbell Flat Press","Pin Machine Chest Fly"]],["Shoulders 1",["Smith Shoulder Press","Dumbbell Seated Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug"]],["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 2",["Smith Flat Chest Press","Pin Machine Chest Fly","Pin Machine Lateral Raise","Pin Machine Decline Chest Press","Cable Front Raise","Cable Upward Chest Fly"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Smith Shoulder Press","Pin Machine Cable Fly","Pin Machine Shoulder Press Blue","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlifts","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Shoulders 2",["Smith Shoulder Press","Dumbbell Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug"]],["Chest 2",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Incline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Decline Chest Press","Pin Machine Cable Fly","Bench Press Flat","Dumbbell Flat Press","Pin Machine Chest Fly"]]];
+const base=[["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 1",["Smith Shoulder Press","Pin Machine Decline Chest Press","Pin Machine Lateral Raise","Pin Machine Chest Fly","Pin Machine Shoulder Press Blue","Cable Front Raise"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Chest Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug","Cable Side Raise"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlift","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Chest 1",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Decline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Chest Fly","Bench Press Flat"]],["Shoulders 1",["Smith Shoulder Press","Dumbbell Seated Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug","Dumbbell Side Raise","Cable Side Raise"]],["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 2",["Smith Flat Chest Press","Pin Machine Chest Fly","Pin Machine Lateral Raise","Pin Machine Decline Chest Press","Cable Front Raise","Cable Upward Chest Fly"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Smith Shoulder Press","Pin Machine Shoulder Press Blue","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Chest Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug","Cable Side Raise"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlift","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Shoulders 2",["Smith Shoulder Press","Dumbbell Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug","Dumbbell Seated Side Raise","Cable Side Raise"]],["Chest 2",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Incline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Decline Chest Press","Pin Machine Chest Fly","Bench Press Flat"]]];
 
 
 const ORIGINAL=JSON.parse(JSON.stringify(base));
+
+// ===== ZAG data layer v4 (November 2026) =====
+// Exercise identity (one canonical name per exercise), a week for every position of every
+// workout day, and Workout-page swaps that never edit the planned split.
+// Everything here is idempotent: it is safe to run on every launch, after a cloud restore
+// and after a backup import, and it never deletes a workout, a set or a PB event.
+
+// Approved merges: the same exercise under two names. Old name -> canonical name.
+const ZAG_EXERCISE_MERGES={"Deadlifts":"Deadlift","Dumbbell Flat Press":"Dumbbell Flat Chest Press","Cable Fly":"Cable Chest Fly","Pin Machine Cable Fly":"Pin Machine Chest Fly"};
+// Of those, the old names that were still selectable in the library until this version.
+// They can hold newer data than the canonical name, so the stronger record wins.
+const ZAG_LIVE_DUPLICATES={"Deadlifts":1,"Dumbbell Flat Press":1,"Pin Machine Cable Fly":1};
+// Audited pre-September-2026 names that are the same exercise re-worded or re-spelled.
+// Ambiguous old names (for example "Free Weight Row", "Single Lat Raise Pin", "Cable Side Raise",
+// "DB Press" and every "a / b" name) are deliberately NOT listed: their data stays under the old name.
+const ZAG_LEGACY_RENAMES={"Close Pulldown B":"Pin Machine Lat Pulldown Close Grip B","Close Pulldown R":"Pin Machine Lat Pulldown Close Grip Red","Wide Pulldown B":"Pin Machine Lat Pulldown Wide Grip B","Wide Pulldown R":"Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pull Down":"Advanced Lat Pulldown","Shoulder Smyth Press":"Smith Shoulder Press","Shoulder Smyth Machine":"Smith Shoulder Press","Lateral Raise Pin":"Pin Machine Lateral Raise","Cable Fly Pin":"Pin Machine Chest Fly","Pin Shoulder Blue":"Pin Machine Shoulder Press Blue","Close Grip Shoulder Machine Blue":"Pin Machine Shoulder Press Blue","Close Grip Shoulder Red":"Pin Machine Shoulder Press Red","Front Raise Cable":"Cable Front Raise","Stand Square BB Shoulder":"Square Barbell Shoulder Press","Arnold DB":"Dumbbell Arnold Press","Incline Smith":"Smith Incline Chest Press","Incline Smyth":"Smith Incline Chest Press","Bench":"Bench Press Flat","Upward cable fly":"Cable Upward Chest Fly","Upward Cable Fly":"Cable Upward Chest Fly","Dumbell Flat":"Dumbbell Flat Chest Press","Rear Delt Machine":"Pin Machine Rear Deltoids","Dumbell Side Raise":"Dumbbell Side Raise","Tri Dips":"Weighted Tricep Dips","DB Preacher Curl":"Dumbbell Preacher Curl","Rope Curl":"Cable Rope Bicep Curl","Single Rope Extension":"Cable Single Arm Tricep Extension","Single Cable Curl":"Cable Single Arm Bicep Curl","Single Spider":"Dumbbell Spider Bicep Curl","Double Rope Extension":"Cable Double Rope Tricep Extension","Sitting Calfs":"Sitting Calf Raises","Lying Curl":"Lying Hamstring Curl","Siting Hammy Curl":"Sitting Hamstring Curl","Sitting Hammy Curl":"Sitting Hamstring Curl"};
+const ZAG_NAME_MAP=(function(){const m=Object.assign({},ZAG_LEGACY_RENAMES,ZAG_EXERCISE_MERGES);Object.keys(m).forEach(function(k){let v=m[k],n=0;while(Object.prototype.hasOwnProperty.call(m,v)&&n++<5)v=m[v];m[k]=v});return m})();
+const ZAG_DATA_VERSION=4;
+const ZAG_MANUAL_PB_KEY='zagManualPBOverridesV288';
+const ZAG_PRE_V4_BACKUP_KEY='zagScienceBackupBeforeDataV4';
+let zagDataReady=false;
+let zagIdSeq=0;
+
+function zagCanon(name){
+ if(typeof name!=='string')return name;
+ if(Object.prototype.hasOwnProperty.call(ZAG_NAME_MAP,name))return ZAG_NAME_MAP[name];
+ const t=name.trim();
+ if(t!==name&&Object.prototype.hasOwnProperty.call(ZAG_NAME_MAP,t))return ZAG_NAME_MAP[t];
+ return name;
+}
+// Canonical names, de-duplicated, original order kept (for pick-lists such as a group's exercises).
+function zagCanonList(list){
+ const out=[],seen=new Set();
+ (Array.isArray(list)?list:[]).forEach(function(x){const c=zagCanon(x);if(typeof c!=='string'||!c||seen.has(c))return;seen.add(c);out.push(c)});
+ return out;
+}
+// A {name:number} map (for example a group member's PBs) folded onto canonical names; the higher value is kept.
+function zagCanonVals(vals){
+ const out={};
+ Object.keys(vals&&typeof vals==='object'?vals:{}).forEach(function(name){
+  const c=zagCanon(name),v=Number(vals[name])||0;
+  if(!Object.prototype.hasOwnProperty.call(out,c)||v>out[c])out[c]=v;
+ });
+ return out;
+}
+function zagClampWeek(w){const n=Number(w);return Number.isInteger(n)&&n>=1&&n<=8?n:1}
+function zagNewId(prefix){zagIdSeq++;return prefix+Date.now().toString(36)+zagIdSeq.toString(36)+Math.floor(Math.random()*1679616).toString(36)}
+function zagLooseDate(raw){
+ if(!raw)return null;
+ const m=String(raw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+ if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d.getTime())?null:d.getTime()}
+ const d=new Date(raw);return isNaN(d.getTime())?null:d.getTime();
+}
+
+// Every day gets a stable id and every main-exercise position gets a stable id and its own week:
+//   day = [name, mains[], extras[], {id, s:[{id, x:exerciseName, w:week}]}]
+// Positions are matched by exercise name, so re-ordering, duplicating or moving a day keeps each
+// position's week. A position that is new takes the last week known for that exercise (or Week 1).
+function zagEnsureDaySlots(s){
+ if(!s||!Array.isArray(s.days))return false;
+ if(!s.weeks||typeof s.weeks!=='object'||Array.isArray(s.weeks))s.weeks={};
+ let changed=false;const dayIds=new Set();
+ s.days.forEach(function(d,di){
+  if(!Array.isArray(d)){d=s.days[di]=[String(d||('Day '+(di+1))),[],[]];changed=true}
+  if(!Array.isArray(d[1])){d[1]=[];changed=true}
+  if(!Array.isArray(d[2])){d[2]=[];changed=true}
+  let meta=d[3];
+  if(!meta||typeof meta!=='object'||Array.isArray(meta)){meta={id:'',s:[]};changed=true}
+  if(!Array.isArray(meta.s)){meta.s=[];changed=true}
+  if(typeof meta.id!=='string'||!meta.id||dayIds.has(meta.id)){
+   // New day, or a duplicated day: new ids, same weeks.
+   meta={id:zagNewId('d'),s:meta.s.map(function(x){return {id:'',x:x&&x.x,w:x&&x.w}})};changed=true;
+  }
+  dayIds.add(meta.id);
+  const pool=meta.s.filter(function(x){return x&&typeof x==='object'}),slots=[],slotIds=new Set();
+  d[1].forEach(function(name){
+   let at=-1;
+   for(let p=0;p<pool.length;p++){if(pool[p].x===name){at=p;break}}
+   let slot;
+   if(at>=0){slot=pool[at];pool.splice(at,1)}else{slot={id:'',x:name,w:s.weeks[name]}}
+   let id=slot.id;
+   if(typeof id!=='string'||!id||slotIds.has(id))id=zagNewId('s');
+   slotIds.add(id);slots.push({id:id,x:name,w:zagClampWeek(slot.w)});
+  });
+  // Positions that no longer exist: remember their week by name so re-adding the exercise restores it.
+  pool.forEach(function(x){if(typeof x.x==='string'&&x.x)s.weeks[x.x]=zagClampWeek(x.w)});
+  if(meta.s.length!==slots.length||meta.s.some(function(x,j){return !x||x.id!==slots[j].id||x.x!==slots[j].x||x.w!==slots[j].w}))changed=true;
+  meta.s=slots;d[3]=meta;
+ });
+ return changed;
+}
+// Temporary swaps only make sense for a position that still exists in the current split.
+function zagPruneTempSwaps(s){
+ if(!s)return;
+ const src=(s.tempSwaps&&typeof s.tempSwaps==='object'&&!Array.isArray(s.tempSwaps))?s.tempSwaps:{},valid={};
+ (Array.isArray(s.days)?s.days:[]).forEach(function(d){
+  const m=Array.isArray(d)?d[3]:null;if(!m||!m.id)return;
+  const map=src[m.id];if(!map||typeof map!=='object')return;
+  const keep={},used=new Set();
+  (Array.isArray(m.s)?m.s:[]).forEach(function(slot,j){
+   const sub=map[slot.id];
+   if(typeof sub==='string'&&sub&&sub!==d[1][j]&&!used.has(sub)){keep[slot.id]=sub;used.add(sub)}
+  });
+  if(Object.keys(keep).length)valid[m.id]=keep;
+ });
+ s.tempSwaps=valid;
+}
+// Older builds applied a Workout-page swap by editing st.days and kept the plan in st.plannedDays.
+// Any swap still in flight is put back to the planned exercise and returned so that it can be
+// re-applied as a temporary swap. A difference that is not a clean main<->extra exchange is left alone.
+function zagConvertLegacySwaps(s){
+ const out=[];
+ if(!s||!Array.isArray(s.days)||!Array.isArray(s.plannedDays)||s.plannedDays.length!==s.days.length)return out;
+ s.days.forEach(function(d,i){
+  const p=s.plannedDays[i];
+  if(!Array.isArray(d)||!Array.isArray(p)||d[0]!==p[0]||!Array.isArray(d[1])||!Array.isArray(p[1])||d[1].length!==p[1].length)return;
+  const diffs=[];
+  d[1].forEach(function(name,j){if(name!==p[1][j])diffs.push({day:i,slot:j,sub:name,planned:p[1][j]})});
+  if(!diffs.length)return;
+  const all=function(x){return x[1].concat(Array.isArray(x[2])?x[2]:[]).slice().sort().join('\n')};
+  if(all(d)!==all(p))return;
+  d[1]=p[1].slice();d[2]=Array.isArray(p[2])?p[2].slice():[];
+  diffs.forEach(function(x){out.push(x)});
+ });
+ return out;
+}
+
+// Moves every piece of data stored under an old exercise name onto its canonical name.
+// - Maximums: among names that are (or recently were) selectable, the stronger record wins
+//   (heavier weight, then more reps). A retired pre-September name whose value was already copied
+//   forward by the old v3 migration never overrides the current name; it is only used when the
+//   current name has no maximum at all.
+// - PB event lists are combined (no event is dropped), workout history keeps its dates, weights
+//   and reps and only the exercise label changes, drafts and splits are renamed in place.
+// The returned journal records everything that was changed so it can be reversed.
+function zagMigrateExerciseNames(s,overrides){
+ const report={changed:false,merged:[],historySets:0,journal:{maps:{},history:[],draft:[],lists:null}};
+ if(!s||typeof s!=='object')return report;
+ overrides=(overrides&&typeof overrides==='object'&&!Array.isArray(overrides))?overrides:{};
+ const own=function(o,k){return Object.prototype.hasOwnProperty.call(o,k)};
+ ['max','repsAtMax','prHistory','weeks','draft'].forEach(function(f){if(!s[f]||typeof s[f]!=='object'||Array.isArray(s[f]))s[f]={}});
+ if(!Array.isArray(s.history))s.history=[];
+ const dayLists=function(){
+  const lists=[];
+  if(Array.isArray(s.days))lists.push(s.days);
+  if(Array.isArray(s.plannedDays))lists.push(s.plannedDays);
+  if(s.customSplits&&typeof s.customSplits==='object')Object.keys(s.customSplits).forEach(function(n){if(Array.isArray(s.customSplits[n]))lists.push(s.customSplits[n])});
+  return lists;
+ };
+ // Old names that a split still uses may hold newer data than the canonical name.
+ const inUse=new Set();
+ dayLists().forEach(function(days){days.forEach(function(d){if(!Array.isArray(d))return;[d[1],d[2]].forEach(function(arr){(Array.isArray(arr)?arr:[]).forEach(function(x){if(typeof x==='string')inUse.add(x)})})})});
+ Object.keys(s.draft).forEach(function(key){const m=/^([^|]*)\|([\s\S]*)\|(\d+)(\|#\d+)?$/.exec(key);if(m)inUse.add(m[2])});
+
+ // 1. Name-keyed maps.
+ const groups={};
+ [s.max,s.repsAtMax,s.prHistory,s.weeks,overrides].forEach(function(map){Object.keys(map).forEach(function(name){const c=zagCanon(name);if(c!==name)(groups[c]||(groups[c]=[])).indexOf(name)<0&&groups[c].push(name)})});
+ Object.keys(groups).forEach(function(c){
+  const olds=groups[c],names=[c].concat(olds),before={};
+  names.forEach(function(n){before[n]={max:own(s.max,n)?s.max[n]:undefined,reps:own(s.repsAtMax,n)?s.repsAtMax[n]:undefined,weeks:own(s.weeks,n)?s.weeks[n]:undefined,pr:own(s.prHistory,n)?JSON.parse(JSON.stringify(s.prHistory[n])):undefined,override:own(overrides,n)?JSON.parse(JSON.stringify(overrides[n])):undefined}});
+  const val=function(n){
+   let kg=own(s.max,n)?Number(s.max[n]):NaN,reps=own(s.repsAtMax,n)?Number(s.repsAtMax[n]):NaN,manual=false;
+   const o=own(overrides,n)?overrides[n]:null;
+   if(o&&typeof o==='object'&&Number.isFinite(Number(o.kg))){kg=Number(o.kg);manual=true;if(Number.isFinite(Number(o.reps))&&Number(o.reps)>=0.5)reps=Number(o.reps)}
+   return {name:n,kg:kg,reps:reps,manual:manual,has:Number.isFinite(kg)&&kg>0};
+  };
+  const better=function(a,b){
+   if(!b)return true;
+   if(a.kg!==b.kg)return a.kg>b.kg;
+   const ar=Number.isFinite(a.reps)?a.reps:-1,br=Number.isFinite(b.reps)?b.reps:-1;
+   if(ar!==br)return ar>br;
+   return a.name===c;
+  };
+  const live=[val(c)],frozen=[];
+  olds.forEach(function(n){(own(ZAG_LIVE_DUPLICATES,n)||inUse.has(n)?live:frozen).push(val(n))});
+  let win=null;
+  live.forEach(function(v){if(v.has&&better(v,win))win=v});
+  if(!win)frozen.forEach(function(v){if(v.has&&better(v,win))win=v});
+  if(win){
+   s.max[c]=win.kg;
+   if(Number.isFinite(win.reps))s.repsAtMax[c]=win.reps;else if(win.name!==c)delete s.repsAtMax[c];
+   if(win.manual){const src=overrides[win.name]||{};overrides[c]={kg:win.kg,reps:Number.isFinite(win.reps)?win.reps:null,at:Number(src.at)||Date.now()}}
+   else if(own(overrides,c))delete overrides[c];
+  }else if(!own(s.max,c)&&olds.some(function(n){return own(s.max,n)})){
+   s.max[c]=0;
+  }
+  // PB events: keep every one, newest first when every date can be read.
+  const seen=new Set(),events=[];
+  names.forEach(function(n){(Array.isArray(s.prHistory[n])?s.prHistory[n]:[]).forEach(function(e){const sig=JSON.stringify(e);if(seen.has(sig))return;seen.add(sig);events.push({e:e,t:zagLooseDate(e&&e.date),o:events.length})})});
+  if(events.length||own(s.prHistory,c)){
+   if(events.every(function(x){return x.t!==null}))events.sort(function(a,b){return b.t-a.t||a.o-b.o});
+   s.prHistory[c]=events.map(function(x){return x.e});
+  }
+  if(!own(s.weeks,c)){const src=olds.filter(function(n){return own(s.weeks,n)})[0];if(src!==undefined)s.weeks[c]=s.weeks[src]}
+  olds.forEach(function(n){delete s.max[n];delete s.repsAtMax[n];delete s.prHistory[n];delete s.weeks[n];delete overrides[n]});
+  report.journal.maps[c]=before;
+  report.merged.push({to:c,from:olds.slice(),kept:win?win.name:null,kg:win?win.kg:null,reps:win&&Number.isFinite(win.reps)?win.reps:null});
+  report.changed=true;
+ });
+
+ // 2. Workout history: only the exercise label changes.
+ s.history.forEach(function(h){
+  if(!h||!Array.isArray(h.sets))return;
+  h.sets.forEach(function(v,si){
+   if(!v||typeof v.exercise!=='string')return;
+   const c=zagCanon(v.exercise);
+   if(c!==v.exercise){report.journal.history.push([String(h.date||''),si,v.exercise]);v.exercise=c;report.historySets++;report.changed=true}
+  });
+ });
+
+ // 3. Unfinished workout drafts ("day|exercise|set").
+ const hasData=function(v){return !!v&&(!!v.done||(v.kg!==undefined&&v.kg!=='')||(v.r!==undefined&&v.r!==''))};
+ Object.keys(s.draft).forEach(function(key){
+  const m=/^([^|]*)\|([\s\S]*)\|(\d+)(\|#\d+)?$/.exec(key);if(!m)return;
+  const c=zagCanon(m[2]);if(c===m[2])return;
+  const nk=m[1]+'|'+c+'|'+m[3]+(m[4]||''),clash=hasData(s.draft[nk]);
+  report.journal.draft.push([key,nk,clash?s.draft[key]:null]);
+  if(!clash)s.draft[nk]=s.draft[key];
+  delete s.draft[key];report.changed=true;
+ });
+
+ // 4. Splits. A duplicate that only exists because of a rename is removed from the alternatives;
+ //    nothing else in a day is removed or re-ordered.
+ const listsBefore=JSON.stringify([s.days,s.plannedDays,s.customSplits]);
+ dayLists().forEach(function(days){
+  days.forEach(function(d){
+   if(!Array.isArray(d))return;
+   const made=new Set();
+   if(Array.isArray(d[1]))d[1]=d[1].map(function(x){const c=zagCanon(x);if(c!==x)made.add(c);return c});
+   if(Array.isArray(d[2])){
+    const mapped=d[2].map(function(x){const c=zagCanon(x);if(c!==x)made.add(c);return c});
+    const mains=new Set(Array.isArray(d[1])?d[1]:[]),seen=new Set(),out=[];
+    mapped.forEach(function(x){
+     if(made.has(x)&&(mains.has(x)||seen.has(x)))return;
+     seen.add(x);out.push(x);
+    });
+    d[2]=out;
+   }
+   if(d[3]&&Array.isArray(d[3].s))d[3].s.forEach(function(slot){if(slot&&typeof slot.x==='string')slot.x=zagCanon(slot.x)});
+  });
+ });
+ if(JSON.stringify([s.days,s.plannedDays,s.customSplits])!==listsBefore){report.journal.lists=JSON.parse(listsBefore);report.changed=true}
+
+ // 5. Other places an exercise name is stored.
+ if(s.tempSwaps&&typeof s.tempSwaps==='object')Object.keys(s.tempSwaps).forEach(function(dayId){const map=s.tempSwaps[dayId];if(!map||typeof map!=='object')return;Object.keys(map).forEach(function(slotId){const c=zagCanon(map[slotId]);if(c!==map[slotId]){map[slotId]=c;report.changed=true}})});
+ if(typeof s.groupExercise==='string'){const c=zagCanon(s.groupExercise);if(c!==s.groupExercise){s.groupExercise=c;report.changed=true}}
+ const fixExerciseList=function(holder){
+  if(!holder||typeof holder!=='object'||!Array.isArray(holder.exercises))return;
+  const next=zagCanonList(holder.exercises);
+  if(JSON.stringify(next)!==JSON.stringify(holder.exercises)){holder.exercises=next;report.changed=true}
+ };
+ fixExerciseList(s.demoGroup);
+ (Array.isArray(s.demoGroups)?s.demoGroups:[]).forEach(fixExerciseList);
+ if(s.onlineGroupConfigs&&typeof s.onlineGroupConfigs==='object')Object.keys(s.onlineGroupConfigs).forEach(function(id){fixExerciseList(s.onlineGroupConfigs[id])});
+ return report;
+}
+
+// Approved one-off: on The Goat Split, put Cable Chest Fly back at Chest 1 position 3 where an old
+// Workout-page swap displaced it. Nothing else in any split is touched.
+function zagFixChest1Swap(s){
+ if(!s||s.splitName!=="The Goat Split"||!Array.isArray(s.days))return false;
+ const d=s.days.filter(function(x){return Array.isArray(x)&&x[0]==="Chest 1"&&Array.isArray(x[1])&&Array.isArray(x[2])})[0];
+ if(!d||d[1].length<3||d[1].indexOf("Cable Chest Fly")>=0)return false;
+ const at=d[2].indexOf("Cable Chest Fly");if(at<0)return false;
+ const displaced=d[1][2];
+ d[1][2]="Cable Chest Fly";d[2][at]=displaced;
+ if(d[3]&&Array.isArray(d[3].s)&&d[3].s[2])d[3].s[2].x="Cable Chest Fly";
+ return true;
+}
+// Approved additions to the default alternatives on The Goat Split. Additive only.
+function zagTopUpAlternatives(s){
+ if(!s||s.splitName!=="The Goat Split"||!Array.isArray(s.days))return false;
+ const adds={"Shoulders 1":["Dumbbell Side Raise","Cable Side Raise"],"Shoulders 2":["Dumbbell Seated Side Raise","Cable Side Raise"],"Push 1":["Cable Side Raise"],"Push 2":["Cable Side Raise"]};
+ let changed=false;
+ s.days.forEach(function(d){
+  if(!Array.isArray(d)||!Array.isArray(d[1])||!Array.isArray(d[2])||!Object.prototype.hasOwnProperty.call(adds,d[0]))return;
+  adds[d[0]].forEach(function(x){if(d[1].indexOf(x)<0&&d[2].indexOf(x)<0){d[2].push(x);changed=true}});
+ });
+ return changed;
+}
+
+// Runs every data step on the live state, in a fixed order. Safe to call repeatedly.
+function zagRunDataMigrations(reason){
+ const report={reason:reason||'',swaps:0,chest1:false,alts:false,names:null,error:''};
+ try{
+  const mig=(st.zagMig&&typeof st.zagMig==='object'&&!Array.isArray(st.zagMig))?st.zagMig:{};
+  let overrides={};
+  try{overrides=JSON.parse(localStorage.getItem(ZAG_MANUAL_PB_KEY)||'{}')||{}}catch(_){overrides={}}
+  const overridesBefore=JSON.stringify(overrides);
+  const pending=zagConvertLegacySwaps(st);
+  zagEnsureDaySlots(st);
+  if(pending.length){
+   if(!st.tempSwaps||typeof st.tempSwaps!=='object'||Array.isArray(st.tempSwaps))st.tempSwaps={};
+   pending.forEach(function(x){
+    const d=st.days[x.day],m=d&&d[3],slot=m&&m.s&&m.s[x.slot];
+    if(!slot)return;
+    (st.tempSwaps[m.id]||(st.tempSwaps[m.id]={}))[slot.id]=x.sub;report.swaps++;
+   });
+  }
+  report.names=zagMigrateExerciseNames(st,overrides);
+  if(mig.chest1!==1){report.chest1=zagFixChest1Swap(st);mig.chest1=1}
+  if(mig.alts!==1){report.alts=zagTopUpAlternatives(st);mig.alts=1}
+  zagEnsureDaySlots(st);zagPruneTempSwaps(st);
+  st.plannedDays=JSON.parse(JSON.stringify(st.days));
+  mig.v=ZAG_DATA_VERSION;st.zagMig=mig;
+  if(JSON.stringify(overrides)!==overridesBefore)localStorage.setItem(ZAG_MANUAL_PB_KEY,JSON.stringify(overrides));
+  if(report.names.changed||report.swaps||report.chest1||report.alts){
+   const log=Array.isArray(st.zagMigLog)?st.zagMigLog:[];
+   log.unshift({at:new Date().toISOString(),reason:report.reason,merged:report.names.merged,historySets:report.names.historySets,swaps:report.swaps,chest1:report.chest1,alts:report.alts});
+   st.zagMigLog=log.slice(0,5);
+  }
+ }catch(e){
+  console.warn('Zag data migration failed',e);
+  report.error=String((e&&e.message)||e);
+ }
+ return report;
+}
+// Keeps the per-position data consistent whenever the state is saved (split edits, loads, imports).
+function zagBeforeSave(){
+ if(!zagDataReady)return;
+ try{
+  zagEnsureDaySlots(st);zagPruneTempSwaps(st);
+  st.plannedDays=JSON.parse(JSON.stringify(st.days));
+ }catch(e){console.warn('Zag slot sync failed',e)}
+}
+function zagMigStatusText(){
+ const v=(st.zagMig&&st.zagMig.v)||0,last=Array.isArray(st.zagMigLog)?st.zagMigLog[0]:null;
+ if(!last)return 'Data v'+v+' · no exercise changes were needed on this device.';
+ const names=(last.merged||[]).length;
+ return 'Data v'+v+' · last update '+String(last.at||'').slice(0,10)+': '+names+' exercise name'+(names===1?'':'s')+' merged, '+(last.historySets||0)+' history set'+(last.historySets===1?'':'s')+' relabelled'+(last.swaps?', '+last.swaps+' swap'+(last.swaps===1?'':'s')+' made temporary':'')+(last.chest1?', Chest 1 exercise 3 restored':'')+'.';
+}
+
+// ----- Live helpers for the Workout page -----
+function zagDayMeta(d){return (Array.isArray(d)&&d[3]&&typeof d[3]==='object')?d[3]:null}
+function zagDaySlots(i){const m=zagDayMeta(st.days[i===undefined?st.day:i]);return (m&&Array.isArray(m.s))?m.s:[]}
+function zagDaySwaps(i){const m=zagDayMeta(st.days[i===undefined?st.day:i]);return (m&&st.tempSwaps&&typeof st.tempSwaps==='object'&&st.tempSwaps[m.id])||{}}
+// The exercises actually being performed today: the plan, with any temporary swap applied.
+function zagEffectiveMains(i){
+ const d=st.days[i===undefined?st.day:i];if(!Array.isArray(d))return [];
+ const slots=zagDaySlots(i),swaps=zagDaySwaps(i);
+ return (d[1]||[]).map(function(name,j){const slot=slots[j],sub=slot&&swaps[slot.id];return (typeof sub==='string'&&sub)?sub:name});
+}
+// The alternatives list as it should be shown: a swapped-in exercise leaves the list and the
+// planned exercise it replaced takes its place, exactly as the old exchange looked.
+function zagEffectiveExtras(i){
+ const d=st.days[i===undefined?st.day:i];if(!Array.isArray(d))return [];
+ const mains=zagEffectiveMains(i),inMain=new Set(mains);
+ const displaced=(d[1]||[]).filter(function(x){return !inMain.has(x)}),out=[];
+ let n=0;
+ (d[2]||[]).forEach(function(x){if(inMain.has(x)){if(n<displaced.length)out.push(displaced[n++])}else out.push(x)});
+ while(n<displaced.length)out.push(displaced[n++]);
+ return out.filter(function(x,idx){return out.indexOf(x)===idx});
+}
+function zagSlotWeek(i,j){
+ const slot=zagDaySlots(i)[j];
+ if(slot)return zagClampWeek(slot.w);
+ const d=st.days[i===undefined?st.day:i];
+ return zagClampWeek(st.weeks&&d&&d[1]?st.weeks[d[1][j]]:1);
+}
+// 0 for the first card showing an exercise today, 1 for a second card with the same exercise, ...
+function zagSlotOcc(mains,j){let n=0;for(let a=0;a<j;a++)if(mains[a]===mains[j])n++;return n}
+function zagDraftKey(dayIndex,ex,i,occ){return dayIndex+"|"+ex+"|"+i+(occ?"|#"+(occ+1):"")}
+// st.weeks is kept as "last known week per exercise" for new positions and for older app builds.
+function zagMirrorWeeks(i){zagDaySlots(i).forEach(function(slot){if(typeof slot.x==='string'&&slot.x)st.weeks[slot.x]=zagClampWeek(slot.w)})}
+// Completing a workout moves every position of that day on by one week (Week 8 wraps to Week 1).
+function zagAdvanceDayWeeks(i){
+ zagDaySlots(i).forEach(function(slot){const w=zagClampWeek(slot.w);slot.w=w>=8?1:w+1});
+ zagMirrorWeeks(i);
+}
+function zagClearDaySwaps(i){
+ const m=zagDayMeta(st.days[i===undefined?st.day:i]);
+ if(m&&st.tempSwaps&&typeof st.tempSwaps==='object')delete st.tempSwaps[m.id];
+}
+// Sets logged today for an exercise that was then swapped out are still real work.
+function zagOrphanDraftEntries(dayIndex,current){
+ const out=[],now=new Set(current);
+ Object.keys(st.draft||{}).forEach(function(key){
+  const m=/^([^|]*)\|([\s\S]*)\|(\d+)(\|#\d+)?$/.exec(key);
+  if(!m||m[1]!==String(dayIndex)||now.has(m[2]))return;
+  const v=st.draft[key];
+  if(!v||v.kg===undefined||v.kg===''||v.kg===null||v.r===undefined||v.r===''||v.r===null)return;
+  if(!zagValidLoggedSet(m[2],v.kg,v.r))return;
+  out.push({exercise:m[2],kg:Number(v.kg),reps:Number(v.r),order:Number(m[3])});
+ });
+ out.sort(function(a,b){return a.exercise===b.exercise?a.order-b.order:0});
+ return out.map(function(v){return {exercise:v.exercise,kg:v.kg,reps:v.reps}});
+}
+// ===== end of ZAG data layer v4 =====
 const FLAME="assets/images/asset-013-9039dcc5f86c.png";
 const seed={"Weighted Lat Pull Up":25,"Wide Pulldown B":250,"Wide Pulldown R":275,"Barbell Row":170,"Free Weight Row":100,"Close Pulldown B":225,"Close Pulldown R":230,"Advanced Lat Pull Down":150,"Straight Arm Pulldown":90,"Shoulder Smyth Press":100,"Lateral Raise Pin":70,"Cable Fly Pin":100,"Tri Dips":129,"DB Preacher Curl":60,"Tri EZ Extension":105,"Rope Curl":90,"Single Rope Extension":40,"Bicep Machine":175,"Deadlifts":170,"Siting Hammy Curl":132,"Leg Extension":40,"Leg Extension (R)":40,"Squats":100,"Sitting Calfs":100};
 let raw=JSON.parse(localStorage.getItem("zagScienceV2")||"null");
+// Exact saved text at launch, kept for the one-time safety copy made before the v4 data changes.
+const zagStateTextAtLaunch=raw?localStorage.getItem("zagScienceV2"):null;
 let st=raw||{day:0,weeks:{},max:{},draft:{},history:[],sound:true,days:JSON.parse(JSON.stringify(base)),splitName:"The Goat Split",customSplits:{},prHistory:{},repsAtMax:{}};
 
-// First-ever launch only: stagger exercise weeks in ascending order.
-// Exercise 1 = Week 1, Exercise 2 = Week 2 ... Exercise 8 = Week 8,
-// then the sequence repeats 1–8 for later exercises.
+// First-ever launch only: stagger weeks in ascending order across every position of the split.
+// Position 1 = Week 1, position 2 = Week 2 ... position 8 = Week 8, then the sequence repeats.
+// Every position then advances on its own, so the same exercise on two days no longer shares a week.
 // Because this only runs when `raw` is empty, reopening the app never resets progression.
 if(!raw){
-  let ordered=[],seen=new Set();
+  let n=0;
   st.days.forEach(day=>{
-    (day[1]||[]).forEach(ex=>{
-      if(!seen.has(ex)){seen.add(ex);ordered.push(ex)}
-    });
+    day[3]={id:zagNewId('d'),s:(day[1]||[]).map(ex=>{const w=(n++%8)+1;if(st.weeks[ex]===undefined)st.weeks[ex]=w;return {id:zagNewId('s'),x:ex,w:w}})};
   });
-  ordered.forEach((ex,i)=>st.weeks[ex]=(i%8)+1);
+  st.tempSwaps={};
+  st.zagMig={v:ZAG_DATA_VERSION,chest1:1,alts:1};
 }
 
 // PBs are user data: never preload the old demo/seed maxes on a fresh install.
@@ -524,19 +913,12 @@ st.plannedDays=st.plannedDays||JSON.parse(JSON.stringify(st.days));
 function syncPlannedDays(){st.plannedDays=JSON.parse(JSON.stringify(st.days))}
 
 
-// ZAG exercise-library migration v3: preserve historical/max/week data under renamed exercises.
+// ZAG exercise-library migration v3 (September 2026). It has already run on every existing install.
+// Its old alias table copied some values onto the wrong exercise, so it no longer copies anything:
+// exercise names are now handled by zagMigrateExerciseNames (data layer v4), which runs just below.
 (function(){
  if(localStorage.getItem("zagExerciseLibraryV3")) return;
- const aliases={"Free Weight Row":"Plate Loaded Row","Close Pulldown B":"Pin Machine Lat Pulldown Close Grip B","Close Pulldown R":"Pin Machine Lat Pulldown Close Grip Red","Wide Pulldown B":"Pin Machine Lat Pulldown Wide Grip B","Wide Pulldown R":"Pin Machine Lat Pulldown Wide Grip Red","Shoulder Smyth Press":"Smith Shoulder Press","Shoulder Smyth Machine":"Smith Shoulder Press","Decline Machine Press":"Pin Machine Decline Chest Press","Decline Chest Machine":"Pin Machine Decline Chest Press","Lateral Raise Pin":"Pin Machine Lateral Raise","Cable Fly Pin":"Pin Machine Cable Fly","Pin Shoulder Blue":"Pin Machine Shoulder Press Blue","Front Raise Cable":"Cable Front Raise","Stand Square BB Shoulder":"Square Barbell Shoulder Press","Arnold DB":"Dumbbell Arnold Press","Single Lat Raise Pin":"Cable Lateral Raise","Incline Smith":"Smith Incline Chest Press","Incline Smyth":"Smith Incline Chest Press","Bench":"Bench Press Flat","DB Press":"Dumbbell Flat Press","Db press / bench":"Dumbbell Flat Chest Press","Cable Fly / pin":"Pin Machine Chest Fly","Lateral Raise / pin":"Pin Machine Lateral Raise","Chest pin red / blue / incline":"Pin Machine Decline Chest Press","Front raise db / plate":"Cable Front Raise","Upward cable fly":"Cable Upward Chest Fly","Dumbell Flat":"Dumbbell Flat Chest Press","Cable Fly":"Cable Chest Fly","Upward Cable Fly":"Cable Upward Chest Fly","Incline Chest Machine":"Pin Machine Incline Chest Press","Close Grip Shoulder Machine Blue":"Pin Machine Shoulder Press Blue","Close Grip Shoulder Red":"Pin Machine Shoulder Press Red","Rear Delt Machine":"Pin Machine Rear Deltoids","Cable Side Raise":"Dumbbell Seated Side Raise","Dumbell Side Raise":"Dumbbell Side Raise","Tri Dips":"Weighted Tricep Dips","DB Preacher Curl":"Dumbbell Preacher Curl","Tri EZ Extension":"Cable EZ Bar Tricep Extension","Rope Curl":"Cable Rope Bicep Curl","Single Rope Extension":"Cable Single Arm Tricep Extension","Bicep Machine":"Pin Machine Bicep Curl","Single Cable Curl":"Cable Single Arm Bicep Curl","Single Spider":"Dumbbell Spider Bicep Curl","Double Rope Extension":"Cable Double Rope Tricep Extension","Uni Press / Leg Press":"Unilateral Leg Press","Sitting Calfs":"Sitting Calf Raises","Press Calf":"Donkey Calf Raise","Stiff Deads":"Romanian Deadlifts","Lying Curl":"Lying Hamstring Curl","Siting Hammy Curl":"Sitting Hamstring Curl","Sitting Hammy Curl":"Sitting Hamstring Curl"};
- function moveMap(obj){
-   if(!obj) return;
-   Object.keys(aliases).forEach(old=>{
-     const neu=aliases[old];
-     if(obj[old]!==undefined && obj[neu]===undefined) obj[neu]=obj[old];
-   });
- }
- moveMap(st.max); moveMap(st.weeks); moveMap(st.prHistory); moveMap(st.repsAtMax);
- if(st.splitName==="The Goat Split" || !st.splitName){
+ if(raw&&(st.splitName==="The Goat Split" || !st.splitName)){
    st.days=JSON.parse(JSON.stringify(base));
    st.plannedDays=JSON.parse(JSON.stringify(base));
  }
@@ -558,8 +940,30 @@ function syncPlannedDays(){st.plannedDays=JSON.parse(JSON.stringify(st.days))}
  save();
 })();
 
+// Data layer v4: keep a one-time safety copy of the data exactly as it was, then merge duplicate
+// exercise names, give every position its own week and make Workout-page swaps temporary.
+(function(){
+ let needsCompact=false;
+ try{
+  if(zagStateTextAtLaunch&&!(raw&&raw.zagMig&&raw.zagMig.v>=ZAG_DATA_VERSION)&&!localStorage.getItem(ZAG_PRE_V4_BACKUP_KEY)){
+   localStorage.setItem(ZAG_PRE_V4_BACKUP_KEY,JSON.stringify({savedAt:new Date().toISOString(),state:zagStateTextAtLaunch,manualPBOverrides:localStorage.getItem(ZAG_MANUAL_PB_KEY)}));
+  }
+ }catch(e){needsCompact=true;}
+ let compactBase=null;
+ if(needsCompact){try{const copy=JSON.parse(zagStateTextAtLaunch);delete copy.history;compactBase=JSON.stringify(copy)}catch(_){}}
+ const report=zagRunDataMigrations('startup');
+ if(needsCompact&&compactBase){
+  // Not enough room for a full copy: keep everything except the workout list, plus the list of
+  // history labels that were changed (the only change made to history).
+  try{localStorage.setItem(ZAG_PRE_V4_BACKUP_KEY,JSON.stringify({savedAt:new Date().toISOString(),compact:true,state:compactBase,historyRenames:(report.names&&report.names.journal.history)||[],manualPBOverrides:null}))}catch(_){}
+ }
+ window.zagLastDataMigration=report;
+ zagDataReady=!report.error;
+ save();
+})();
+
 if(st.units!=='lb'&&st.units!=='kg')st.units='kg';
-function save(){zagRestoreManualPBs();localStorage.setItem("zagScienceV2",JSON.stringify(st));if(window.zagRestoringBackup)return;if(typeof zagWidgetScheduleSync==="function")zagWidgetScheduleSync();if(typeof zagQueuePBSync==="function")zagQueuePBSync();if(typeof zagQueueStateSync==="function")zagQueueStateSync()}
+function save(){zagRestoreManualPBs();zagBeforeSave();localStorage.setItem("zagScienceV2",JSON.stringify(st));if(window.zagRestoringBackup)return;if(typeof zagWidgetScheduleSync==="function")zagWidgetScheduleSync();if(typeof zagQueuePBSync==="function")zagQueuePBSync();if(typeof zagQueueStateSync==="function")zagQueueStateSync()}
 function weightUnit(){return st.units==='lb'?'lb':'kg'}
 function kgToDisplay(v){if(v===''||v==null)return '';let n=Number(v);if(!Number.isFinite(n))return v;let out=weightUnit()==='lb'?n*2.2046226218:n;return Math.round(out*10)/10}
 function displayToKg(v){if(v===''||v==null)return '';let n=Number(v);if(!Number.isFinite(n))return v;let out=weightUnit()==='lb'?n/2.2046226218:n;return Math.round(out*1000)/1000}
@@ -567,9 +971,10 @@ function weightText(v){return kgToDisplay(v)+' '+weightUnit()}
 function toggleWeightUnit(){st.units=weightUnit()==='kg'?'lb':'kg';save();settings()}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function q(s){return String(s).replaceAll("\\","\\\\").replaceAll("'","\\'")}
-function sets(ex){
+function sets(ex,week){
  zagRestoreManualPBs();
- let m=+st.max[ex]||0,w=st.stickWeek?"stick":(st.weeks[ex]||1);
+ // The week belongs to the position in the workout day, not to the exercise name.
+ let m=+st.max[ex]||0,w=st.stickWeek?"stick":zagClampWeek(week===undefined?(st.weeks[ex]||1):week);
  if(w==="stick"){
    let prescribed=warm.slice(0,4).concat(plans[8]).map(x=>({p:x[0],r:x[1],kg:Math.round(m*x[0]*10)/10}));
    return prescribed.concat(Array.from({length:4},()=>({p:"",r:"",kg:"",backoff:true})));
@@ -577,7 +982,7 @@ function sets(ex){
  let wu=w===8?warm.slice(0,4):warm;
  return wu.concat(plans[w]).map(x=>({p:x[0],r:x[1],kg:Math.round(m*x[0]*10)/10}))
 }
-function k(ex,i){return st.day+"|"+ex+"|"+i}
+function k(ex,i,occ){return zagDraftKey(st.day,ex,i,occ||0)}
 let zagScrollRestoreToken=0;
 let zagSkipNextScrollSave=false;
 let zagForceWorkoutTop=false;
@@ -795,36 +1200,33 @@ function zagPreviousTouch(event,input){
 function zagPreviousMouse(event,input){
  if(event.detail>=2){event.preventDefault();clearTimeout(input._zagSingleTimer);input._zagSingleTimer=null;input.blur();zagQuickPrevious(input);}
 }
-function workout(){setActiveNav("workout");let d=st.days[st.day],s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><div class="zagGuideTitle"><h1>${esc(d[0])}</h1><button type="button" class="zagGuideLaunch" onclick="zagOpenWorkoutGuide()" aria-label="Workout guide"><img src="assets/images/workout-guide-info-icon.png" alt=""></button></div><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
-d[1].forEach((ex,e)=>{let ts=sets(ex),previousSets=zagPreviousSets(ex),w=st.stickWeek?"stick":(st.weeks[ex]||1);s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek('${q(ex)}',this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
-ts.forEach((t,i)=>{let v=st.draft[k(ex,i)]||{},prev=previousSets[i]||{},prevKg=Number.isFinite(Number(prev.kg))&&prev.kg!==undefined?String(kgToDisplay(prev.kg)):"",prevReps=Number.isFinite(Number(prev.reps))&&prev.reps!==undefined?String(prev.reps):"",stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal aria-label="Actual weight; double tap to use previous session weight" placeholder="${prevKg}" data-zag-previous="${prevKg}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" oninput="zagUpdateSetButton(this)" onchange="field('${q(k(ex,i))}','kg',this.value)"></td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal min="0.5" step="0.5" aria-label="Actual reps; double tap to use previous session reps" placeholder="${prevReps}" data-zag-previous="${prevReps}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.r??""}" oninput="zagUpdateSetButton(this)" onchange="field('${q(k(ex,i))}','r',this.value)"></td><td><button class="fist ${v.done||(v.kg!==undefined&&v.kg!==''&&v.r!==undefined&&v.r!=='')?'done':''}" onclick="one('${q(ex)}',${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise('${q(ex)}',${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets('${q(ex)}')" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
-s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${d[2].map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${q(x)}',this.value)"><button class=btn onclick="openSwap('${q(x)}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s;zagRestoreWorkoutPanels()}
+function workout(){setActiveNav("workout");if(zagDataReady)zagEnsureDaySlots(st);let d=st.days[st.day],mains=zagEffectiveMains(),extras=zagEffectiveExtras(),s=`<div class=top><button class=btn onclick="move(-1)">‹ Back</button><div class=title><div class="zagGuideTitle"><h1>${esc(d[0])}</h1><button type="button" class="zagGuideLaunch" onclick="zagOpenWorkoutGuide()" aria-label="Workout guide"><img src="assets/images/workout-guide-info-icon.png" alt=""></button></div><p>${esc(st.splitName)} • Day ${st.day+1}/${st.days.length}</p></div><button class=btn onclick="move(1)">Next ›</button></div>`;
+mains.forEach((ex,e)=>{let wk=zagSlotWeek(st.day,e),occ=zagSlotOcc(mains,e),ts=sets(ex,wk),previousSets=zagPreviousSets(ex),w=st.stickWeek?"stick":wk;s+=`<section id="exercise-${e}" class="exercise collapsed"><div class="exerciseTitleRow"><div class=n>${e+1}</div><div class=name>${esc(ex)}</div><div class="titleMaxTop">MAX: ${weightText(st.max[ex]||0)}</div><div class="exerciseControls"><button class="exerciseExpand" type="button" onclick="event.stopPropagation();toggleExerciseCard(${e})">EXPAND</button><select class=week onclick="event.stopPropagation()" onchange="setExerciseWeek(${e},this.value)">${st.stickWeek?`<option value="stick" selected>Stick Week</option>`:[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n==w?'selected':''}>Week ${n}</option>`).join("")}</select><span></span><button class="btn editMain" onclick="event.stopPropagation();chooseExtraForMain(${e})">Edit</button></div></div><div class=exerciseBody><table><tr><th>Set</th><th>%</th><th>Target<br>Weight</th><th>Target<br>Reps</th><th>Actual<br>Weight</th><th>Actual<br>Reps</th><th>Quick</th></tr>`;
+ts.forEach((t,i)=>{let key=k(ex,i,occ),v=st.draft[key]||{},prev=previousSets[i]||{},prevKg=Number.isFinite(Number(prev.kg))&&prev.kg!==undefined?String(kgToDisplay(prev.kg)):"",prevReps=Number.isFinite(Number(prev.reps))&&prev.reps!==undefined?String(prev.reps):"",stick=st.stickWeek,workStart=stick?4:5,setLabel=t.backoff?"B"+(i-8):(i<workStart?"W"+(i+1):i-workStart+1),pct=t.backoff?"":(Math.round(t.p*1000)/10+"%");s+=`<tr><td>${setLabel}</td><td>${pct}</td><td>${t.backoff?"":kgToDisplay(t.kg)}</td><td>${t.backoff?"":t.r}</td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal aria-label="Actual weight; double tap to use previous session weight" placeholder="${prevKg}" data-zag-previous="${prevKg}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.kg===undefined||v.kg===""?"":kgToDisplay(v.kg)}" oninput="zagUpdateSetButton(this)" onchange="field('${esc(q(key))}','kg',this.value)"></td><td><input class="cell zagPreviousInput" onpointerdown="if(event.pointerType==='touch'&&this.value===''&&this.dataset.zagPrevious)event.preventDefault()" type=number inputmode=decimal min="0.5" step="0.5" aria-label="Actual reps; double tap to use previous session reps" placeholder="${prevReps}" data-zag-previous="${prevReps}" ondblclick="zagPreviousMouse(event,this)" ontouchstart="zagPreviousStart(event,this)" ontouchend="zagPreviousTouch(event,this)" value="${v.r??""}" oninput="zagUpdateSetButton(this)" onchange="field('${esc(q(key))}','r',this.value)"></td><td><button class="fist ${v.done||(v.kg!==undefined&&v.kg!==''&&v.r!==undefined&&v.r!=='')?'done':''}" onclick="one(${e},${i},this)">&nbsp;</button></td></tr>`});s+=`</table><div class=exerciseBottomActions><button class=exComplete onclick="completeExercise(${e})"><img class=flameimg src="assets/images/asset-017-67cca83dc4cc.png"><span>NEXT EXERCISE</span></button><button class=allSetsBtn onclick="fillAllSets(${e})" aria-label="Fill all sets"><span>ALL</span><span class=allSetsFist></span></button></div></div></section>`});
+s+=`<button class=finish onclick=finish()>✓ FINISH WORKOUT</button><section id=workoutExtras class="extras collapsed"><div class=extrasTitleRow onclick=toggleExtrasCard()><h2>Extras / Replacements</h2><span class=exerciseChevron>⌄</span></div><div class=extrasBody>${extras.map(x=>`<div class=extra><span>${esc(x)}</span><input class=cell type=number value="${st.max[x]?kgToDisplay(st.max[x]):""}" placeholder="Max (${weightUnit()})" onchange="zagSetMax('${esc(q(x))}',this.value)"><button class=btn onclick="openSwap('${esc(q(x))}')">Swap</button></div>`).join("")}<button class=btn style="margin-top:6px" onclick=addEx()>+ Add Exercise</button></div></section>`;document.getElementById("screen").innerHTML=s;zagRestoreWorkoutPanels()}
 
 function expandWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='Week '+o.value})}
 function compactWeekLabels(sel){if(!sel||st.stickWeek)return;Array.from(sel.options).forEach(o=>{if(/^\d+$/.test(o.value))o.textContent='W'+o.value})}
-function setExerciseWeek(ex,w){
+function setExerciseWeek(e,w){
   if(st.stickWeek)return;
   zagRestoreManualPBs();
   const week=Math.max(1,Math.min(8,Number(w)||1));
-  const today=(st.days||[])[st.day];
-  const exercises=today&&Array.isArray(today[1])?today[1]:[];
-  // Only changing the first exercise realigns the rest of this workout day.
-  // Regular workout completion still advances each exercise independently.
-  if(exercises.length&&exercises[0]===ex){
-    // Ask before changing other exercises: cancelling keeps their weeks unchanged.
-    const changeOthers=exercises.length>1 && window.confirm(
+  // Older callers passed the exercise name; positions are now addressed by their index in today's workout.
+  if(typeof e==='string')e=zagEffectiveMains().indexOf(e);
+  const slots=zagDaySlots();
+  if(!Number.isInteger(e)||e<0||!slots[e])return;
+  // Only changing the first exercise can realign the rest of THIS workout day.
+  // Other days are never affected, even when they contain the same exercises.
+  if(e===0&&slots.length>1&&window.confirm(
       'Also update the other exercises to follow in ascending weeks?\n\n' +
       'Yes (OK): Set the following exercises to Week '+(week%8+1)+', Week '+((week+1)%8+1)+' and so on.\n' +
       'No (Cancel): Change only this exercise.'
-    );
-    if(changeOthers){
-      exercises.forEach((name,index)=>{st.weeks[name]=((week-1+index)%8)+1});
-    }else{
-      st.weeks[ex]=week;
-    }
+    )){
+    slots.forEach((slot,index)=>{slot.w=((week-1+index)%8)+1});
   }else{
-    st.weeks[ex]=week;
+    slots[e].w=week;
   }
+  zagMirrorWeeks();
   save();workout();
 }
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
@@ -841,8 +1243,8 @@ function field(key,f,v){
  if(v==='')st.draft[key].done=false;
  save();
 }
-function zagPrepareSetFill(ex,i,planned,row){
- const key=k(ex,i),old=st.draft[key]||{};
+function zagPrepareSetFill(ex,i,planned,row,keyOverride){
+ const key=keyOverride||k(ex,i),old=st.draft[key]||{};
  const inputs=row?.querySelectorAll('input.cell');
  const weightInput=inputs?.[0],repsInput=inputs?.[1];
  // Current input contents take precedence over stored draft. Empty inputs are
@@ -865,14 +1267,19 @@ function zagApplyPreparedSetFill(item){
  if(item.weightInput&&!item.hasWeight)item.weightInput.value=String(kgToDisplay(item.kg));
  if(item.repsInput&&!item.hasReps)item.repsInput.value=String(item.r);
 }
-function zagFillMissingSetFields(ex,i,planned,row){
- const item=zagPrepareSetFill(ex,i,planned,row);
+function zagFillMissingSetFields(ex,i,planned,row,key){
+ const item=zagPrepareSetFill(ex,i,planned,row,key);
  if(item.error||item.skip)return false;
  zagApplyPreparedSetFill(item);
  return true;
 }
-function one(ex,i,btn){
- const key=k(ex,i),t=sets(ex)[i],row=btn?.closest('tr');
+function one(e,i,btn){
+ // e is the position in today's workout (older callers passed the exercise name).
+ const mains=zagEffectiveMains();
+ if(typeof e==='string')e=mains.indexOf(e);
+ const ex=mains[e];if(ex===undefined)return;
+ const key=k(ex,i,zagSlotOcc(mains,e)),t=sets(ex,zagSlotWeek(st.day,e))[i],row=btn?.closest('tr');
+ if(!t)return;
  const inputs=row?.querySelectorAll('input.cell');
  const weight=inputs?.[0]?.value.trim()??'',reps=inputs?.[1]?.value.trim()??'';
  // Both values present: this button is now a clear/reset toggle, even for
@@ -882,7 +1289,7 @@ function one(ex,i,btn){
   if(inputs){inputs[0].value='';inputs[1].value='';}
   zagUpdateSetButton(inputs?.[0]);
  }else{
-  if(!zagFillMissingSetFields(ex,i,t,row)){alert(zagSetValidationMessage());return;}
+  if(!zagFillMissingSetFields(ex,i,t,row,key)){alert(zagSetValidationMessage());return;}
   zagUpdateSetButton(inputs?.[0]);
  }
  clickSound();save();
@@ -930,14 +1337,18 @@ function zagNextExerciseTarget(next){
  const clearance=landscape?2:12;
  return Math.max(0,window.scrollY+next.getBoundingClientRect().top-fixedBottom-clearance);
 }
-function completeExercise(ex,e){
- const ts=sets(ex);let pbChanged=false;
- const invalid=ts.some((t,i)=>{const v=st.draft[k(ex,i)];return v&&(v.done||v.kg!==undefined&&v.kg!==''||v.r!==undefined&&v.r!=='')&&!zagValidLoggedSet(ex,v.kg,v.r)});
+function completeExercise(e,legacyIndex){
+ // e is the position in today's workout (older callers passed the exercise name, then the index).
+ const mains=zagEffectiveMains();
+ if(typeof e==='string')e=Number.isInteger(legacyIndex)?legacyIndex:mains.indexOf(e);
+ const ex=mains[e];if(ex===undefined)return;
+ const occ=zagSlotOcc(mains,e),ts=sets(ex,zagSlotWeek(st.day,e));let pbChanged=false;
+ const invalid=ts.some((t,i)=>{const v=st.draft[k(ex,i,occ)];return v&&(v.done||v.kg!==undefined&&v.kg!==''||v.r!==undefined&&v.r!=='')&&!zagValidLoggedSet(ex,v.kg,v.r)});
  if(invalid){alert(zagSetValidationMessage());return;}
 
  // Any completed, user-entered set can establish a PB on any week.
  ts.forEach((t,i)=>{
-   const v=st.draft[k(ex,i)];
+   const v=st.draft[k(ex,i,occ)];
    if(!v||v.kg===""||v.kg==null||v.r===""||v.r==null)return;
    const kg=Number(v.kg),reps=Number(v.r);
    if(!zagValidLoggedSet(ex,kg,reps))return;
@@ -978,11 +1389,13 @@ function completeExercise(ex,e){
   });
  }));
 }
-function fillAllSets(ex){
+function fillAllSets(e){
  zagRestoreManualPBs();
- const exerciseIndex=st.days[st.day][1].indexOf(ex);
- if(exerciseIndex<0)return;
- const ts=sets(ex),prepared=[];
+ const mains=zagEffectiveMains();
+ if(typeof e==='string')e=mains.indexOf(e);
+ const exerciseIndex=e,ex=mains[e];
+ if(!Number.isInteger(e)||e<0||ex===undefined)return;
+ const occ=zagSlotOcc(mains,e),ts=sets(ex,zagSlotWeek(st.day,e)),prepared=[];
  // Validate the entire exercise BEFORE modifying any saved data or inputs.
  const table=document.querySelector(`#exercise-${exerciseIndex} table`);
  if(!table)return;
@@ -991,10 +1404,10 @@ function fillAllSets(ex){
   // table row index so every ALL action reads its own set's inputs.
   const row=table.rows[i+1];
   if(!row)return;
-  const key=k(ex,i),existing=st.draft[key]||{};
+  const key=k(ex,i,occ),existing=st.draft[key]||{};
   // A completed set must never be rewritten or marked incomplete.
   if(existing.done)continue;
-  const item=zagPrepareSetFill(ex,i,ts[i],row);
+  const item=zagPrepareSetFill(ex,i,ts[i],row,key);
   if(item.error){alert(zagSetValidationMessage());return;}
   prepared.push(item);
  }
@@ -1006,36 +1419,60 @@ function fillAllSets(ex){
  });
 }
 // Legacy name retained in case an older cached click handler calls it.
-function allExercise(ex){const e=st.days[st.day][1].indexOf(ex);completeExercise(ex,e)}
-function move(n){if(st.plannedDays&&st.plannedDays[st.day])st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
+function allExercise(ex){completeExercise(ex)}
+// Looking at another day never changes the plan and never discards a swap or a draft.
+function move(n){st.day=(st.day+n+st.days.length)%st.days.length;save();workout()}
 function closeModal(){document.getElementById("modalRoot").innerHTML=""}
 function modal(title,body){document.getElementById("modalRoot").innerHTML=`<div class=modal onclick="if(event.target===this)closeModal()"><div class=modalbox><button class="btn close" onclick=closeModal()>×</button><h2>${title}</h2>${body}</div></div>`}
-function openSwap(extra){let mains=st.days[st.day][1];modal("Swap "+esc(extra),`<p class=small>Tap the current exercise you want to replace.</p>${mains.map((x,i)=>`<button class=pick onclick="doSwap('${q(extra)}',${i})">${i+1}. ${esc(x)}</button>`).join("")}`)}
-function doSwap(extra,i){if(!window.zagRequirePro())return;let d=st.days[st.day],j=d[2].indexOf(extra);if(j<0)return;let old=d[1][i];d[1][i]=extra;d[2][j]=old;save();closeModal();workout()}
-function chooseExtraForMain(i){let extras=st.days[st.day][2];modal("Replace "+esc(st.days[st.day][1][i]),`<p class=small>Choose an extra exercise.</p>${extras.map(x=>`<button class=pick onclick="doSwap('${q(x)}',${i})">${esc(x)}</button>`).join("")}`)}
-function addEx(){let x=prompt("New exercise name:");if(!x)return;st.days[st.day][2].push(x.trim());st.max[x.trim()]=+displayToKg(prompt("Max weight ("+weightUnit()+"):")||0);save();workout()}
+function openSwap(extra){let mains=zagEffectiveMains();modal("Swap "+esc(extra),`<p class=small>Tap the current exercise you want to replace. The swap lasts for this workout only.</p>${mains.map((x,i)=>`<button class=pick onclick="doSwap('${esc(q(extra))}',${i})">${i+1}. ${esc(x)}</button>`).join("")}`)}
+// A Workout-page swap is temporary: it is remembered against today's position only and is cleared
+// when this day's workout is finished. The planned split (st.days) is never edited here; permanent
+// changes are made in Edit Split.
+function doSwap(extra,i){
+ if(!window.zagRequirePro())return;
+ const d=st.days[st.day],meta=zagDayMeta(d),slots=zagDaySlots(),slot=slots[i];
+ if(!d||!meta||!slot||zagEffectiveExtras().indexOf(extra)<0)return;
+ if(!st.tempSwaps||typeof st.tempSwaps!=='object'||Array.isArray(st.tempSwaps))st.tempSwaps={};
+ const map=st.tempSwaps[meta.id]||(st.tempSwaps[meta.id]={});
+ // An exercise can only fill one position at a time.
+ slots.forEach(other=>{if(other.id!==slot.id&&map[other.id]===extra)delete map[other.id]});
+ if(extra===d[1][i])delete map[slot.id];else map[slot.id]=extra;
+ if(!Object.keys(map).length)delete st.tempSwaps[meta.id];
+ save();closeModal();workout();
+}
+function zagRestorePlanned(i){
+ const meta=zagDayMeta(st.days[st.day]),slot=zagDaySlots()[i];
+ if(meta&&slot&&st.tempSwaps&&st.tempSwaps[meta.id]){
+  delete st.tempSwaps[meta.id][slot.id];
+  if(!Object.keys(st.tempSwaps[meta.id]).length)delete st.tempSwaps[meta.id];
+ }
+ save();closeModal();workout();
+}
+function chooseExtraForMain(i){let mains=zagEffectiveMains(),extras=zagEffectiveExtras(),planned=st.days[st.day][1][i],swapped=mains[i]!==planned;modal("Replace "+esc(mains[i]),`<p class=small>Choose an extra exercise. The swap lasts for this workout only; use Edit Split to change your plan.</p>${swapped?`<button class=pick onclick="zagRestorePlanned(${i})">↩ Back to planned: ${esc(planned)}</button>`:""}${extras.filter(x=>!(swapped&&x===planned)).map(x=>`<button class=pick onclick="doSwap('${esc(q(x))}',${i})">${esc(x)}</button>`).join("")}`)}
+function addEx(){let x=prompt("New exercise name:");if(!x||!x.trim())return;const name=zagCanon(x.trim()),d=st.days[st.day];if(d[1].indexOf(name)<0&&d[2].indexOf(name)<0)d[2].push(name);const typed=prompt("Max weight ("+weightUnit()+"):");const kg=+displayToKg(typed||0);if(Number.isFinite(kg)&&kg>0)st.max[name]=kg;else if(st.max[name]===undefined)st.max[name]=0;save();workout()}
 function finish(){
- let d=st.days[st.day],rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];
+ let d=st.days[st.day],mains=zagEffectiveMains(),rec={date:new Date().toLocaleString(),day:d[0],sets:[]},prs=[];
  const entries=[];let invalid=false;
- d[1].forEach(ex=>sets(ex).forEach((t,i)=>{
-  const v=st.draft[k(ex,i)];if(!v)return;
+ mains.forEach((ex,e)=>{const occ=zagSlotOcc(mains,e);sets(ex,zagSlotWeek(st.day,e)).forEach((t,i)=>{
+  const v=st.draft[k(ex,i,occ)];if(!v)return;
   const entered=(v.done||v.kg!==undefined&&v.kg!==''||v.r!==undefined&&v.r!=='');
   if(!entered)return;
   if(!zagValidLoggedSet(ex,v.kg,v.r)){invalid=true;return;}
   entries.push({exercise:ex,kg:Number(v.kg),reps:Number(v.r)});
- }));
+ })});
  if(invalid){alert(zagSetValidationMessage());return;}
+ // Sets logged today for an exercise that was then swapped out are recorded under that exercise.
+ zagOrphanDraftEntries(st.day,mains).forEach(v=>entries.push(v));
  if(!entries.length){alert('Log at least one valid set before finishing your workout.');return;}
  entries.forEach(v=>{rec.sets.push(v);if(zagRecordPB(v.exercise,v.kg,v.reps))prs.push(v.exercise+' '+weightText(v.kg))});
  st.history.unshift(rec);
 st.recommendedDay=(st.day+1)%st.days.length;
  if(typeof zagRescheduleNative==="function")setTimeout(()=>zagRescheduleNative().catch(console.warn),0);
-d[1].forEach(ex=>{
- let w=Number(st.weeks[ex]||1);
- st.weeks[ex]=w>=8?1:w+1;
-});
+// One completed workout moves every position of THIS day on by one week. No other day changes.
+zagAdvanceDayWeeks(st.day);
 st.draft={};
-if(st.plannedDays&&st.plannedDays[st.day]) st.days[st.day]=JSON.parse(JSON.stringify(st.plannedDays[st.day]));
+// The planned exercises return for this day's next workout.
+zagClearDaySwaps(st.day);
 recordStreakWorkout();save();zagRescheduleNative().catch(console.warn);returnSound();zagFinishAdvancePending=true;showStreakPopup(true)}
 function zagStreakPopupContinue(btn){if(btn&&btn.closest)btn.closest('.streakOverlay')?.remove();if(zagFinishAdvancePending){zagFinishAdvancePending=false;st.day=(st.day+1)%st.days.length;st.pageScrolls=st.pageScrolls||{};st.pageScrolls.workout=0;zagSkipNextScrollSave=true;zagForceWorkoutTop=true;++zagScrollRestoreToken;save();workout();const pin=()=>{st.pageScrolls.workout=0;window.scrollTo({top:0,left:0,behavior:"instant"})};pin();requestAnimationFrame(()=>requestAnimationFrame(pin));setTimeout(pin,60);setTimeout(()=>{pin();zagForceWorkoutTop=false;save()},220);}}
 function zagWeightCalculatorHTML(){return `<section class="zagWeightCalc" aria-label="Weight converter"><div class="zagCalcHead"><b>WEIGHT CONVERTER</b><span>kg ↔ lb</span></div><div class="zagCalcInputs"><label>KG<input id="zagCalcKg" type="number" inputmode="decimal" min="0" step="any" placeholder="Kilograms" oninput="zagConvertWeight('kg')"></label><span class="zagCalcSwap">⇄</span><label>LB<input id="zagCalcLb" type="number" inputmode="decimal" min="0" step="any" placeholder="Pounds" oninput="zagConvertWeight('lb')"></label></div><div class="zagCalcNote">Convert machine weights without changing your workout's unit setting.</div></section>`;}
@@ -1091,7 +1528,7 @@ function dayExerciseEditor(i){
    <button type="button" class=pick onclick="addExerciseTo(${i},1)">+ Extra Exercise</button>`);
  setTimeout(initSplitExerciseDrag,0);
 }
-function renameExercise(di,type,j){let arr=st.days[di][type?2:1];textEntryModal("Edit Exercise","Exercise name",arr[j],n=>{arr[j]=n;syncPlannedDays();save();dayExerciseEditor(di)})}
+function renameExercise(di,type,j){let arr=st.days[di][type?2:1];textEntryModal("Edit Exercise","Exercise name",arr[j],n=>{arr[j]=zagCanon(n);syncPlannedDays();save();dayExerciseEditor(di)})}
 
 let splitExerciseDrag=null;
 function splitDragTargetIndex(zone,y){
@@ -1133,7 +1570,7 @@ function initSplitExerciseDrag(){
 }
 
 function removeExercise(di,type,j){st.days[di][type?2:1].splice(j,1);syncPlannedDays();save();dayExerciseEditor(di)}
-function addExerciseTo(di,type){textEntryModal(type?"Add Extra Exercise":"Add Main Exercise","Exercise name","",n=>{st.days[di][type?2:1].push(n);syncPlannedDays();save();dayExerciseEditor(di)})}
+function addExerciseTo(di,type){textEntryModal(type?"Add Extra Exercise":"Add Main Exercise","Exercise name","",n=>{st.days[di][type?2:1].push(zagCanon(n));syncPlannedDays();save();dayExerciseEditor(di)})}
 function nextCustomSplitName(){let i=1;while(st.customSplits["Custom Split "+i])i++;return "Custom Split "+i}
 function saveAsSplit(){let n=nextCustomSplitName();st.splitName=n;st.customSplits[n]=JSON.parse(JSON.stringify(st.days));save();editSplit()}
 function loadSplit(n){st.days=JSON.parse(JSON.stringify(st.customSplits[n]));st.plannedDays=JSON.parse(JSON.stringify(st.days));st.splitName=n;st.day=0;save();home()}
@@ -1226,9 +1663,9 @@ function groupMembers(){
 const groupMedalGold="assets/images/zag-podium-1-v2718.jpg",groupMedalSilver="assets/images/zag-podium-2-v2718.jpg",groupMedalBronze="assets/images/zag-podium-3-v2718.jpg";
 function medalImg(i,cls='rankMedalImg'){let a=[groupMedalGold,groupMedalSilver,groupMedalBronze];return i<3?`<img class="${cls}" src="${a[i]}" alt="${i+1} place medal">`:String(i+1)}
 function rankBadge(i){return medalImg(i)}
-function groupScore(m){let total=m.vals["Squats"]+m.vals["Bench Press"]+m.vals["Deadlifts"];return Math.round((total/m.bw)*100)}
+function groupScore(m){let total=m.vals["Squats"]+m.vals["Bench Press"]+m.vals["Deadlift"];return Math.round((total/m.bw)*100)}
 function memberCard(m,i,metric){let tr=m.trend>0?`<span style="color:#e969ff">↑${m.trend}</span>`:m.trend<0?`<span style="opacity:.65">↓${Math.abs(m.trend)}</span>`:`<span style="opacity:.45">—</span>`;return `<div class="pagecard" style="padding:12px;margin:8px 0"><div class=row><div style="font-size:24px;width:42px;text-align:center">${rankBadge(i)}</div><div class=grow><b>${esc(m.name)}${m.name==='Kieron'?' <span class=small>(You)</span>':''}</b><div class=small>${m.prs} PRs this month • ⚡ ${m.streak} day streak</div></div><div style="text-align:right"><b style="font-size:19px">${metric(m)}</b><div class=small>${tr}</div></div></div></div>`}
-function showcaseSecondGroup(){let ms=groupMembers().slice().sort((a,b)=>(b.vals['Deadlifts']||0)-(a.vals['Deadlifts']||0));return `<div class="groupSectionBox"><div class=groupSectionLabel>Group 2</div><div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>Strength Crew</div><div class=small>${ms.length} Members • Push each other</div><div class=showcaseNote>Demo group for layout testing</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs><button class="groupMainTab">Total</button><button class="groupMainTab">Bodyweight</button><button class="groupMainTab sel">Individual Exercises</button></div><div class=exerciseTabStrip><button class="exerciseTab sel">Deadlifts</button><button class=exerciseTab>Bench Press</button><button class=exerciseTab>Squats</button></div>${groupPodium(ms,m=>weightText(m.vals['Deadlifts']||0))}${groupTable('Deadlifts Leaderboard',ms,m=>weightText(m.vals['Deadlifts']||0),'Best Lift')}</div>`}function groupsPage(view){setActiveNav("groups");st.groupView=view||st.groupView||"overall";save();if(!st.demoGroup){document.getElementById("screen").innerHTML=`<div class=title><h1>Groups</h1><p>Compete • improve • celebrate PRs</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><div class="groupEmptyFigurine"><img src="assets/images/asset-022-0703892d0bc1.png" alt="Zag Science trophy figurine"></div><h2 style="margin:0 0 6px">No groups yet</h2><div class=small style="margin-bottom:18px">Create a group to start a leaderboard with friends.</div><button class=pick style="width:100%" onclick=createGroup()>＋ Create Group</button></div>`;window.scrollTo(0,0);return}let tabs=[['total','Total'],['bodyweight','Bodyweight'],['exercises','Individual Exercises']];if(!view&&(!st.groupView||!['total','bodyweight','exercises'].includes(st.groupView)))st.groupView='total';let inner=`<div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>${esc(st.demoGroup.name||'The Lads')}</div><div class=small>${groupMembers().length} Members • Train harder together</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs>${tabs.map(t=>`<button class="groupMainTab ${st.groupView===t[0]?'sel':''}" onclick="groupsPage('${t[0]}')">${t[1]}</button>`).join('')}</div>`;if(st.groupView==='exercises')inner+=groupExercises();else if(st.groupView==='bodyweight')inner+=groupBodyweightLayout();else inner+=groupTotalLayout();if(window.zagProEntitled!==true){
+function showcaseSecondGroup(){let ms=groupMembers().slice().sort((a,b)=>(b.vals['Deadlift']||0)-(a.vals['Deadlift']||0));return `<div class="groupSectionBox"><div class=groupSectionLabel>Group 2</div><div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>Strength Crew</div><div class=small>${ms.length} Members • Push each other</div><div class=showcaseNote>Demo group for layout testing</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs><button class="groupMainTab">Total</button><button class="groupMainTab">Bodyweight</button><button class="groupMainTab sel">Individual Exercises</button></div><div class=exerciseTabStrip><button class="exerciseTab sel">Deadlift</button><button class=exerciseTab>Bench Press</button><button class=exerciseTab>Squats</button></div>${groupPodium(ms,m=>weightText(m.vals['Deadlift']||0))}${groupTable('Deadlift Leaderboard',ms,m=>weightText(m.vals['Deadlift']||0),'Best Lift')}</div>`}function groupsPage(view){setActiveNav("groups");st.groupView=view||st.groupView||"overall";save();if(!st.demoGroup){document.getElementById("screen").innerHTML=`<div class=title><h1>Groups</h1><p>Compete • improve • celebrate PRs</p></div><div class=pagecard style="text-align:center;padding:28px 18px"><div class="groupEmptyFigurine"><img src="assets/images/asset-022-0703892d0bc1.png" alt="Zag Science trophy figurine"></div><h2 style="margin:0 0 6px">No groups yet</h2><div class=small style="margin-bottom:18px">Create a group to start a leaderboard with friends.</div><button class=pick style="width:100%" onclick=createGroup()>＋ Create Group</button></div>`;window.scrollTo(0,0);return}let tabs=[['total','Total'],['bodyweight','Bodyweight'],['exercises','Individual Exercises']];if(!view&&(!st.groupView||!['total','bodyweight','exercises'].includes(st.groupView)))st.groupView='total';let inner=`<div class="pagecard groupHero"><div class=groupBadge>👥</div><div class=grow><div class=groupTitle>${esc(st.demoGroup.name||'The Lads')}</div><div class=small>${groupMembers().length} Members • Train harder together</div></div><button class=btn onclick="inviteMembers()">+ Invite</button></div><div class=groupMainTabs>${tabs.map(t=>`<button class="groupMainTab ${st.groupView===t[0]?'sel':''}" onclick="groupsPage('${t[0]}')">${t[1]}</button>`).join('')}</div>`;if(st.groupView==='exercises')inner+=groupExercises();else if(st.groupView==='bodyweight')inner+=groupBodyweightLayout();else inner+=groupTotalLayout();if(window.zagProEntitled!==true){
  const start=inner.indexOf('<div class=groupMainTabs>');
  if(start>=0){const head=inner.slice(0,start), locked=inner.slice(start);
  inner=head+`<div class="zagGroupLocked"><div class="zagGroupBlurred" aria-hidden="true">${locked}</div><div class="zagGroupLockOverlay"><b>🔒 Unlock Zag Pro</b><span>Unlock group leaderboards, podiums and individual exercise rankings.</span><button class="btn" onclick="openZagPro(event)">Unlock Zag Pro</button></div></div>`;
@@ -1244,10 +1681,10 @@ function groupPodium(ms,metric){
  return `<div class="zagLegacyPodium">${card(top[1],2)}${card(top[0],1)}${card(top[2],3)}</div>`;
 }
 function groupTable(title,ms,metric,label){return `<div class=pagecard groupBoard><h2> ${esc(title)}</h2><div class=boardHead><span>#</span><span>Member</span><span>${esc(label)}</span></div>${ms.map((m,i)=>`<div class=boardRow><span>${rankBadge(i)}</span><b>${esc(m.name)}</b><b>${metric(m)}</b></div>`).join('')}</div>`}
-function combinedValue(m){let ex=(st.demoGroup?.exercises||[]);if(!ex.length)ex=['Squats','Bench Press','Deadlifts'];return ex.reduce((n,x)=>n+(m.vals[x]||0),0)}
+function combinedValue(m){let ex=(st.demoGroup?.exercises||[]);if(!ex.length)ex=['Squats','Bench Press','Deadlift'];return ex.reduce((n,x)=>n+(m.vals[x]||0),0)}
 function groupTotalLayout(){let ms=groupMembers().sort((a,b)=>combinedValue(b)-combinedValue(a));return groupPodium(ms,m=>weightText(combinedValue(m)))+groupTable('Combined Weight Leaderboard',ms,m=>weightText(combinedValue(m)),'Combined')}
 function groupBodyweightLayout(){let ms=groupMembers().sort((a,b)=>(combinedValue(b)/b.bw)-(combinedValue(a)/a.bw));return groupPodium(ms,m=>(combinedValue(m)/m.bw).toFixed(2)+'×')+groupTable('Bodyweight Ratio Leaderboard',ms,m=>(combinedValue(m)/m.bw).toFixed(2)+'×','Ratio')}
-function groupExercises(){let opts=(st.demoGroup?.exercises||[]).filter(Boolean);if(!opts.length)opts=['Squats','Bench Press','Deadlifts','Weighted Lat Pull Up','Barbell Row'];if(!opts.includes(st.groupExercise))st.groupExercise=opts[0];let ex=st.groupExercise;let ms=groupMembers().sort((a,b)=>(b.vals[ex]||0)-(a.vals[ex]||0));return `<div class=exerciseTabStrip>${opts.map(x=>`<button class="exerciseTab ${x===ex?'sel':''}" onclick="st.groupExercise='${q(x)}';save();groupsPage('exercises')">${esc(x)}</button>`).join('')}</div>${groupPodium(ms,m=>weightText(m.vals[ex]||0))}${groupTable(ex+' Leaderboard',ms,m=>weightText(m.vals[ex]||0),'Best Lift')}`}
+function groupExercises(){let opts=(st.demoGroup?.exercises||[]).filter(Boolean);if(!opts.length)opts=['Squats','Bench Press','Deadlift','Weighted Lat Pull Up','Barbell Row'];if(!opts.includes(st.groupExercise))st.groupExercise=opts[0];let ex=st.groupExercise;let ms=groupMembers().sort((a,b)=>(b.vals[ex]||0)-(a.vals[ex]||0));return `<div class=exerciseTabStrip>${opts.map(x=>`<button class="exerciseTab ${x===ex?'sel':''}" onclick="st.groupExercise='${q(x)}';save();groupsPage('exercises')">${esc(x)}</button>`).join('')}</div>${groupPodium(ms,m=>weightText(m.vals[ex]||0))}${groupTable(ex+' Leaderboard',ms,m=>weightText(m.vals[ex]||0),'Best Lift')}`}
 function groupActivity(){let a=[];return `<div class=pagecard><h2 style="margin:0">🏅 Recent PRs</h2><div class=small>Mock activity for testing the future live group feed</div></div>${a.map((x,i)=>`<div class=pagecard style="padding:13px;margin:8px 0"><div class=row><div style="font-size:24px">${i===0?'⚡':'🏋️'}</div><div class=grow><b>${x[0]}</b><div class=small>${x[1]} • ${x[3]}</div></div><b>${x[2]}</b></div></div>`).join('')}`}
 function groupTotal(){return groupOverall()}
 function groupBody(){let ms=groupMembers().sort((a,b)=>groupScore(b)-groupScore(a));return `<div class=pagecard><h2>⚖️ Bodyweight Ranking</h2></div>${ms.map((m,i)=>memberCard(m,i,x=>(groupScore(x)/100).toFixed(2)+'×')).join('')}`}
@@ -1535,10 +1972,10 @@ ${streakRestSelector()}
 ${streakReminderTimeSetting()}
 <div class=settingLine><div class=grow><b style="font-size:15px">Notification permission</b><div class=note style="margin-top:4px">Allow Zag Science notifications on this device.</div></div><button class=btn onclick="requestZagNotifications()">${zagNativeNotifications()?"Enable / Check":(("Notification" in window&&Notification.permission==="granted")?"Enabled":"Enable")}</button></div>
 <div class=note style="margin-top:10px">Rest days preserve your streak rather than adding to it. On iPhone, workout and streak reminders use local notifications. Group leaderboard and PR alerts still require the push backend. Bodyweight reminders are scheduled for two weeks after your last saved weigh-in.</div>
-</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff;display:${window.zagBuildChannel==='testflight'?'block':'none'}"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">TestFlight only — unavailable in production builds.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><small id="zag-widget-diagnostics" style="display:block;margin-top:6px;color:#dca6ff">Widget bridge: checking…</small><pre id="zag-widget-graph-debug" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#e7b7ff;line-height:1.5;margin-top:8px">Graph diagnostics: checking…</pre><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
+</div><div class=pagecard><b>Sounds</b><div class=settingLine><span>Workout sounds</span><button class=btn onclick="st.sound=!st.sound;save();settings()">${st.sound?"On":"Off"}</button></div></div><div class=pagecard><b>Data & Cloud Backup</b><div class=settingLine><span>Cloud Backup</span><span class=coming>Coming Soon</span></div><button class=btn onclick=backup()>Export Backup</button> <label class=btn>Import Backup<input hidden type=file accept=.json onchange=restore(this)></label></div><div class="pagecard" id="zag-dev-pro-panel" style="border:2px dashed #d98bff;display:${window.zagBuildChannel==='testflight'?'block':'none'}"><b>Developer Test Mode</b><div class="note" style="margin:8px 0">TestFlight only — unavailable in production builds.</div><div class="settingLine"><span id="zag-dev-pro-status">Current access: ${window.zagProEntitled ? "TEST PRO" : "FREE"}</span><small id="zag-data-status" style="display:block;margin-top:6px;color:#dca6ff">${esc(zagMigStatusText())}</small><small id="zag-widget-diagnostics" style="display:block;margin-top:6px;color:#dca6ff">Widget bridge: checking…</small><pre id="zag-widget-graph-debug" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#e7b7ff;line-height:1.5;margin-top:8px">Graph diagnostics: checking…</pre><button class="btn" onclick="zagSetDevPro(!window.zagProEntitled)">Switch Free / Pro</button></div></div><div class=pagecard><b>Danger Zone</b><div style="margin-top:8px"><button class="btn danger" onclick="if(confirm('Reset all Zag Science data?')){localStorage.removeItem('zagScienceV2');location.reload()}">Reset All Data</button></div></div>`}
 async function backup(){
  try{
-  const json=JSON.stringify({format:'zag-science-backup',version:1,exportedAt:new Date().toISOString(),data:st,manualPBOverrides:zagManualPBOverrides()},null,2);
+  const json=JSON.stringify({format:'zag-science-backup',version:1,exportedAt:new Date().toISOString(),data:st,manualPBOverrides:zagManualPBOverrides(),preDataV4Backup:localStorage.getItem(ZAG_PRE_V4_BACKUP_KEY)||null},null,2);
   const file=new File([json],'zag-science-backup-'+new Date().toISOString().slice(0,10)+'.json',{type:'application/json'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'Zag Science backup'});return;}
   const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
@@ -3553,7 +3990,7 @@ function zagPBMap(){const out={};Object.keys(st.max||{}).sort().forEach(ex=>{con
 function zagPBSignature(map=zagPBMap()){return JSON.stringify(map)}
 function zagPBMarkerKey(){return zagSession?.user?.id?'zagPbCloudV14:'+zagSession.user.id:''}
 function zagSetCloudPBStatus(t){const el=document.getElementById('zagCloudPBStatus');if(el)el.textContent=t||''}
-async function zagFetchCloudPBMap(){if(!zagSb||!zagSession?.user)return{};const {data,error}=await zagSb.from('personal_bests').select('exercise_name,weight_kg,reps,achieved_at,created_at').eq('user_id',zagSession.user.id).order('achieved_at',{ascending:true});if(error)throw error;const out={};(data||[]).forEach(r=>{out[r.exercise_name]={kg:Number(r.weight_kg||0),reps:r.reps==null?null:Number(r.reps)}});return out}
+async function zagFetchCloudPBMap(){if(!zagSb||!zagSession?.user)return{};const {data,error}=await zagSb.from('personal_bests').select('exercise_name,weight_kg,reps,achieved_at,created_at').eq('user_id',zagSession.user.id).order('achieved_at',{ascending:true});if(error)throw error;const latest={};(data||[]).forEach(r=>{latest[r.exercise_name]={kg:Number(r.weight_kg||0),reps:r.reps==null?null:Number(r.reps)}});/* Rows saved under an old exercise name count towards the canonical name. Same rule as on the phone: a retired name never overrides the current name; for names that were still selectable the stronger row wins. */const out={};Object.keys(latest).forEach(n=>{const c=zagCanon(n),v=latest[n],cur=out[c];if(n!==c&&Object.prototype.hasOwnProperty.call(latest,c)&&!Object.prototype.hasOwnProperty.call(ZAG_LIVE_DUPLICATES,n))return;if(!cur||v.kg>cur.kg||(v.kg===cur.kg&&Number(v.reps||0)>Number(cur.reps||0)))out[c]=v});return out}
 async function zagUploadPBDifferences(cloud){const local=zagPBMap(),rows=[];for(const [ex,v] of Object.entries(local)){const c=cloud[ex];if(!c||Number(c.kg)!==Number(v.kg)||Number(c.reps||0)!==Number(v.reps||0))rows.push({user_id:zagSession.user.id,exercise_name:ex,weight_kg:v.kg,reps:v.reps,achieved_at:new Date().toISOString()})}if(rows.length){const {error}=await zagSb.from('personal_bests').insert(rows);if(error)throw error}return local}
 function zagApplyCloudPBMap(cloud){zagPBSyncSuppress=true;st.repsAtMax=st.repsAtMax||{};Object.entries(cloud).forEach(([ex,v])=>{if(zagPBDirty.has(ex))return;st.max[ex]=Number(v.kg||0);if(v.reps!=null)st.repsAtMax[ex]=Number(v.reps)});zagRestoreManualPBs();localStorage.setItem('zagScienceV2',JSON.stringify(st));zagPBSyncSuppress=false}
 async function zagInitPBSync(){if(!zagSb||!zagSession?.user)return;if(zagPBSyncBusy){clearTimeout(zagPBSyncTimer);zagPBSyncTimer=setTimeout(zagInitPBSync,1000);return;}zagPBSyncBusy=true;zagSetCloudPBStatus('Syncing PBs…');try{const key=zagPBMarkerKey(),marker=localStorage.getItem(key),cloud=await zagFetchCloudPBMap(),cloudHas=Object.keys(cloud).length>0,currentSig=zagPBSignature();if(!marker){if(cloudHas){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}else{const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));zagPBDirty.clear();}}else if(currentSig!==marker){const local=await zagUploadPBDifferences(cloud);localStorage.setItem(key,zagPBSignature(local));zagPBDirty.clear();}else if(cloudHas){const cloudSig=zagPBSignature(cloud);if(cloudSig!==marker){zagApplyCloudPBMap(cloud);localStorage.setItem(key,zagPBSignature());}}zagSetCloudPBStatus('PB cloud sync is up to date.');}catch(e){console.warn('PB cloud sync failed',e);zagSetCloudPBStatus('PB sync will retry when you are online.');}finally{zagPBSyncBusy=false}}
@@ -3674,6 +4111,9 @@ function zagApplyCloudState(row){
    st.history=Array.isArray(st.history)?st.history:[];
    st.groups=Array.isArray(st.groups)?st.groups:[];
    st.streak=st.streak||{count:0,lastWorkout:'',weekKey:'',restUsed:0,lastPopup:''};
+   // A snapshot saved by an older build can still contain old exercise names, shared weeks or an
+   // in-flight swap: bring it up to the current data layout before it is stored.
+   zagRunDataMigrations('cloud');zagRestoreManualPBs();
    localStorage.setItem('zagScienceV2',JSON.stringify(st));
  }finally{zagStateSyncSuppress=false;}
 }
@@ -3813,7 +4253,7 @@ if ('serviceWorker' in navigator) {
    try{
      const r=await zagSb.rpc("zag_group_members",{group_id_input:id});
      if(!r.error&&Array.isArray(r.data)){
-       return r.data.map(m=>({id:m.user_id,name:m.display_name||m.username||"Member",username:m.username||"",bw:Number(m.bodyweight_kg)||0,vals:(m.pb_values&&typeof m.pb_values==="object")?m.pb_values:{},role:m.role||((g?.owner_id===m.user_id)?"owner":"member"),streak:Number(m.streak)||0,prs:Number(m.pr_count)||0,trend:0}));
+       return r.data.map(m=>({id:m.user_id,name:m.display_name||m.username||"Member",username:m.username||"",bw:Number(m.bodyweight_kg)||0,vals:zagCanonVals((m.pb_values&&typeof m.pb_values==="object")?m.pb_values:{}),role:m.role||((g?.owner_id===m.user_id)?"owner":"member"),streak:Number(m.streak)||0,prs:Number(m.pr_count)||0,trend:0}));
      }
    }catch(_){}
    let ms=[];try{const mr=await zagSb.from("group_members").select("user_id,role").eq("group_id",id);if(!mr.error)ms=mr.data||[]}catch(_){}
@@ -3821,7 +4261,7 @@ if ('serviceWorker' in navigator) {
    const ids=[...new Set(ms.map(x=>x.user_id).filter(Boolean))];if(!ids.length)return [];
    let profiles=[],pbs=[];try{const a=await zagSb.from("profiles").select("id,username,display_name,bodyweight_kg,streak").in("id",ids);if(!a.error)profiles=a.data||[]}catch(_){}
    try{const b=await zagSb.from("personal_bests").select("user_id,exercise_name,weight_kg,reps").in("user_id",ids);if(!b.error)pbs=b.data||[]}catch(_){}
-   return ms.map(m=>{const pr=profiles.find(x=>x.id===m.user_id)||{},mine=pbs.filter(x=>x.user_id===m.user_id),vals={};mine.forEach(x=>{const w=Number(x.weight_kg)||0;if(w>(vals[x.exercise_name]||0))vals[x.exercise_name]=w});return {id:m.user_id,name:pr.display_name||pr.username||"Member",username:pr.username||"",bw:Number(pr.bodyweight_kg)||0,vals,role:m.role||"member",streak:Number(pr.streak)||0,prs:mine.length,trend:0}});
+   return ms.map(m=>{const pr=profiles.find(x=>x.id===m.user_id)||{},mine=pbs.filter(x=>x.user_id===m.user_id),vals={};mine.forEach(x=>{const w=Number(x.weight_kg)||0;const name=zagCanon(x.exercise_name);if(w>(vals[name]||0))vals[name]=w});return {id:m.user_id,name:pr.display_name||pr.username||"Member",username:pr.username||"",bw:Number(pr.bodyweight_kg)||0,vals,role:m.role||"member",streak:Number(pr.streak)||0,prs:mine.length,trend:0}});
  }
  function totalOf(m){return Object.values(m.vals||{}).reduce((n,v)=>n+(Number(v)||0),0)}
  function zagOnlineEmblemHTML(g){
@@ -4083,7 +4523,7 @@ if ('serviceWorker' in navigator) {
  async function zagSharedGroupConfig(g){
    let local=(st.onlineGroupConfigs||{})[g.id]||{}, server={};
    try{const r=await zagSb.rpc("zag_group_config",{group_id_input:g.id});if(!r.error&&r.data)server=Array.isArray(r.data)?(r.data[0]||{}):r.data}catch(_){}
-   const exercises=local.exercises?.length?local.exercises:(Array.isArray(server.exercises)?server.exercises:[]);
+   const exercises=zagCanonList(local.exercises?.length?local.exercises:(Array.isArray(server.exercises)?server.exercises:[]));
    const c={combined:local.combined??server.combined??true,bodyweight:local.bodyweight??server.bodyweight??true,individual:local.individual??server.individual??true,ratioCombined:local.ratioCombined??server.ratio_combined??true,ratioIndividual:local.ratioIndividual??server.ratio_individual??true,emblem:local.emblem||g.emblem||"",exercises};
    st.onlineGroupConfigs=st.onlineGroupConfigs||{};st.onlineGroupConfigs[g.id]=c;save();return c;
  }
