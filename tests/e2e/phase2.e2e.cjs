@@ -61,7 +61,7 @@ function oldInstall() {
     same(errors, [], 'no script errors on first launch');
     const w = await weeks(page);
     same(w[0], [1, 2, 3, 4, 5], 'Pull 1 starts Week 1-5'); same(w[1], [6, 7, 8, 1, 2, 3], 'Push 1 continues the sequence');
-    same(w[4], [8, 1, 2, 3, 4], 'Pull 2 is consecutive (no shared weeks with Pull 1)');
+    same(w[4], w[0], 'Pull 2 starts on the same weeks as Pull 1'); same(w[13], w[5], 'Chest 2 starts on the same weeks as Chest 1'); same(w[12], w[6], 'Shoulders 2 starts on the same weeks as Shoulders 1');
     await S(page, () => { st.day = 0; workout(); });
     same(await shownWeeks(page), [1, 2, 3, 4, 5], 'Workout page shows each position\'s week');
     ok((await names(page))[0] === 'Weighted Lat Pull Up', 'first card is the planned exercise');
@@ -81,7 +81,9 @@ function oldInstall() {
     await S(page, () => finish()); await closePopup(page);
     const after = await weeks(page);
     same(after[0], [2, 3, 4, 5, 6], 'finishing Pull 1 advances Pull 1 by one week');
-    same(after.slice(1), before.slice(1), 'no other day changed (second Pull 1 and Pull 2 share exercises)');
+    same(after[7], after[0], 'the second Pull 1 day moves with it');
+    same(after[4], [1, 3, 4, 4, 6], 'Pull 2: shared exercises 2, 3, 5 move; its own exercises 1 and 4 do not'); same(after[11], after[4], 'both Pull 2 days alike');
+    for (const i of [1, 2, 3, 5, 6, 8, 9, 10, 12, 13]) same(after[i], before[i], 'day ' + (i + 1) + ' unchanged by Pull 1');
     ok(await S(page, () => st.history.length === 1 && st.history[0].day === 'Pull 1' && st.history[0].sets.length === 10 && st.history[0].sets.every(v => v.exercise === 'Barbell Row') && st.day === 1), 'workout saved once, app moved to the next day');
     await S(page, () => finish()); await page.waitForTimeout(200);
     same(await weeks(page), after, 'a second Finish with nothing logged does not advance again');
@@ -90,21 +92,26 @@ function oldInstall() {
     same(await weeks(page), after, 'weeks survive closing and reopening');
     // Week 8 wraps, manual selector, realign prompt (dialog auto-accepted = Yes)
     await S(page, () => { st.day = 4; workout(); const sel = document.querySelectorAll('#screen select.week')[2]; sel.value = '8'; sel.dispatchEvent(new Event('change')); });
-    same((await weeks(page))[4], [8, 1, 8, 3, 4], 'manual week change affects one position');
+    same((await weeks(page))[4], [1, 3, 8, 4, 6], 'manual week change affects that position'); same((await weeks(page))[0][2], 8, 'and the same exercise in the same position on Pull 1');
     await S(page, () => { const sel = document.querySelectorAll('#screen select.week')[0]; sel.value = '6'; sel.dispatchEvent(new Event('change')); });
     same((await weeks(page))[4], [6, 7, 8, 1, 2], 'changing the first exercise realigns this day (after confirmation)');
-    same((await weeks(page))[11], after[11], 'the other Pull 2 day is not realigned');
+    same((await weeks(page))[11], [6, 7, 8, 1, 2], 'the other Pull 2 day follows'); same((await weeks(page))[0], [2, 7, 8, 5, 2], 'Pull 1 follows only at the shared exercises');
     await S(page, () => { one(0, 5, null); }); // fill one set without a row -> uses targets
     await S(page, () => { st.draft['4|Barbell Row|5'] = { kg: 60, r: 8, done: true }; save(); finish(); }); await closePopup(page);
     same((await weeks(page))[4], [7, 8, 1, 2, 3], 'Week 8 wraps to Week 1');
+    const pb = await weeks(page);
+    await S(page, () => { st.day = 1; workout(); st.draft[k('Smith Shoulder Press', 5)] = { kg: 40, r: 8, done: true }; save(); finish(); }); await closePopup(page);
+    const pw = await weeks(page);
+    same(pw[8][2], pw[1][2], 'Push 2 exercise 3 (Pin Machine Lateral Raise on both) follows Push 1'); same([pw[8][0], pw[8][1], pw[8][3]], [pb[8][0], pb[8][1], pb[8][3]], 'other Push 2 exercises keep their own weeks');
     same(errors, [], 'no script errors during the fresh-install run');
     await ctx.close(); }
 
   console.log('B. Existing install with old names, conflicting PBs and swaps');
   { const seed = oldInstall(); const shown = seed.plannedDays.map(d => d[1].map(ex => seed.weeks[ex] || 1));
+    shown[12][1] = shown[6][1]; shown[5][2] = seed.weeks['Cable Chest Fly']; // Shoulders 2 #2 now matches Shoulders 1; Chest 1 #3 restored to Cable Chest Fly
     const { ctx, page, errors } = await open(seed, { zagManualPBOverridesV288: JSON.stringify({ Deadlifts: { kg: 180, reps: 1, at: 1 } }) });
     same(errors, [], 'no script errors on upgrade');
-    const r = await S(page, () => ({ mig: st.zagMig, max: st.max, reps: st.repsAtMax, pr: st.prHistory.Deadlift.map(e => e.to), hist: st.history.map(h => [h.date, h.day, h.sets.map(v => [v.exercise, v.kg, v.reps])]), draft: Object.keys(st.draft), legs: st.days[3][1], push: st.days[1][1], chest: st.days[5][1], chestExtras: st.days[5][2], arms: st.days[2][1], sh1: st.days[6][2], sh2: st.days[12][2], planned: JSON.stringify(st.plannedDays) === JSON.stringify(st.days), report: window.zagLastDataMigration, ov: localStorage.getItem('zagManualPBOverridesV288'), backup: JSON.parse(localStorage.getItem('zagScienceBackupBeforeDataV4') || 'null'), eff: zagEffectiveMains(2) }));
+    const r = await S(page, () => ({ mig: st.zagMig, max: st.max, reps: st.repsAtMax, pr: st.prHistory.Deadlift.map(e => e.to), hist: st.history.map(h => [h.date, h.day, h.sets.map(v => [v.exercise, v.kg, v.reps])]), draft: Object.keys(st.draft), legs: st.days[3][1], push: st.days[1][1], chest: st.days[5][1], chestExtras: st.days[5][2], arms: st.days[2][1], sh1: st.days[6][2], sh2: st.days[12][2], sh2m: st.days[12][1], planned: JSON.stringify(st.plannedDays) === JSON.stringify(st.days), report: window.zagLastDataMigration, ov: localStorage.getItem('zagManualPBOverridesV288'), backup: JSON.parse(localStorage.getItem('zagScienceBackupBeforeDataV4') || 'null'), eff: zagEffectiveMains(2) }));
     ok(r.mig && r.mig.v === 4 && r.report.error === '', 'data layer v4 applied without error');
     ok(r.max.Deadlift === 180 && r.reps.Deadlift === 1 && !('Deadlifts' in r.max), 'Deadlift max is the stronger 180 x 1', r.max);
     same(r.pr, [180, 160], 'PB events from both names kept, newest first');
@@ -115,7 +122,7 @@ function oldInstall() {
     ok(r.legs[0] === 'Deadlift' && r.push[3] === 'Pin Machine Chest Fly', 'split uses canonical names');
     ok(r.chest[2] === 'Cable Chest Fly' && r.chestExtras.includes('Dumbbell Incline Chest Press'), 'Chest 1 exercise 3 restored to Cable Chest Fly');
     ok(r.arms[1] === 'Dumbbell Preacher Curl' && r.eff[1] === 'Dumbbell Spider Bicep Curl' && r.report.swaps === 1, 'in-flight swap kept for this workout but removed from the plan');
-    ok(r.sh1.includes('Dumbbell Side Raise') && r.sh1.includes('Cable Side Raise') && r.sh2.includes('Dumbbell Seated Side Raise'), 'both side raises available on both Shoulders days');
+    ok(r.sh1.includes('Dumbbell Side Raise') && r.sh1.includes('Cable Side Raise') && r.sh2.includes('Dumbbell Side Raise') && r.sh2m[1] === 'Dumbbell Seated Side Raise' && JSON.stringify(r.sh2m) === JSON.stringify(seed.plannedDays[6][1]), 'Shoulders 2 now matches Shoulders 1; standing side raise kept as an alternative');
     ok(r.planned, 'planned split mirrors the split');
     same(JSON.parse(r.ov), { Deadlift: { kg: 180, reps: 1, at: 1 } }, 'manual max edit moved to the canonical name');
     ok(r.backup && JSON.parse(r.backup.state).max.Deadlifts === 180 && JSON.parse(r.backup.state).days[3][1][0] === 'Deadlifts', 'untouched safety copy of the old data kept on the device');
@@ -139,7 +146,7 @@ function oldInstall() {
     const before = await weeks(page);
     await S(page, () => { st.day = 3; workout(); finish(); }); await closePopup(page);
     const after = await weeks(page);
-    same(after[3], before[3].map(w => w >= 8 ? 1 : w + 1), 'Legs advanced'); same(after[10], before[10], 'the other Legs day did not');
+    same(after[3], before[3].map(w => w >= 8 ? 1 : w + 1), 'Legs advanced'); same(after[10], after[3], 'the other Legs day moves with it');
     ok(await S(page, () => st.history[0].sets.length === 1 && st.history[0].sets[0].exercise === 'Deadlift' && st.max.Deadlift === 180), 'set recorded as Deadlift; lighter set is not a PB');
     same(errors, [], 'no script errors during the upgrade run');
     await ctx.close(); }
@@ -182,7 +189,7 @@ function oldInstall() {
     await S(page, () => { moveDay(0, 1); dupDay(1); });
     let w = await weeks(page); same(w[1], w0[0], 'moved day keeps its weeks'); same(w[2], w0[0], 'duplicated day starts with the same weeks');
     await S(page, () => { st.day = 2; workout(); st.draft[k('Barbell Row', 5)] = { kg: 50, r: 8, done: true }; save(); finish(); }); await closePopup(page);
-    w = await weeks(page); same(w[2], w0[0].map(x => x >= 8 ? 1 : x + 1), 'the copy advances'); same(w[1], w0[0], 'the original it was copied from does not');
+    w = await weeks(page); same(w[2], w0[0].map(x => x >= 8 ? 1 : x + 1), 'the copy advances'); same(w[1], w[2], 'the original moves with its copy (same day)');
     await S(page, () => { saveAsSplit(); loadOriginal(); });
     ok(await S(page, () => st.days.length === 14 && st.days.every(d => d[3] && d[3].s.length === d[1].length) && st.splitName === 'The Goat Split'), 'loading the original split rebuilds every position');
     await S(page, () => { loadSplit('Custom Split 1'); });

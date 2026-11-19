@@ -23,11 +23,17 @@ No Codemagic, Capacitor or package file was changed, and no existing image was c
 
 ## What changed in the app
 1. **Four names merged**: Deadlifts → Deadlift, Dumbbell Flat Press → Dumbbell Flat Chest Press, Cable Fly → Cable Chest Fly, Pin Machine Cable Fly → Pin Machine Chest Fly (library, splits, maxes, reps, PB events, history, drafts, graphs, group lists).
-2. **Each position in each workout day has its own week.** Finishing a day advances only that day; Week 8 wraps to Week 1. The week selector and the first-exercise realign prompt work per day.
+2. **Weeks belong to positions, linked across days of the same kind** (updated 19 Nov). Days whose names match apart from the number (Pull 1/Pull 2, Chest 1/Chest 2, Shoulders 1/2, Push 1/2, both Arms, both Legs) share a week at every position where they have the same exercise. Finishing either day moves the shared positions on both; positions with a different exercise move only with their own day. Week 8 wraps to Week 1. The week selector and the realign prompt change linked positions too.
+   - Pull: exercises 2, 3, 5 shared by all four Pull days; exercises 1 and 4 shared by the two Pull 1 days, and separately by the two Pull 2 days.
+   - Chest: exercises 1-4 shared; exercise 5 (Decline on Chest 1, Incline on Chest 2) separate.
+   - Push: only exercise 3 (Pin Machine Lateral Raise on both) is shared.
+   - Arms, Legs, Shoulders: whole day shared.
+   - Re-ordering a day changes which positions match; a newly matched position takes the week of the first matching day in the split.
 3. **Workout-page swaps are temporary.** They use the position's week and the substitute's own max, are recorded under the exercise performed, survive tab changes and restarts, and clear when that day is finished. The Replace dialog offers "Back to planned".
 4. **Chest 1 exercise 3** is put back to Cable Chest Fly once, on The Goat Split only, where a swap had displaced it.
-5. **Shoulders alternatives**: Dumbbell Side Raise and Cable Side Raise added to Shoulders 1; Dumbbell Seated Side Raise and Cable Side Raise added to Shoulders 2; Cable Side Raise added to Push 1 and Push 2.
-6. **Old names arriving from Supabase or a backup import** are converted on arrival.
+5. **Shoulders 2 exercise 2 is now Dumbbell Seated Side Raise**, so both Shoulders days are identical (existing installs on The Goat Split are changed once; Dumbbell Side Raise keeps its own data and stays as an alternative).
+6. **Shoulders alternatives**: Dumbbell Side Raise and Cable Side Raise added to Shoulders 1; Dumbbell Seated Side Raise and Cable Side Raise added to Shoulders 2; Cable Side Raise added to Push 1 and Push 2.
+7. **Old names arriving from Supabase or a backup import** are converted on arrival.
 
 ## Migration (runs on first launch of this build, and again harmlessly on every launch)
 - A safety copy of the saved data, exactly as it was, is stored on the phone under `zagScienceBackupBeforeDataV4` and included in Export Backup.
@@ -46,7 +52,7 @@ The old v3 migration no longer copies values. Maxes it copied in September are l
 
 ## Tested
 - `npm test`: 28/28 (12 existing + 16 new).
-- Browser run (`tests/e2e/phase2.e2e.cjs`): 76/76 checks across fresh install, upgrade of an old install, swap lifecycle and split editing.
+- Browser run (`tests/e2e/phase2.e2e.cjs`): 94/94 checks across fresh install, upgrade of an old install, swap lifecycle and split editing.
 - All 53 inline scripts parse.
 
 ## Not tested

@@ -42,14 +42,15 @@ test('default library matches the approved exercise lists', () => {
   assert.deepEqual(mains[6], ['Dumbbell Flat Chest Press', 'Smith Incline Chest Press', 'Cable Chest Fly', 'Cable Upward Chest Fly', 'Pin Machine Decline Chest Press']);
   assert.deepEqual(mains[7], ['Smith Shoulder Press', 'Dumbbell Seated Side Raise', 'Pin Machine Shoulder Press Blue', 'Cable Front Raise', 'Pin Machine Rear Deltoids', 'Shrugs']);
   assert.deepEqual(mains[9], ['Smith Flat Chest Press', 'Pin Machine Chest Fly', 'Pin Machine Lateral Raise', 'Pin Machine Decline Chest Press', 'Cable Front Raise', 'Cable Upward Chest Fly']);
-  assert.deepEqual(mains[13], ['Smith Shoulder Press', 'Dumbbell Side Raise', 'Pin Machine Shoulder Press Blue', 'Cable Front Raise', 'Pin Machine Rear Deltoids', 'Shrugs']);
+  assert.deepEqual(mains[13], ['Smith Shoulder Press', 'Dumbbell Seated Side Raise', 'Pin Machine Shoulder Press Blue', 'Cable Front Raise', 'Pin Machine Rear Deltoids', 'Shrugs']);
   assert.deepEqual(mains[14], ['Dumbbell Flat Chest Press', 'Smith Incline Chest Press', 'Cable Chest Fly', 'Cable Upward Chest Fly', 'Pin Machine Incline Chest Press']);
   assert.deepEqual(mains[8], mains[1]); assert.deepEqual(mains[10], mains[3]); assert.deepEqual(mains[11], mains[4]); assert.deepEqual(mains[12], mains[5]);
   const all = new Set(base.flatMap(d => [...d[1], ...d[2]]));
   for (const old of Object.keys(api.ZAG_EXERCISE_MERGES)) assert.equal(all.has(old), false, old + ' removed from library');
   base.forEach(d => { const names = [...d[1], ...d[2]]; assert.equal(new Set(names).size, names.length, 'no duplicate inside ' + d[0]); });
   assert.ok(base[6][2].includes('Dumbbell Side Raise') && base[6][2].includes('Cable Side Raise'));
-  assert.ok(base[12][2].includes('Dumbbell Seated Side Raise') && base[12][2].includes('Cable Side Raise'));
+  assert.deepEqual(mains[13], mains[7], 'both Shoulders days are identical');
+  assert.ok(base[12][2].includes('Dumbbell Side Raise') && base[12][2].includes('Cable Side Raise'));
 });
 test('exercises that must stay separate are never mapped', () => {
   for (const n of ['Cable Side Raise', 'Dumbbell Seated Side Raise', 'Dumbbell Side Raise', 'Cable Chest Fly', 'Cable Upward Chest Fly', 'Straight Arm Pulldown', 'Plate Loaded Straight Arm Pulldown', 'Pin Machine Lateral Raise', 'Cable Lateral Raise', 'Pin Machine Lat Pulldown Close Grip B', 'Pin Machine Lat Pulldown Close Grip Red', 'Pin Machine Lat Pulldown Wide Grip B', 'Pin Machine Lat Pulldown Wide Grip Red', 'Free Weight Row', 'Single Lat Raise Pin', 'Chest pin red / blue / incline', 'Front raise db / plate', 'DB Press'])
@@ -131,16 +132,36 @@ test('existing installs keep exactly the weeks they show today', () => {
   assert.equal(new Set(st.days.map(d => d[3].id)).size, 14); assert.equal(new Set(st.days.flatMap(d => d[3].s.map(x => x.id))).size, st.days.reduce((n, d) => n + d[1].length, 0));
   assert.deepEqual(st.days[3][3].s.map(x => x.x), st.days[3][1]);
 });
-test('finishing a day advances only that day, and Week 8 wraps to Week 1', () => {
-  const st = oldState(); const s = sandbox(st); s.zagEnsureDaySlots(st);
-  st.days[0][3].s.forEach((x, j) => { x.w = 3 + j; });
-  const others = st.days.map((d, i) => weeksOf(st, i));
-  s.zagAdvanceDayWeeks(0); assert.deepEqual(weeksOf(st, 0), [4, 5, 6, 7, 8]);
-  s.zagAdvanceDayWeeks(0); assert.deepEqual(weeksOf(st, 0), [5, 6, 7, 8, 1]);
-  for (let i = 1; i < 14; i++) assert.deepEqual(weeksOf(st, i), others[i], 'day ' + (i + 1) + ' untouched (Pull 2 and the second Pull 1 share exercises)');
+test('linked weeks: same kind of day, same position, same exercise move together', () => {
+  const st = oldState(); const s = sandbox(st); s.zagRunDataMigrations('t');
+  const W = () => st.days.map((d, i) => weeksOf(st, i));
+  // Put every position on a distinct week pattern first (through the real setter, so links hold).
+  st.days.forEach((d, i) => d[3].s.forEach((x, j) => { if (i === 0 || i === 4 || i === 1 || i === 2 || i === 3 || i === 5 || i === 6) x.w = ((i + j) % 8) + 1; }));
+  s.zagEnsureDaySlots(st);
+  const b = W();
+  // Arms: day 3 and day 10 are identical, so the whole day moves on both.
+  s.zagAdvanceDayWeeks(2); const a = W();
+  assert.deepEqual(a[2], b[2].map(w => w >= 8 ? 1 : w + 1)); assert.deepEqual(a[9], a[2], 'Arms day 10 follows day 3');
+  for (const i of [0, 1, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13]) assert.deepEqual(a[i], b[i], 'day ' + (i + 1) + ' untouched by Arms');
+  // Pull 1 (day 1): both Pull 1 days move; on both Pull 2 days only exercises 2, 3 and 5 move.
+  const p0 = W(); s.zagAdvanceDayWeeks(0); const p = W(), up = w => w >= 8 ? 1 : w + 1;
+  assert.deepEqual(p[0], p0[0].map(up)); assert.deepEqual(p[7], p[0], 'second Pull 1 follows');
+  for (const i of [4, 11]) { assert.deepEqual([p[i][1], p[i][2], p[i][4]], [p[0][1], p[0][2], p[0][4]], 'Pull 2 shared exercises follow'); assert.deepEqual([p[i][0], p[i][3]], [p0[i][0], p0[i][3]], 'Pull 2 exercises 1 and 4 keep their own week'); }
+  // Pull 2 (day 5): its own exercises 1 and 4 move on both Pull 2 days only.
+  const q0 = W(); s.zagAdvanceDayWeeks(4); const q = W();
+  assert.deepEqual(q[11], q[4]); assert.deepEqual([q[0][0], q[0][3]], [q0[0][0], q0[0][3]], 'Pull 1 exercises 1 and 4 untouched');
+  assert.deepEqual([q[0][1], q[0][2], q[0][4]], [q[4][1], q[4][2], q[4][4]]);
+  // Chest: exercises 1-4 move on both Chest days; exercise 5 is different, so it moves on its own day only.
+  const c0 = W(); s.zagAdvanceDayWeeks(5); const c = W();
+  assert.deepEqual(c[13].slice(0, 4), c[5].slice(0, 4)); assert.equal(c[13][4], c0[13][4], 'Chest 2 exercise 5 untouched'); assert.equal(c[5][4], up(c0[5][4]));
+  s.zagAdvanceDayWeeks(13); const c2 = W(); assert.equal(c2[5][4], c[5][4], 'Chest 1 exercise 5 untouched by Chest 2'); assert.equal(c2[13][4], up(c[13][4]));
+  // Shoulders: identical after the exercise 2 change.
+  s.zagAdvanceDayWeeks(12); const sh = W(); assert.deepEqual(sh[6], sh[12]);
+  // Week 8 wraps to Week 1.
+  st.days[2][3].s.forEach(x => { x.w = 8; }); s.zagEnsureDaySlots(st); s.zagAdvanceDayWeeks(9); assert.deepEqual(W()[2], [1, 1, 1, 1, 1, 1]);
 });
 test('editing a split keeps each position\'s week', () => {
-  const st = oldState(); api.zagEnsureDaySlots(st);
+  const st = oldState(); st.days[0][0] = 'My Back Day'; api.zagEnsureDaySlots(st);
   st.days[0][3].s.forEach((x, j) => { x.w = j + 2; });
   const ids = st.days[0][3].s.map(x => x.id), dayId = st.days[0][3].id;
   st.days[0][1] = [st.days[0][1][2], st.days[0][1][0], st.days[0][1][1], st.days[0][1][4], st.days[0][1][3]];
@@ -187,8 +208,10 @@ test('full migration of an old install is complete, loses nothing and is repeata
   assert.equal(st.max.Deadlift, 180); assert.equal(st.max['Pin Machine Chest Fly'], 60); assert.equal(st.max.Squats, 100);
   assert.deepEqual(JSON.parse(s.store.zagManualPBOverridesV288), { Deadlift: { kg: 180, reps: 1, at: 1 } });
   assert.deepEqual(st.history.flatMap(h => h.sets.map(v => [h.date, v.kg, v.reps])), setsBefore); assert.ok(st.history.every(h => h.sets.every(v => v.exercise === 'Deadlift')));
+  shown[12][1] = shown[6][1]; // Shoulders 2 exercise 2 is now Dumbbell Seated Side Raise, linked to Shoulders 1
   assert.deepEqual(st.days.map((d, i) => weeksOf(st, i)), shown); assert.deepEqual(st.plannedDays, st.days);
-  assert.ok(st.days[6][2].includes('Dumbbell Side Raise') && st.days[12][2].includes('Dumbbell Seated Side Raise') && st.days[6][2].includes('Cable Side Raise'));
+  assert.equal(st.days[12][1][1], 'Dumbbell Seated Side Raise'); assert.ok(st.days[12][2].includes('Dumbbell Side Raise') && !st.days[12][2].includes('Dumbbell Seated Side Raise'));
+  assert.ok(st.days[6][2].includes('Dumbbell Side Raise') && st.days[6][2].includes('Cable Side Raise') && st.days[12][2].includes('Cable Side Raise'));
   const text = JSON.stringify({ ...st, zagMigLog: null }); for (const old of ['"Deadlifts"', '|Deadlifts|', 'Pin Machine Cable Fly', 'Dumbbell Flat Press"']) assert.equal(text.includes(old), false, old + ' gone from live data: ' + text.slice(Math.max(0, text.indexOf(old) - 80), text.indexOf(old) + 30));
   const snapshot = clone(st), stored = { ...s.store };
   const r2 = s.zagRunDataMigrations('startup'); assert.equal(r2.names.changed, false); assert.deepEqual(st, snapshot); assert.deepEqual(s.store, stored);

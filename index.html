@@ -480,7 +480,7 @@ body.zagGroupsBooting #screen{visibility:visible!important}
 <script>
 const warm=[[.2,20],[.4,8],[.6,5],[.75,3],[.9,2]];
 const plans={1:[[.7,8],[.725,8],[.75,8],[.725,8],[.7,10]],2:[[.725,8],[.75,7],[.775,6],[.725,8],[.7,10]],3:[[.75,6],[.8,5],[.825,4],[.75,6],[.7,10]],4:[[.775,5],[.825,4],[.85,3],[.775,5],[.725,8]],5:[[.8,5],[.85,3],[.875,3],[.8,5],[.75,8]],6:[[.825,4],[.875,2],[.9,2],[.8,5]],7:[[.6,8],[.65,6],[.7,5]],8:[[.9,1],[1,1],[1.05,1]]};
-const base=[["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 1",["Smith Shoulder Press","Pin Machine Decline Chest Press","Pin Machine Lateral Raise","Pin Machine Chest Fly","Pin Machine Shoulder Press Blue","Cable Front Raise"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Chest Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug","Cable Side Raise"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlift","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Chest 1",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Decline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Chest Fly","Bench Press Flat"]],["Shoulders 1",["Smith Shoulder Press","Dumbbell Seated Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug","Dumbbell Side Raise","Cable Side Raise"]],["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 2",["Smith Flat Chest Press","Pin Machine Chest Fly","Pin Machine Lateral Raise","Pin Machine Decline Chest Press","Cable Front Raise","Cable Upward Chest Fly"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Smith Shoulder Press","Pin Machine Shoulder Press Blue","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Chest Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug","Cable Side Raise"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlift","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Shoulders 2",["Smith Shoulder Press","Dumbbell Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug","Dumbbell Seated Side Raise","Cable Side Raise"]],["Chest 2",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Incline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Decline Chest Press","Pin Machine Chest Fly","Bench Press Flat"]]];
+const base=[["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 1",["Smith Shoulder Press","Pin Machine Decline Chest Press","Pin Machine Lateral Raise","Pin Machine Chest Fly","Pin Machine Shoulder Press Blue","Cable Front Raise"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Chest Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug","Cable Side Raise"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlift","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Chest 1",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Decline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Chest Fly","Bench Press Flat"]],["Shoulders 1",["Smith Shoulder Press","Dumbbell Seated Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug","Dumbbell Side Raise","Cable Side Raise"]],["Pull 1",["Weighted Lat Pull Up","Barbell Row","Plate Loaded Row","Pin Machine Lat Pulldown Close Grip B","Straight Arm Pulldown"],["Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip B","Pin Machine Lat Pulldown Wide Grip Red","Advanced Lat Pulldown","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Push 2",["Smith Flat Chest Press","Pin Machine Chest Fly","Pin Machine Lateral Raise","Pin Machine Decline Chest Press","Cable Front Raise","Cable Upward Chest Fly"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Shoulder Press Red","Pin Machine Flat Chest Press","Pin Machine Incline Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Dumbbell Side Raise","Smith Shoulder Press","Pin Machine Shoulder Press Blue","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Smith Incline Chest Press","Bench Press Flat","Dumbbell Flat Chest Press","Log Press","Single Arm Dumbbell Raise","Cable Chest Fly","Pin Machine Rear Deltoids","Dumbbell Seated Side Raise","Shrugs","Smith Shrug","Cable Shrug","Cable Side Raise"]],["Arms",["Weighted Tricep Dips","Dumbbell Preacher Curl","Cable EZ Bar Tricep Extension","Cable Rope Bicep Curl","Cable Single Arm Tricep Extension","Pin Machine Bicep Curl"],["Cable Single Arm Bicep Curl","Dumbbell Spider Bicep Curl","Cable Double Rope Tricep Extension","Barbell Preacher Bicep Curl","Barbell Standing Bicep Curl","Dumbbell Standing Bicep Curl","Dumbbell Standing Bicep Hammer Curl","Cable Overhead Tricep Extension","Barbell Tricep Skull Crusher","Dumbbell Tricep Skull Crusher","Close Grip Bench Press","Cable Overhand Bicep Curl","Barbell Overhand Bicep Curl","Plate Loaded Bicep Curl","Plate Loaded Tricep Press","Pin Machine Tricep Press","Seated Dumbbell Bicep Curl"]],["Legs",["Deadlift","Sitting Hamstring Curl","Leg Extension","Unilateral Leg Press","Squats","Sitting Calf Raises"],["Hack Squat","Single Leg Press","Donkey Calf Raise","Romanian Deadlifts","Lying Hamstring Curl","Plate Loaded Leg Press","Pin Machine Leg Press","Plate Loaded Leg Extension","Plate Loaded Hamstring Curl","Safety Bar Squat","Hip Abductor","Hip Adductor","Pendulum Squat","Split Squat","Weighted Lunges"]],["Pull 2",["Pin Machine Lat Pulldown Wide Grip B","Barbell Row","Plate Loaded Row","Advanced Lat Pulldown","Straight Arm Pulldown"],["Weighted Lat Pull Up","Pin Machine Lat Pulldown Close Grip B","Pin Machine Lat Pulldown Close Grip Red","Pin Machine Lat Pulldown Wide Grip Red","Plate Loaded Lat Pulldown Wide","Plate Loaded Lat Pulldown Close","Plate Loaded Straight Arm Pulldown","Dumbbell Rear Deltoids","Deadlift","Pin Machine Cable Row Close","Pin Machine Cable Row Wide","Pin Machine Lower Back","Dumbbell Row","Rack Pulls","Shrugs","Smith Shrug","Cable Shrug","Seated Rope High Row","Single Arm Low Cable Row","Laydown T-Bar Row","T-Bar Chest Pad Row"]],["Shoulders 2",["Smith Shoulder Press","Dumbbell Seated Side Raise","Pin Machine Shoulder Press Blue","Cable Front Raise","Pin Machine Rear Deltoids","Shrugs"],["Pin Machine Shoulder Press Red","Cable Face Pulls","Landmine Shoulder Press","Cable Single Arm Rear Deltoid","Plate Front Raise","Dumbbell Front Raise","Pin Machine Lateral Raise","Square Barbell Shoulder Press","Dumbbell Arnold Press","Cable Lateral Raise","Log Press","Smith Shrug","Cable Shrug","Dumbbell Side Raise","Cable Side Raise"]],["Chest 2",["Dumbbell Flat Chest Press","Smith Incline Chest Press","Cable Chest Fly","Cable Upward Chest Fly","Pin Machine Incline Chest Press"],["Dumbbell Incline Chest Press","Barbell Incline Chest Press","Barbell Decline Chest Press","Pin Machine Flat Chest Press","Plate Loaded Incline Chest Press","Plate Loaded Flat Chest Press","Plate Loaded Decline Chest Press","Pin Machine Decline Chest Press","Pin Machine Chest Fly","Bench Press Flat"]]];
 
 
 const ORIGINAL=JSON.parse(JSON.stringify(base));
@@ -538,6 +538,30 @@ function zagLooseDate(raw){
  const d=new Date(raw);return isNaN(d.getTime())?null:d.getTime();
 }
 
+// Linked positions. Days of the same kind (the day name without its number, so "Pull 1" and
+// "Pull 2" are both Pull days) share a week at any position where they have the same exercise.
+//   Pull 1 / Pull 2: exercises 2, 3 and 5 move together on all four Pull days; exercises 1 and 4
+//   differ, so they move with their own version of the day (both Pull 1 days, or both Pull 2 days).
+//   Chest 1 / Chest 2: exercises 1 to 4 move together; exercise 5 differs, so each day keeps its own.
+//   Identical days (Arms, Legs, Shoulders, the two Pull 1s, the two Pull 2s) move together entirely.
+// So completing either day of a linked pair moves the shared positions on both days.
+function zagDayFamily(name){return String(name==null?'':name).trim().replace(/\s*\d+$/,'').toLowerCase()}
+function zagSlotLinkKey(dayName,j,ex){return zagDayFamily(dayName)+'\u0001'+j+'\u0001'+ex}
+// Brings linked positions into line: the first matching position in the split sets the week.
+// Linked positions are always changed together, so this only acts after a split edit creates a new
+// link, or on data saved before linking existed.
+function zagSyncLinkedWeeks(s){
+ const first={};let changed=false;
+ (Array.isArray(s&&s.days)?s.days:[]).forEach(function(d){
+  const m=Array.isArray(d)?d[3]:null;if(!m||!Array.isArray(m.s))return;
+  m.s.forEach(function(slot,j){
+   const key=zagSlotLinkKey(d[0],j,slot.x);
+   if(!Object.prototype.hasOwnProperty.call(first,key))first[key]=slot.w;
+   else if(slot.w!==first[key]){slot.w=first[key];changed=true}
+  });
+ });
+ return changed;
+}
 // Every day gets a stable id and every main-exercise position gets a stable id and its own week:
 //   day = [name, mains[], extras[], {id, s:[{id, x:exerciseName, w:week}]}]
 // Positions are matched by exercise name, so re-ordering, duplicating or moving a day keeps each
@@ -573,6 +597,7 @@ function zagEnsureDaySlots(s){
   if(meta.s.length!==slots.length||meta.s.some(function(x,j){return !x||x.id!==slots[j].id||x.x!==slots[j].x||x.w!==slots[j].w}))changed=true;
   meta.s=slots;d[3]=meta;
  });
+ if(zagSyncLinkedWeeks(s))changed=true;
  return changed;
 }
 // Temporary swaps only make sense for a position that still exists in the current split.
@@ -750,13 +775,14 @@ function zagFixChest1Swap(s){
  const at=d[2].indexOf("Cable Chest Fly");if(at<0)return false;
  const displaced=d[1][2];
  d[1][2]="Cable Chest Fly";d[2][at]=displaced;
- if(d[3]&&Array.isArray(d[3].s)&&d[3].s[2])d[3].s[2].x="Cable Chest Fly";
+ // The position takes the week Cable Chest Fly is on (the week it shows on Chest 2).
+ if(d[3]&&Array.isArray(d[3].s)&&d[3].s[2]){d[3].s[2].x="Cable Chest Fly";if(s.weeks&&s.weeks["Cable Chest Fly"]!==undefined)d[3].s[2].w=zagClampWeek(s.weeks["Cable Chest Fly"])}
  return true;
 }
 // Approved additions to the default alternatives on The Goat Split. Additive only.
 function zagTopUpAlternatives(s){
  if(!s||s.splitName!=="The Goat Split"||!Array.isArray(s.days))return false;
- const adds={"Shoulders 1":["Dumbbell Side Raise","Cable Side Raise"],"Shoulders 2":["Dumbbell Seated Side Raise","Cable Side Raise"],"Push 1":["Cable Side Raise"],"Push 2":["Cable Side Raise"]};
+ const adds={"Shoulders 1":["Dumbbell Side Raise","Cable Side Raise"],"Shoulders 2":["Dumbbell Side Raise","Cable Side Raise"],"Push 1":["Cable Side Raise"],"Push 2":["Cable Side Raise"]};
  let changed=false;
  s.days.forEach(function(d){
   if(!Array.isArray(d)||!Array.isArray(d[1])||!Array.isArray(d[2])||!Object.prototype.hasOwnProperty.call(adds,d[0]))return;
@@ -765,9 +791,25 @@ function zagTopUpAlternatives(s){
  return changed;
 }
 
+// Approved one-off: Shoulders 2 exercise 2 becomes Dumbbell Seated Side Raise, matching Shoulders 1,
+// so the two Shoulders days are identical. Dumbbell Side Raise stays available as an alternative and
+// keeps its own maximum and history.
+function zagFixShoulders2(s){
+ if(!s||s.splitName!=="The Goat Split"||!Array.isArray(s.days))return false;
+ let changed=false;
+ s.days.forEach(function(d){
+  if(!Array.isArray(d)||d[0]!=="Shoulders 2"||!Array.isArray(d[1])||!Array.isArray(d[2])||d[1][1]!=="Dumbbell Side Raise"||d[1].indexOf("Dumbbell Seated Side Raise")>=0)return;
+  d[1][1]="Dumbbell Seated Side Raise";
+  const at=d[2].indexOf("Dumbbell Seated Side Raise");
+  if(at>=0)d[2][at]="Dumbbell Side Raise";else if(d[2].indexOf("Dumbbell Side Raise")<0)d[2].push("Dumbbell Side Raise");
+  if(d[3]&&Array.isArray(d[3].s)&&d[3].s[1])d[3].s[1].x="Dumbbell Seated Side Raise";
+  changed=true;
+ });
+ return changed;
+}
 // Runs every data step on the live state, in a fixed order. Safe to call repeatedly.
 function zagRunDataMigrations(reason){
- const report={reason:reason||'',swaps:0,chest1:false,alts:false,names:null,error:''};
+ const report={reason:reason||'',swaps:0,chest1:false,alts:false,sh2:false,names:null,error:''};
  try{
   const mig=(st.zagMig&&typeof st.zagMig==='object'&&!Array.isArray(st.zagMig))?st.zagMig:{};
   let overrides={};
@@ -786,13 +828,14 @@ function zagRunDataMigrations(reason){
   report.names=zagMigrateExerciseNames(st,overrides);
   if(mig.chest1!==1){report.chest1=zagFixChest1Swap(st);mig.chest1=1}
   if(mig.alts!==1){report.alts=zagTopUpAlternatives(st);mig.alts=1}
+  if(mig.sh2!==1){report.sh2=zagFixShoulders2(st);mig.sh2=1}
   zagEnsureDaySlots(st);zagPruneTempSwaps(st);
   st.plannedDays=JSON.parse(JSON.stringify(st.days));
   mig.v=ZAG_DATA_VERSION;st.zagMig=mig;
   if(JSON.stringify(overrides)!==overridesBefore)localStorage.setItem(ZAG_MANUAL_PB_KEY,JSON.stringify(overrides));
-  if(report.names.changed||report.swaps||report.chest1||report.alts){
+  if(report.names.changed||report.swaps||report.chest1||report.alts||report.sh2){
    const log=Array.isArray(st.zagMigLog)?st.zagMigLog:[];
-   log.unshift({at:new Date().toISOString(),reason:report.reason,merged:report.names.merged,historySets:report.names.historySets,swaps:report.swaps,chest1:report.chest1,alts:report.alts});
+   log.unshift({at:new Date().toISOString(),reason:report.reason,merged:report.names.merged,historySets:report.names.historySets,swaps:report.swaps,chest1:report.chest1,alts:report.alts,sh2:report.sh2});
    st.zagMigLog=log.slice(0,5);
   }
  }catch(e){
@@ -849,9 +892,25 @@ function zagDraftKey(dayIndex,ex,i,occ){return dayIndex+"|"+ex+"|"+i+(occ?"|#"+(
 // st.weeks is kept as "last known week per exercise" for new positions and for older app builds.
 function zagMirrorWeeks(i){zagDaySlots(i).forEach(function(slot){if(typeof slot.x==='string'&&slot.x)st.weeks[slot.x]=zagClampWeek(slot.w)})}
 // Completing a workout moves every position of that day on by one week (Week 8 wraps to Week 1).
+// Sets one position's week and every position linked to it.
+function zagSetLinkedWeek(key,w){
+ w=zagClampWeek(w);
+ st.days.forEach(function(d){
+  const m=Array.isArray(d)?d[3]:null;if(!m||!Array.isArray(m.s))return;
+  m.s.forEach(function(slot,j){if(zagSlotLinkKey(d[0],j,slot.x)===key){slot.w=w;if(typeof slot.x==='string'&&slot.x)st.weeks[slot.x]=w}});
+ });
+}
+function zagSetSlotWeek(i,j,w){
+ const d=st.days[i===undefined?st.day:i],slot=zagDaySlots(i)[j];
+ if(!d||!slot)return;
+ zagSetLinkedWeek(zagSlotLinkKey(d[0],j,slot.x),w);
+}
+// Completing a workout moves every position of that day on by one week (Week 8 wraps to Week 1),
+// together with the positions linked to them on other days.
 function zagAdvanceDayWeeks(i){
- zagDaySlots(i).forEach(function(slot){const w=zagClampWeek(slot.w);slot.w=w>=8?1:w+1});
- zagMirrorWeeks(i);
+ const d=st.days[i===undefined?st.day:i];if(!d)return;
+ const next=zagDaySlots(i).map(function(slot,j){const w=zagClampWeek(slot.w);return [zagSlotLinkKey(d[0],j,slot.x),w>=8?1:w+1]});
+ next.forEach(function(x){zagSetLinkedWeek(x[0],x[1])});
 }
 function zagClearDaySwaps(i){
  const m=zagDayMeta(st.days[i===undefined?st.day:i]);
@@ -884,12 +943,15 @@ let st=raw||{day:0,weeks:{},max:{},draft:{},history:[],sound:true,days:JSON.pars
 // Every position then advances on its own, so the same exercise on two days no longer shares a week.
 // Because this only runs when `raw` is empty, reopening the app never resets progression.
 if(!raw){
-  let n=0;
+  // Days of the same kind (Pull 1 and Pull 2, Chest 1 and Chest 2, both Arms days...) start on the
+  // same week at each position; positions with the same exercise then stay linked.
+  let n=0;const start={};
   st.days.forEach(day=>{
-    day[3]={id:zagNewId('d'),s:(day[1]||[]).map(ex=>{const w=(n++%8)+1;if(st.weeks[ex]===undefined)st.weeks[ex]=w;return {id:zagNewId('s'),x:ex,w:w}})};
+    const fam=zagDayFamily(day[0]);
+    day[3]={id:zagNewId('d'),s:(day[1]||[]).map((ex,j)=>{const key=fam+'|'+j;if(start[key]===undefined)start[key]=(n++%8)+1;const w=start[key];if(st.weeks[ex]===undefined)st.weeks[ex]=w;return {id:zagNewId('s'),x:ex,w:w}})};
   });
   st.tempSwaps={};
-  st.zagMig={v:ZAG_DATA_VERSION,chest1:1,alts:1};
+  st.zagMig={v:ZAG_DATA_VERSION,chest1:1,alts:1,sh2:1};
 }
 
 // PBs are user data: never preload the old demo/seed maxes on a fresh install.
@@ -1216,17 +1278,16 @@ function setExerciseWeek(e,w){
   const slots=zagDaySlots();
   if(!Number.isInteger(e)||e<0||!slots[e])return;
   // Only changing the first exercise can realign the rest of THIS workout day.
-  // Other days are never affected, even when they contain the same exercises.
+  // Positions linked to these on other days of the same kind (see zagSlotLinkKey) follow them.
   if(e===0&&slots.length>1&&window.confirm(
       'Also update the other exercises to follow in ascending weeks?\n\n' +
       'Yes (OK): Set the following exercises to Week '+(week%8+1)+', Week '+((week+1)%8+1)+' and so on.\n' +
       'No (Cancel): Change only this exercise.'
     )){
-    slots.forEach((slot,index)=>{slot.w=((week-1+index)%8)+1});
+    slots.forEach((slot,index)=>{zagSetSlotWeek(st.day,index,((week-1+index)%8)+1)});
   }else{
-    slots[e].w=week;
+    zagSetSlotWeek(st.day,e,week);
   }
-  zagMirrorWeeks();
   save();workout();
 }
 function toggleStickWeek(){st.stickWeek=!st.stickWeek;save();settings()}
